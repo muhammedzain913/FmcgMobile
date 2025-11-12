@@ -11,16 +11,9 @@ const Drawer = createDrawerNavigator();
 
 const DrawerNavigation = () => {
   const { colors }: { colors: any } = useTheme();
-     const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
-  useEffect(() => {
-    try {
-        
-        dispatch(test());
-    } catch (error : any) {
-        console.log(error.message)
-    }
-  });
+
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.card }}>
