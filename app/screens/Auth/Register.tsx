@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -22,11 +22,14 @@ import { StackScreenProps } from "@react-navigation/stack";
 import Checkbox from "expo-checkbox";
 import { useDispatch } from "react-redux";
 import { registerUser } from "../../redux/reducer/userReducer";
+import SearchDropdown from "../../components/DropDown/SearchDropDown";
+import { AppDispatch } from "../../redux/store";
+import { Location } from "../../types/location";
 
 type RegisterScreenProps = StackScreenProps<RootStackParamList, "Register">;
 
 const Register = ({ navigation }: RegisterScreenProps) => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const theme = useTheme();
   const [loading, setLoading] = useState(false);
   const { colors }: { colors: any } = theme;
@@ -34,6 +37,14 @@ const Register = ({ navigation }: RegisterScreenProps) => {
     name: "",
     email: "",
     password: "",
+    location: {
+      id: 0,
+      area: "",
+      block: "",
+      street: "",
+      building: "",
+      source: "",
+    },
     role: "USER",
   });
 
@@ -57,14 +68,19 @@ const Register = ({ navigation }: RegisterScreenProps) => {
     try {
       setLoading(true);
       dispatch(registerUser(registerData));
-    } catch (error) {
+      navigation.navigate("Login");
+    } catch (error) {}
+  }
 
-    }}
-  
+
+  useEffect(() =>{
+    console.log('for testing',registerData)
+  },[registerData])
 
   return (
     <View style={{ backgroundColor: colors.card, flex: 1 }}>
       <ScrollView
+        nestedScrollEnabled
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
       >
@@ -193,6 +209,11 @@ const Register = ({ navigation }: RegisterScreenProps) => {
                     }
                   />
                 </View>
+
+                <View style={{}}>
+                  <SearchDropdown placeHolder='Select Location' onSelect = {(item : Location) => {handleInputChange('location',item)}} />
+                </View>
+
                 <View style={{ marginTop: 15 }}>
                   <Input
                     backround
@@ -211,6 +232,7 @@ const Register = ({ navigation }: RegisterScreenProps) => {
                       />
                     }
                   />
+
                   <View
                     style={{
                       flexDirection: "row",
@@ -311,7 +333,6 @@ const Register = ({ navigation }: RegisterScreenProps) => {
                     color={colors.card}
                     rounded
                     text="Apple"
-                    //gap
                   />
                 </View>
               </View>
