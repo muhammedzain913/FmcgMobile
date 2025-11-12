@@ -67,13 +67,8 @@ const DrawerMenu = ({ navigation }: any) => {
 
   const { colors }: { colors: any } = theme;
 
-  const user = useSelector((x: any) => x.user.userInfo);
-  const state = store.getState().user.userInfo.accessToken
-  useEffect(() => {
-    console.log("user", user);
-    console.log("state", state);
+  const user = useSelector((x: any) => x?.user?.userInfo);
 
-  });
 
   const handleLogout = () => {
 
@@ -121,12 +116,12 @@ const DrawerMenu = ({ navigation }: any) => {
                 { color: colors.title, fontSize: 18 },
               ]}
             >
-              {user.name}
+              {user?.name}
             </Text>
             <Text
               style={[FONTS.fontRegular, { color: colors.title, fontSize: 15 }]}
             >
-              {user.email}
+              {user?.email}
             </Text>
           </View>
           <View style={{ position: "absolute", right: 10, top: 0 }}>
