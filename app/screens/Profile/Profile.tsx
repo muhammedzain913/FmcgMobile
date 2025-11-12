@@ -1,5 +1,9 @@
-import { useNavigation, useTheme } from "@react-navigation/native";
-import React from "react";
+import {
+  CommonActions,
+  useNavigation,
+  useTheme,
+} from "@react-navigation/native";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,6 +11,7 @@ import {
   Image,
   ScrollView,
   SectionList,
+  ActivityIndicator,
 } from "react-native";
 import Header from "../../layout/Header";
 import { GlobalStyleSheet } from "../../constants/StyleSheet";
@@ -15,7 +20,8 @@ import { COLORS, FONTS, SIZES } from "../../constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../../redux/reducer/userReducer";
 
 const btnData = [
   {
@@ -88,12 +94,55 @@ type ProfileScreenProps = StackScreenProps<RootStackParamList, "Profile">;
 
 const Profile = ({ navigation }: ProfileScreenProps) => {
   const user = useSelector((x: any) => x.user.userInfo);
-
+  const dispatch = useDispatch();
+  const [loading, setLoading] = useState<boolean>(false);
   const theme = useTheme();
   const { colors }: { colors: any } = theme;
 
   //const navigation = useNavigation();
 
+  const handleLogout = () => {
+    setLoading(true);
+    setTimeout(() => {
+      dologout();
+    }, 5000);
+
+    const dologout = () => {
+      dispatch(logout());
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: "OnBoarding" }],
+        })
+      );
+      setLoading(false);
+    };
+  };
+
+  if (loading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: colors.card,
+        }}
+      >
+        <ActivityIndicator size="large" color={COLORS.primary} />
+        <Text
+          style={{
+            ...FONTS.fontMedium,
+            fontSize: 16,
+            color: colors.title,
+            marginTop: 10,
+          }}
+        >
+          Logging out...
+        </Text>
+      </View>
+    );
+  }
   return (
     <View style={{ backgroundColor: colors.card, flex: 1 }}>
       <Header
@@ -224,6 +273,49 @@ const Profile = ({ navigation }: ProfileScreenProps) => {
               </Text>
             )}
           />
+
+          <TouchableOpacity
+            onPress={handleLogout}
+            style={{
+              flexDirection: "row",
+              marginHorizontal: 15,
+              height: 48,
+              alignItems: "center",
+              paddingVertical: 10,
+              //borderRadius: SIZES.radius,
+            }}
+          >
+            <View
+              style={{
+                height: 30,
+                width: 30,
+                borderRadius: 6,
+                alignItems: "center",
+                justifyContent: "center",
+                marginRight: 10,
+              }}
+            >
+              <Image
+                style={{
+                  height: 20,
+                  width: 20,
+                  tintColor: colors.title,
+                  resizeMode: "contain",
+                }}
+                // source={item.icon}
+              />
+            </View>
+            <Text
+              style={{
+                ...FONTS.fontRegular,
+                fontSize: 16,
+                color: colors.title,
+                flex: 1,
+              }}
+            >
+              Logout
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
