@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Platform,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import { COLORS, FONTS } from "../../constants/theme";
@@ -21,12 +22,14 @@ import { RootStackParamList } from "../../navigation/RootStackParamList";
 import { StackScreenProps } from "@react-navigation/stack";
 import { loginUser } from "../../redux/reducer/userReducer";
 import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../redux/store";
+import { unwrapResult } from "@reduxjs/toolkit";
 
 type LoginScreenProps = StackScreenProps<RootStackParamList, "Login">;
 
 const Login = ({ navigation }: LoginScreenProps) => {
   const [loading, setLoading] = useState(false);
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const theme = useTheme();
   const { colors }: { colors: any } = theme;
 
@@ -35,7 +38,7 @@ const Login = ({ navigation }: LoginScreenProps) => {
     password: "",
   });
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     console.log("handler");
     const { email, password } = loginData;
     if (!email || !password) {
@@ -44,10 +47,12 @@ const Login = ({ navigation }: LoginScreenProps) => {
     }
     try {
       setLoading(true);
-      dispatch(loginUser(loginData));
-        navigation.navigate("DrawerNavigation", { screen: "Home" })
+      const resultAction = await dispatch(loginUser(loginData));
+      const userData = unwrapResult(resultAction);
+      navigation.navigate("DrawerNavigation", { screen: "Home" });
     } catch (error: any) {
-      console.log(error.message);
+      Alert.alert("Login Failed", error || "Something went wrong");
+      console.log("this is the login error", error.message);
     }
   };
 
@@ -210,13 +215,17 @@ const Login = ({ navigation }: LoginScreenProps) => {
                   </TouchableOpacity>
                 </View>
               </View>
-              <View style={{ marginTop: 20, marginBottom: 20 }}>
-                <Button
-                  title="Sign In"
-                  color={theme.dark ? COLORS.white : COLORS.primary}
-                  text={theme.dark ? COLORS.primary : COLORS.white}
-                  onPress={handleLogin}
-                />
+            <View style={{ marginTop: 20, marginBottom: 20 }}>
+                {loading ? (
+                  <ActivityIndicator size="large" color={COLORS.primary} />
+                ) : (
+                  <Button
+                    title="Sign In"
+                    color={theme.dark ? COLORS.white : COLORS.primary}
+                    text={theme.dark ? COLORS.primary : COLORS.white}
+                    onPress={handleLogin}
+                  />
+                )}
               </View>
               <View
                 style={{
