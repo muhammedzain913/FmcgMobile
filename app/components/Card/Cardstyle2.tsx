@@ -14,6 +14,7 @@ type Props = {
     title : string;
     price : string;
     image ?: any;
+    quantity ?: number; 
     delevery : string;
     removelikebtn?: any;
     offer?:string,
@@ -23,7 +24,7 @@ type Props = {
     onPress2 ?: (e : any) => void,
 }
 
-const Cardstyle2 = ({id,title,price,image,delevery,removelikebtn,offer,btntitle,onPress,onPress1,onPress2}:Props) => {
+const Cardstyle2 = ({id,title,price,image,delevery,quantity,removelikebtn,offer,btntitle,onPress,onPress1,onPress2}:Props) => {
 
     const theme = useTheme();
     const { colors } : {colors : any} = theme;
@@ -65,7 +66,7 @@ const Cardstyle2 = ({id,title,price,image,delevery,removelikebtn,offer,btntitle,
         <View style={{height: undefined, width:SIZES.width / 2.8,aspectRatio:1/1, borderRadius: 8,backgroundColor:theme.dark ? 'rgba(255,255,255,0.10)':colors.background}}>
             <Image
                 style={[{ height: undefined, width:SIZES.width / 2.8,aspectRatio:1/1, borderRadius: 8, },Platform.OS === 'web' && {height:null}]}
-                source={image}
+                source={{uri : image}}
             />
             <View style={{position:'absolute',top:-5,left:-5}}>
                 <LikeBtn
@@ -120,7 +121,7 @@ const Cardstyle2 = ({id,title,price,image,delevery,removelikebtn,offer,btntitle,
                 </View>
                 :
                 <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginTop:10}}>
-                    <CheckoutItems/>
+                    <CheckoutItems quantity={quantity} productId={id}/>
                     <TouchableOpacity
                         onPress={onPress2}
                         activeOpacity={0.7} 

@@ -51,10 +51,10 @@ const Cardstyle1 = ({id,title,price,image,offer,color,hascolor,onPress,onPress1,
         <View style={{height:undefined,width:'100%',aspectRatio:1/1.1,backgroundColor:theme.dark ? 'rgba(255,255,255,0.10)':colors.background,borderRadius:8,alignItems:'center',justifyContent:'center'}}>
             <Image
                 style={{ height: undefined, width: '100%', aspectRatio: 1 / 1.1,resizeMode:'contain'}}
-                source={image}
+                source={{uri: String(image)}}
             />
         </View>
-        {hascolor ?
+        {/* {hascolor ?
             null
         :
             <View style={{
@@ -75,7 +75,7 @@ const Cardstyle1 = ({id,title,price,image,offer,color,hascolor,onPress,onPress1,
                 <Text style={[FONTS.fontMedium,{fontSize:12,color:theme.dark ? COLORS.title :colors.card,}]}>{offer}</Text>
             </View>
 
-        }
+        } */}
         <View style={{position:'absolute',right:-5,top:-5}}>
             <LikeBtn
                 onPress={inWishlist().includes(id) ? removeItemFromWishList : onPress1}
