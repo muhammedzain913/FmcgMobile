@@ -57,6 +57,7 @@ import Call from '../screens/Chat/Call';
 import Datepicker from '../screens/Components/Datepicker';
 import Search2 from '../screens/Components/Search2';
 import { useSelector } from 'react-redux';
+import MyCart from '../screens/MyCart/MyCart';
 //import BottomNavigation from './BottomNavigation';
 
 const StackComponent = createStackNavigator<RootStackParamList>();
@@ -66,10 +67,10 @@ const StackNavigator = () => {
     const theme = useTheme();
 
 	const [initialRoue,setInitialRoute] = useState<any>('')
-	const token = useSelector((x : any ) => x.user.userInfo.accessToken)
+	const token = useSelector((x : any ) => x.user?.userInfo?.accessToken)
 	const [isSignedIn,setIsSignedIn] = useState(token ? true : false)
 
-	console.log(isSignedIn)
+	
 
     return (
 		<SafeAreaView style={{width : '100%',flex:1}}>
@@ -92,6 +93,7 @@ const StackNavigator = () => {
 				<StackComponent.Screen name="DrawerNavigation" component={DrawerNavigation} />
 				<StackComponent.Screen name="Search" component={Search} />
 				<StackComponent.Screen name="Notification" component={Notification} />
+				<StackComponent.Screen name="MyCart" component={MyCart} />
 				<StackComponent.Screen name="Products" component={Products} />
 				<StackComponent.Screen name="ProductsDetails" component={ProductsDetails} />
 				<StackComponent.Screen name="DeleveryAddress" component={DeleveryAddress} />
