@@ -5,36 +5,59 @@ import { PURGE } from "redux-persist";
 import { ApiClient } from "../api";
 import axiosConfig from "../axios";
 import { store } from "../store";
+import { SavedAddress } from "../../types/savedAddress";
 
-const apiPath = ApiClient()
+const apiPath = ApiClient();
 
-export const registerUser = createAsyncThunk(
-  "user/registerUser",
-  async (userData, { getState, rejectWithValue }) => {
-    console.log("reached thunk successfully");
-    try {
-      const response = await axios.post(`${Url}/api/users`, userData);
+interface UserData {
+  name: string;
+  email: string;
+  password: string;
+  location: {};
+  role?: string;
+}
 
-      console.log("from api", response.data);
-      return response.data;
-    } catch (error: any) {
-      console.log(error.message);
-      return rejectWithValue(
-        error.response?.data?.message || "Something went wrong"
-      );
-    }
+type UserState = {
+  userInfo: Record<string, unknown>;
+  status: "idle" | "loading" | "succeeded" | "failed";
+  error: string | null;
+  defaultAddress: SavedAddress | null;
+  reuseDefaultAddress: boolean;
+};
+
+const initialState: UserState = {
+  userInfo: {},
+  status: "idle",
+  error: null,
+  defaultAddress: null,
+  reuseDefaultAddress: false,
+};
+
+export const registerUser = createAsyncThunk<
+  any, // Return type (response.data)
+  UserData, // Argument type (userData)
+  { rejectValue: string } // ThunkAPI type (optional)
+>("user/registerUser", async (userData : any, { getState, rejectWithValue }) => {
+  console.log("reached thunk successfully");
+  try {
+    const response = await axios.post(`${Url}/api/users`, userData);
+
+    console.log("from api", response.data);
+    return response.data;
+  } catch (error: any) {
+    console.log(error.message);
+    return rejectWithValue(
+      error.response?.data?.message || "Something went wrong"
+    );
   }
-);
+});
 
 export const loginUser = createAsyncThunk(
   "user/loginUser",
-  async (userData, { getState, rejectWithValue }) => {
+  async (userData: any, { rejectWithValue }) => {
     console.log("reached thunk successfully", axiosConfig);
     try {
-      const response = await axiosConfig.post(
-        `${Url}/api/users/login`,
-        userData
-      );
+      const response = await axios.post(`${Url}/api/users/login`, userData);
       console.log("from api", response.data);
       return response.data;
     } catch (error: any) {
@@ -52,7 +75,7 @@ export const test = createAsyncThunk(
     console.log("reached test thunk successfully", axiosConfig);
     try {
       const response = await apiPath.get(`${Url}/api/categories`);
-      console.log("from api", response);
+      console.log("from api", response.data);
       return response.data;
     } catch (error: any) {
       console.log(error.message);
@@ -65,16 +88,31 @@ export const test = createAsyncThunk(
 
 export const userSlice = createSlice({
   name: "user",
-  initialState: {
-    userInfo: {},
-    status: "idle",
-    error: null,
-  },
+  initialState,
   reducers: {
-    setToken : (state,action) => {
-        state.userInfo.accessToken = action.payload.accessToken;
-        state.userInfo.refreshToken = action.payload.refreshToken
-    }
+    setToken: (state, action) => {
+      state.userInfo.accessToken = action.payload.accessToken;
+      state.userInfo.refreshToken = action.payload.refreshToken;
+    },
+    saveDefaultAddress(state, action) {
+      state.defaultAddress = action.payload; // { fullName, phone, ... }
+      state.reuseDefaultAddress = false;
+    },
+    setReuseDefaultAddress(state, action) {
+      state.reuseDefaultAddress = action.payload; // true when “Use the same location”
+    },
+    clearDefaultAddress(state) {
+      state.defaultAddress = null;
+      state.reuseDefaultAddress = false;
+    },
+    logout(state) {
+      // Reset to initial state
+      state.userInfo = {};
+      state.status = "idle";
+      state.error = null;
+      state.defaultAddress = null;
+      state.reuseDefaultAddress = false;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -108,6 +146,7 @@ export const userSlice = createSlice({
   },
 });
 
-export const {setToken} = userSlice.actions;
+export const { setToken, saveDefaultAddress, setReuseDefaultAddress, logout } =
+  userSlice.actions;
 
 export default userSlice.reducer;
