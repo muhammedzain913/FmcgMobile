@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   Platform,
   Alert,
+  StyleSheet,
+  ActivityIndicator,
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import { COLORS, FONTS } from "../../constants/theme";
@@ -22,9 +24,9 @@ import { StackScreenProps } from "@react-navigation/stack";
 import Checkbox from "expo-checkbox";
 import { useDispatch } from "react-redux";
 import { registerUser } from "../../redux/reducer/userReducer";
-import SearchDropdown from "../../components/DropDown/SearchDropDown";
 import { AppDispatch } from "../../redux/store";
-import { Location } from "../../types/location";
+import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
+import { unwrapResult } from "@reduxjs/toolkit";
 
 type RegisterScreenProps = StackScreenProps<RootStackParamList, "Register">;
 
@@ -37,14 +39,6 @@ const Register = ({ navigation }: RegisterScreenProps) => {
     name: "",
     email: "",
     password: "",
-    location: {
-      id: 0,
-      area: "",
-      block: "",
-      street: "",
-      building: "",
-      source: "",
-    },
     role: "USER",
   });
 
@@ -67,15 +61,16 @@ const Register = ({ navigation }: RegisterScreenProps) => {
     }
     try {
       setLoading(true);
-      dispatch(registerUser(registerData));
-      navigation.navigate("Login");
-    } catch (error) {}
+      const response = await dispatch(registerUser(registerData));
+      const result = unwrapResult(response);
+      console.log("Registration successful:", result);
+      // navigation.navigate("UserLocation");
+    } catch (error: any) {
+      Alert.alert("Registration Error", error);
+    } finally {
+      setLoading(false);
+    }
   }
-
-
-  useEffect(() =>{
-    console.log('for testing',registerData)
-  },[registerData])
 
   return (
     <View style={{ backgroundColor: colors.card, flex: 1 }}>
@@ -172,6 +167,30 @@ const Register = ({ navigation }: RegisterScreenProps) => {
                   Welcome Back! Please Enter Your Details
                 </Text>
               </View>
+
+              <GooglePlacesAutocomplete
+                fetchDetails={true}
+                enablePoweredByContainer={false}
+                query={{
+                  key: "AIzaSyAWxAHguNNLfRqbJLnpCpeFpoZ9MvOxoeI",
+                  language: "en",
+                }}
+                onNotFound={() => {
+                  console.log("Not");
+                }}
+                onFail={() => {
+                  console.log("failed");
+                }}
+                placeholder="Search for a place"
+                onPress={(data, details = null) => {
+                  // 'details' is provided when fetchDetails = true
+                  console.log(data, details);
+                }}
+                styles={{
+                  listView: { height: 0 }, // disable list
+                }}
+              />
+
               <View style={{ marginTop: 20 }}>
                 <View>
                   <Input
@@ -208,10 +227,6 @@ const Register = ({ navigation }: RegisterScreenProps) => {
                       />
                     }
                   />
-                </View>
-
-                <View style={{}}>
-                  <SearchDropdown placeHolder='Select Location' onSelect = {(item : Location) => {handleInputChange('location',item)}} />
                 </View>
 
                 <View style={{ marginTop: 15 }}>
@@ -266,13 +281,17 @@ const Register = ({ navigation }: RegisterScreenProps) => {
                   </View>
                 </View>
               </View>
-              <View style={{ marginTop: 10, marginBottom: 20 }}>
-                <Button
-                  title="Sign Up"
-                  color={theme.dark ? COLORS.white : COLORS.primary}
-                  text={theme.dark ? COLORS.primary : COLORS.white}
-                  onPress={onSubmit}
-                />
+              <View style={{ marginTop: 20, marginBottom: 20 }}>
+                {loading ? (
+                  <ActivityIndicator size="large" color={COLORS.primary} />
+                ) : (
+                  <Button
+                    title="Sign Up"
+                    color={theme.dark ? COLORS.white : COLORS.primary}
+                    text={theme.dark ? COLORS.primary : COLORS.white}
+                    onPress={onSubmit}
+                  />
+                )}
               </View>
               <View
                 style={{
@@ -366,7 +385,6 @@ const Register = ({ navigation }: RegisterScreenProps) => {
                 textDecorationLine: "underline",
               }}
             >
-              {" "}
               Sign In
             </Text>
           </TouchableOpacity>
@@ -377,3 +395,13 @@ const Register = ({ navigation }: RegisterScreenProps) => {
 };
 
 export default Register;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  map: {
+    width: "100%",
+    height: "100%",
+  },
+});

@@ -1,5 +1,5 @@
 import { useTheme } from "@react-navigation/native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -25,16 +25,17 @@ import {
   selectCartTotalPrice,
   selectCartTotalQuantity,
 } from "../../redux/reducer/cartReducer";
-const apiPath = ApiClient();
 
 type CheckoutScreenProps = StackScreenProps<RootStackParamList, "Checkout">;
 
 const Checkout = ({ navigation }: CheckoutScreenProps) => {
+  const apiPath = ApiClient();
   const theme = useTheme();
+  const user = useSelector((x: any) => x.user.userInfo);
   const { colors }: { colors: any } = theme;
   const [loading, setLoading] = useState<boolean>(false);
-  const address = useSelector((x) => x?.user?.defaultAddress);
-  const cartItems = useSelector((x) => x?.cart?.cart);
+  const address = useSelector((x: any) => x?.user?.defaultAddress);
+  const cartItems = useSelector((x: any) => x?.cart?.cart);
 
   const orderItems = cartItems.map((x: any) => {
     return {
@@ -47,26 +48,40 @@ const Checkout = ({ navigation }: CheckoutScreenProps) => {
     };
   });
 
-  const handleSubmitOrder = () => {
+  const handleSubmitOrder = async () => {
     setLoading(true);
     console.log("cartItems", orderItems);
     try {
       const checkoutFormData = {
-        ...address,
+        userId: address.userId,
+        email: user.email,
+        country: address.country,
+        city: address.city,
+        state: address.governorate, // governorate → state
+        block: address.block, // block → district
+        streetAddress: address.street, // street → streetAddress
+        phone: address.phone,
         paymentMethod: "Cash On Delivery",
-        shippingCost: 0,
       };
 
-      apiPath.post(`${Url}/api/orders`, { checkoutFormData, orderItems }, "");
-    } catch (error) {
+      await apiPath.post(
+        `${Url}/api/orders`,
+        { checkoutFormData, orderItems },
+        ""
+      );
+      navigation.navigate("Myorder");
+    } catch (error: any) {
+      console.log("Error submitting order:", error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const cart = useSelector(selectCartItems);
-  const totalQuantity = useSelector(selectCartTotalQuantity);
   const totalPrice = useSelector(selectCartTotalPrice);
+
+  useEffect(() => {
+    console.log("address", address);
+  }, []);
 
   return (
     <View style={{ backgroundColor: colors.card, flex: 1 }}>
@@ -121,7 +136,7 @@ const Checkout = ({ navigation }: CheckoutScreenProps) => {
                     color: colors.title,
                   }}
                 >
-                  {address.city} , {address.pinCode}
+                  {address.city} , {address.street}
                 </Text>
                 <Text
                   style={{
@@ -130,7 +145,7 @@ const Checkout = ({ navigation }: CheckoutScreenProps) => {
                     color: colors.title,
                   }}
                 >
-                  {address.locality} , {address.streetAddress}
+                  {address.block} , {address.building} , {address.phone}
                 </Text>
               </View>
             </View>

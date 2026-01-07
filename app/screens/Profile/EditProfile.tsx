@@ -25,9 +25,7 @@ const EditProfile = ({ navigation }: any) => {
     setInputValue(numericValue);
   };
 
-  useEffect(() => {
-    console.log("userinfofrom", userInfo);
-  });
+
 
   return (
     <View style={{ backgroundColor: colors.card, flex: 1 }}>

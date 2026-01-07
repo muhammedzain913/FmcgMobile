@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { COLORS, SIZES, FONTS } from '../../constants/theme';
 
@@ -9,6 +9,7 @@ type Props = {
     style ?: object,
     size ?: any,
     text ?: any,
+    disabled ? : boolean
 }
 
 const Button = ({
@@ -18,11 +19,15 @@ const Button = ({
     style,
     size,
     text,
+    disabled
 }: Props) => {
+
+
     return (
         <TouchableOpacity 
             activeOpacity={.8}
             onPress={onPress}
+            disabled = {disabled}
         >
             <View
                 style={[styles.button,color && {

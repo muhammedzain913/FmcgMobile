@@ -6,6 +6,18 @@ import { ApiClient } from "../api";
 import axiosConfig from "../axios";
 import { store } from "../store";
 import { SavedAddress } from "../../types/savedAddress";
+import { BaseLocation } from "../../types/location";
+import { LocationRequest } from "../../types/requests/locationRequest";
+import { LocationResponse } from "../../types/response/locationResponse";
+
+
+const mobileAxios = axios.create({
+  baseURL : Url,
+  headers : {
+    'Content-Type' : 'aplication/json',
+    'X-Client-Type' : 'mobile'
+  }
+})
 
 const apiPath = ApiClient();
 
@@ -13,7 +25,6 @@ interface UserData {
   name: string;
   email: string;
   password: string;
-  location: {};
   role?: string;
 }
 
@@ -21,7 +32,7 @@ type UserState = {
   userInfo: Record<string, unknown>;
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
-  defaultAddress: SavedAddress | null;
+  defaultAddress: LocationResponse | null;
   reuseDefaultAddress: boolean;
 };
 
@@ -37,11 +48,11 @@ export const registerUser = createAsyncThunk<
   any, // Return type (response.data)
   UserData, // Argument type (userData)
   { rejectValue: string } // ThunkAPI type (optional)
->("user/registerUser", async (userData : any, { getState, rejectWithValue }) => {
+>("user/registerUser", async (userData: any, { getState, rejectWithValue }) => {
   console.log("reached thunk successfully");
   try {
-    const response = await axios.post(`${Url}/api/users`, userData);
-
+    const response = await mobileAxios.post(`${Url}/api/users`, userData);
+    console.log('response from register',response)
     console.log("from api", response.data);
     return response.data;
   } catch (error: any) {
@@ -86,6 +97,29 @@ export const test = createAsyncThunk(
   }
 );
 
+export const saveUserLocation = createAsyncThunk<
+  any,
+  LocationRequest,
+  { rejectValue: string }
+>(
+  "user/saveUserLocation",
+  async (location: LocationRequest, { getState, rejectWithValue }) => {
+    console.log("reached save location thunk successfully", location);
+
+    try {
+      const response = await axios.post(`${Url}/api/users/location`, location);
+      console.log("from api", response.data);
+
+      return response.data;
+    } catch (error: any) {
+      console.log(error.message);
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to save location"
+      );
+    }
+  }
+);
+
 export const userSlice = createSlice({
   name: "user",
   initialState,
@@ -122,7 +156,8 @@ export const userSlice = createSlice({
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.status = "succeeded";
-        const profileData = action.payload.userData;
+        console.log("payload register", action.payload);
+        const profileData = action.payload.data;
         state.userInfo = profileData;
       })
       .addCase(registerUser.rejected, (state, action) => {
@@ -135,9 +170,25 @@ export const userSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         console.log("payload");
         state.status = "succeeded";
-        state.userInfo = action.payload;
+        const { location, ...userWithoutLocation } = action.payload;
+        console.log("user info reducer login", action.payload);
+        state.userInfo = userWithoutLocation;
+        state.defaultAddress = location || null;
       })
       .addCase(loginUser.rejected, (state, action) => {
+        state.status = "failed";
+      })
+      .addCase(saveUserLocation.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(saveUserLocation.fulfilled, (state, action) => {
+        console.log("payload");
+        state.status = "succeeded";
+        console.log("location payload", action.payload);
+        state.defaultAddress = action.payload;
+      })
+      .addCase(saveUserLocation.rejected, (state, action) => {
         state.status = "failed";
       })
       .addCase(PURGE, (state, action) => {

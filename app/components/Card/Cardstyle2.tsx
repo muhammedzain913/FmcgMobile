@@ -49,7 +49,7 @@ const Cardstyle2 = ({id,title,price,image,delevery,quantity,removelikebtn,offer,
 
   return (
     <TouchableOpacity
-        onPress={() => navigation.navigate('ProductsDetails')}
+        onPress={onPress}
         activeOpacity={0.8}
         style={{
             flexDirection: 'row',

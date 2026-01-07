@@ -3,7 +3,7 @@ import {
   useNavigation,
   useTheme,
 } from "@react-navigation/native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -94,10 +94,12 @@ type ProfileScreenProps = StackScreenProps<RootStackParamList, "Profile">;
 
 const Profile = ({ navigation }: ProfileScreenProps) => {
   const user = useSelector((x: any) => x.user.userInfo);
+  const address = useSelector((x: any) => x.user.defaultAddress);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState<boolean>(false);
   const theme = useTheme();
   const { colors }: { colors: any } = theme;
+
 
   //const navigation = useNavigation();
 
@@ -109,12 +111,6 @@ const Profile = ({ navigation }: ProfileScreenProps) => {
 
     const dologout = () => {
       dispatch(logout());
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ name: "OnBoarding" }],
-        })
-      );
       setLoading(false);
     };
   };

@@ -17,6 +17,7 @@ export const IMAGES = {
     ball: require('../assets/images/icons/bell.png'),
     close: require('../assets/images/icons/close.png'),
     check: require('../assets/images/icons/check.png'),
+    multiply: require('../assets/images/icons/multiply.png'),
     delete: require('../assets/images/icons/delete.png'),
     Chat: require('../assets/images/icons/Chat.png'),
     Star: require('../assets/images/icons/Star.png'),

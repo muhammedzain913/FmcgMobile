@@ -127,7 +127,8 @@ const Myorder = ({ navigation }: MyorderScreenProps) => {
   const [error, setError] = useState(null);
   const theme = useTheme();
   const { colors }: { colors: any } = theme;
-  const id = useSelector((x) => x?.user?.userInfo?.id);
+  const userInfo = useSelector((x: any) => x.user.userInfo);
+  const id = useSelector((x: any) => x?.user?.userInfo?.id);
   const [orders, setOrders] = useState<any>();
   const scrollRef = useRef<any>();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -147,11 +148,13 @@ const Myorder = ({ navigation }: MyorderScreenProps) => {
     dispatch(addTowishList(data));
   };
 
+
   useEffect(() => {
-    const fetchProduct = async () => {
+    const fetchOrders = async () => {
       try {
-        const response = await apiPath.get(`${Url}/api/orders/user/${id}`);
-        console.log("order api", response.data);
+        const response = await apiPath.get(
+          `${Url}/api/orders/user/${userInfo.id}`
+        );
         setOrders(response.data);
       } catch (error: any) {
         setError(error.message || "Something went wrong");
@@ -159,7 +162,7 @@ const Myorder = ({ navigation }: MyorderScreenProps) => {
         setLoading(false);
       }
     };
-    fetchProduct();
+    fetchOrders();
   }, []);
 
   const getSubTotal = (orderItems: any[]) => {
@@ -477,6 +480,9 @@ const Myorder = ({ navigation }: MyorderScreenProps) => {
                                 alignItems: "center",
                                 marginRight: 10,
                               }}
+                              onPress={() => {navigation.navigate('Trackorder',{
+                                orderId : order.id
+                              })}}
                             >
                               <Text
                                 style={{
@@ -485,7 +491,7 @@ const Myorder = ({ navigation }: MyorderScreenProps) => {
                                   color: "#111",
                                 }}
                               >
-                                View Order
+                                Track Order
                               </Text>
                             </TouchableOpacity>
 

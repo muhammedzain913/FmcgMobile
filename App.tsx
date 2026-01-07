@@ -6,10 +6,27 @@ import { Provider } from "react-redux";
 import { store, persistor } from "./app/redux/store";
 import Route from "./app/navigation/Route";
 import { PersistGate } from "redux-persist/integration/react";
-import { useEffect } from "react";
-import { setupAxiosInterceptors } from "./app/redux/axios";
-
+import { useEffect, useState } from "react";
+import * as Location from "expo-location";
 export default function App() {
+  useEffect(() => {
+    async function getCurrentLocation() {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
+    }
+
+    getCurrentLocation();
+  }, []);
+  const [location, setLocation] = useState<Location.LocationObject | null>(
+    null
+  );
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [loaded] = useFonts({
     JostBold: require("./app/assets/fonts/Jost-Bold.ttf"),
     JostSemiBold: require("./app/assets/fonts/Jost-SemiBold.ttf"),
@@ -22,8 +39,6 @@ export default function App() {
   if (!loaded) {
     return null;
   }
-
-
 
   return (
     <SafeAreaProvider>

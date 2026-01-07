@@ -1,6 +1,13 @@
 import { useTheme } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, Image, TouchableOpacity, Alert } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
 import { IMAGES } from "../../constants/Images";
 import Header from "../../layout/Header";
 import { COLORS, FONTS } from "../../constants/theme";
@@ -17,21 +24,6 @@ const saveData = [
     title: "Home Address",
     text: "123 Main Street, Anytown, USA 12345",
   },
-  // {
-  //     image: IMAGES.Location,
-  //     title: "Office Address",
-  //     text: "456 Elm Avenue, Smallville, CA 98765",
-  // },
-  // {
-  //     image: IMAGES.Home,
-  //     title: "Home Address",
-  //     text: "789 Maple Lane, Suburbia, NY 54321",
-  // },
-  // {
-  //     image: IMAGES.Bag,
-  //     title: "Shop Address",
-  //     text: "654 Pine Road, Countryside, FL 34567",
-  // },
 ];
 
 type DeleveryAddressScreenProps = StackScreenProps<
@@ -45,11 +37,18 @@ const DeleveryAddress = ({ navigation }: DeleveryAddressScreenProps) => {
 
   const [isChecked, setIsChecked] = useState(false);
 
-  const address = useSelector((x) => x.user.defaultAddress);
+  const address = useSelector((x: any) => x?.user?.defaultAddress);
 
-  useEffect(() => {
-    console.log("address", address);
-  }, [address]);
+  const isDeliverAddressExist = () => {
+    if (
+      address?.street === null ||
+      address?.phone === null ||
+      address.building === null
+    ) {
+      return false;
+    }
+    return true;
+  };
 
   return (
     <View style={{ backgroundColor: colors.card, flex: 1 }}>
@@ -59,8 +58,9 @@ const DeleveryAddress = ({ navigation }: DeleveryAddressScreenProps) => {
           {address && (
             <TouchableOpacity
               onPress={() => {
+                console.log("touched");
                 setIsChecked(!isChecked);
-                navigation.navigate("Checkout");
+                // navigation.navigate("Checkout");
               }}
               style={{
                 flexDirection: "row",
@@ -115,17 +115,21 @@ const DeleveryAddress = ({ navigation }: DeleveryAddressScreenProps) => {
                             color: colors.title,
                           }}
                         >
-                          {address.city} , {address.pinCode}
+                          {address.governorate} , {address.city} ,{" "}
+                          {address.block}
                         </Text>
-                        <Text
-                          style={{
-                            ...FONTS.fontRegular,
-                            fontSize: 14,
-                            color: colors.title,
-                          }}
-                        >
-                          {address.locality} , {address.streetAddress}
-                        </Text>
+
+                        {isDeliverAddressExist() === true && (
+                          <Text
+                            style={{
+                              ...FONTS.fontRegular,
+                              fontSize: 14,
+                              color: colors.title,
+                            }}
+                          >
+                            {address?.street},{address.building},{address.phone}
+                          </Text>
+                        )}
                       </View>
                     }
                   </View>
@@ -162,43 +166,55 @@ const DeleveryAddress = ({ navigation }: DeleveryAddressScreenProps) => {
             </TouchableOpacity>
           )}
 
-          <TouchableOpacity
-            style={{
-              height: 48,
-              width: "100%",
-              borderWidth: 1,
-              borderColor: colors.border,
-              borderRadius: 10,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              paddingHorizontal: 10,
-              // marginTop: 30,
-            }}
-            onPress={() => navigation.navigate("AddDeleveryAddress")}
-          >
-            <View style={{ flexDirection: "row", gap: 10 }}>
-              <Image
-                style={{
-                  height: 20,
-                  width: 20,
-                  resizeMode: "contain",
-                  tintColor: colors.title,
-                }}
-                source={IMAGES.plus}
-              />
-              <Text
-                style={{
-                  ...FONTS.fontMedium,
-                  fontSize: 14,
-                  color: colors.title,
-                }}
-              >
-                Add Address
-              </Text>
-            </View>
-            <Ionicons color={colors.title} name="chevron-forward" size={20} />
-          </TouchableOpacity>
+          {isDeliverAddressExist() === false && (
+            <TouchableOpacity
+              style={{
+                height: 48,
+                width: "100%",
+                borderWidth: 1,
+                borderColor: colors.border,
+                borderRadius: 10,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                paddingHorizontal: 10,
+                // marginTop: 30,
+              }}
+              onPress={() => navigation.navigate("AddDeleveryAddress")}
+            >
+              <View style={{ flexDirection: "row", gap: 10 }}>
+                <Image
+                  style={{
+                    height: 20,
+                    width: 20,
+                    resizeMode: "contain",
+                    tintColor: colors.title,
+                  }}
+                  source={IMAGES.plus}
+                />
+                <Text
+                  style={{
+                    ...FONTS.fontMedium,
+                    fontSize: 14,
+                    color: colors.title,
+                  }}
+                >
+                  Add Address
+                </Text>
+              </View>
+              <Ionicons color={colors.title} name="chevron-forward" size={20} />
+            </TouchableOpacity>
+          )}
+
+          {isDeliverAddressExist() === true && (
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("AddDeleveryAddress");
+              }}
+            >
+              <Text>Change Address</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </ScrollView>
       <View
@@ -218,13 +234,14 @@ const DeleveryAddress = ({ navigation }: DeleveryAddressScreenProps) => {
           }}
         >
           <Button
-            title="Save Address"
+            title="Proceed"
+            disabled={!isChecked}
             color={colors.title}
             text={theme.dark ? COLORS.primary : COLORS.white}
             onPress={() => {
-              if (!address) {
-                Alert.alert('Please FIll Address','fill the form for address')
-                return
+              if (isDeliverAddressExist() === false) {
+                Alert.alert("Please FIll Address", "fill the form for address");
+                return;
               }
               navigation.navigate("Payment");
             }}

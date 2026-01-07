@@ -18,6 +18,7 @@ export const ApiClient = () => {
   // Add a request interceptor to add the JWT token to the authorization header
   api.interceptors.request.use(
     async (config) => {
+      console.log('reached request interceptor')
       const token = store.getState().user.userInfo.accessToken;
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -29,27 +30,27 @@ export const ApiClient = () => {
 
   createAxiosResponseInterceptor();
 
-  function createAxiosResponseInterceptor()     {
+  function createAxiosResponseInterceptor() {
     const interceptor = api.interceptors.response.use(
       (response) => {
         console.log("RETURN REPONSE INSTEAD ERRRO");
         return response;
       },
       async (error) => {
-        console.log(error.response.status);
+        console.log('error status',error.response.status);
         // Reject promise if usual error
         if (error.response.status !== 401) {
-          console.log('ist case')
+          console.log("ist case");
           return Promise.reject(error);
         }
         if (
           error.response.status === 401 &&
-          store.getState().user.userInfo.refreshToken
+          store.getState().user?.userInfo?.refreshToken
         ) {
-            console.log('second case')
+          console.log("second case");
           try {
+            console.log('this is the interceptor',interceptor)
             api.interceptors.response.eject(interceptor);
-
             const refreshToken = store.getState().user.userInfo.refreshToken;
             console.error(
               "Error at API AXIOS",
@@ -82,9 +83,12 @@ export const ApiClient = () => {
             return axios(error.response.config);
           } catch (err: any) {
             console.error("Error at refresh token", err.response.status);
-
             //If refresh token is invalid, you will receive this error status and log user out
             if (err.response.status === 400) {
+              console.log("LOGOUT USER");
+              store.dispatch(
+                setToken({ accessToken: null, refreshToken: null })
+              );
               throw { response: { status: 401 } };
             }
             return Promise.reject(err);
@@ -94,6 +98,8 @@ export const ApiClient = () => {
         }
       }
     );
+
+    console.log('this is the interceptor',interceptor)
   }
 
   const get = (path: string, params?: any) => {
@@ -103,6 +109,7 @@ export const ApiClient = () => {
   };
 
   const post = (path: string, body: any, params: any) => {
+    console.log('post api called')
     return api.post(path, body, params).then((response) => response);
   };
 

@@ -13,12 +13,12 @@ import { useTheme } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 import { ApiClient } from "../../redux/api";
 import { Url } from "../../redux/userConstant";
-import { Location } from "../../types/location";
+import { BaseLocation } from "../../types/location";
 
 const apiPath = ApiClient();
 
 interface SearchDropDownProps {
-  onSelect?: (item: Location) => void; // 👈 callback prop
+  onSelect?: (item: BaseLocation) => void; // 👈 callback prop
   placeHolder: string;
 }
 
@@ -30,13 +30,14 @@ const SearchDropDown: React.FC<SearchDropDownProps> = ({
   const { colors }: { colors: any } = useTheme();
   const [clicked, setClicked] = useState<boolean>(false);
   const [data, setData] = useState<any[]>();
-  const [selectedItem, setSelectedItem] = useState<Location>({
-    id: 0,
-    area: "",
-    block: "",
-    street: "",
-    building: "",
-    source: "",
+  const [selectedItem, setSelectedItem] = useState<BaseLocation>({
+      governorate: "",
+      street: "",
+      block: "",
+      city: "",
+      phone :"",
+      building : "",
+      country: ""
   });
   const searchRef = useRef<TextInput>(null);
   const onSearch = async () => {
@@ -77,13 +78,13 @@ const SearchDropDown: React.FC<SearchDropDownProps> = ({
             {
               flex: 1,
               color:
-                selectedItem.area === "" ? "rgba(0,0,0,0.4)" : colors.title,
+                selectedItem.street === "" ? "rgba(0,0,0,0.4)" : colors.title,
               fontSize: 14,
               paddingHorizontal: 15,
             },
           ]}
         >
-          {selectedItem.area === "" ? placeHolder : selectedItem.area}
+          {selectedItem.street === "" ? placeHolder : selectedItem.street}
         </Text>
         <View style={styles.arrowContainer}>
           <Feather

@@ -19,7 +19,7 @@ import { RootStackParamList } from "../../navigation/RootStackParamList";
 import Cardstyle1 from "../../components/Card/Cardstyle1";
 import Cardstyle2 from "../../components/Card/Cardstyle2";
 import BottomSheet2 from "../Components/BottomSheet2";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addTowishList } from "../../redux/reducer/wishListReducer";
 import { ApiClient } from "../../redux/api";
 import { Url } from "../../redux/userConstant";
@@ -155,15 +155,18 @@ const Products = ({ navigation, route }: ProductsScreenProps) => {
   const [products, setProducts] = useState<[]>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+   const address = useSelector((x:any)=> x.user.defaultAddress)
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await apiPath.get(`${Url}/api/products`);
+       const response = await apiPath.get( `${Url}/api/products?gov=${address.governorate}&city=${address.city}&block=${address.block}`);
         let allProducts = response.data;
-          if (categoryId) {
+        if (categoryId) {
           // Filter products dynamically based on categoryId
-          allProducts = allProducts.filter((p: any) => p.categoryId === categoryId);
+          allProducts = allProducts.filter(
+            (p: any) => p.categoryId === categoryId
+          );
         }
         console.log("product api", response.data);
         setProducts(allProducts);
@@ -321,7 +324,11 @@ const Products = ({ navigation, route }: ProductsScreenProps) => {
               {sliderData.map((data: any, index: any) => {
                 return (
                   <TouchableOpacity
-                    onPress={() => navigation.navigate("ProductsDetails")}
+                    onPress={() => {
+                      navigation.navigate("ProductsDetails", {
+                        productId: data.slug,
+                      });
+                    }}
                     key={index}
                     style={{
                       backgroundColor: theme.dark
@@ -380,7 +387,11 @@ const Products = ({ navigation, route }: ProductsScreenProps) => {
                         offer={data.offer}
                         hascolor={data.hascolor}
                         onPress1={() => addItemToWishList(data)}
-                        onPress={() => navigation.navigate("ProductsDetails")}
+                        onPress={() => {
+                          navigation.navigate("ProductsDetails", {
+                            productId: data.slug,
+                          });
+                        }}
                       />
                     </View>
                   );
@@ -400,7 +411,11 @@ const Products = ({ navigation, route }: ProductsScreenProps) => {
                         offer={data.offer}
                         removelikebtn
                         onPress1={() => addItemToWishList(data)}
-                        onPress={() => navigation.navigate("ProductsDetails")}
+                        onPress={() => {
+                          navigation.navigate("ProductsDetails", {
+                            productId: data.slug,
+                          });
+                        }}
                       />
                     </View>
                   );

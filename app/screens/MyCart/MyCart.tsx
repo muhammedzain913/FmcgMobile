@@ -39,6 +39,11 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
   const totalQuantity = useSelector(selectCartTotalQuantity);
   const totalPrice = useSelector(selectCartTotalPrice);
 
+
+  useEffect(() => {
+    console.log('first item',cart[0])
+  })
+
   return (
     <View style={{ backgroundColor: colors.card, flex: 1 }}>
       <Header title="My Cart" leftIcon="back" rightIcon1={"search"} />
@@ -98,12 +103,26 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                   quantity={data.quantity}
                   onPress1={() => addItemToWishList(data)}
                   onPress2={() => removeItemFromCart(data)}
+                  onPress={() => {
+                    navigation.navigate("ProductsDetails", {
+                      productId: data.slug,
+                    });
+                  }}
                 />
               </View>
             );
           })}
         </View>
       </ScrollView>
+
+      {/* <View style={GlobalStyleSheet.container}>
+        <Button
+          title={`Proceed to Buy (${totalQuantity} items)`}
+          color={theme.dark ? COLORS.white : COLORS.primary}
+          text={theme.dark ? COLORS.primary : COLORS.white}
+          onPress={() => navigation.navigate("DeliveryLocation")}
+        />
+      </View> */}
       {cart.length > 0 ? (
         <View style={GlobalStyleSheet.container}>
           <Button

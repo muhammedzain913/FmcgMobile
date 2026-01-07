@@ -61,11 +61,13 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
 
   const [activeSize, setActiveSize] = useState(productSizes[0]);
 
-  const [product, setproduct] = useState<Product>();
+  const [product, setproduct] = useState<Product | null>(null);
 
   const productColors = ["#BAA488", "#5F75C5", "#C58F5E", "#919191"];
 
   const [activeColor, setActiveColor] = useState(productColors[0]);
+
+  const isStockExist = product?.productStock ?? 0 > 0
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -99,6 +101,7 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
         image: product?.imageUrl,
         title: product?.title,
         price: product?.salePrice,
+        slug : product?.slug,
         color: false,
         hascolor: false,
         vendorId : product?.userId
@@ -111,9 +114,9 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
 
     dispatch(
       addTowishList({
-        image: selectedImage,
-        title: "Echo Vibe Urban Runners",
-        price: "$179",
+        image: product?.imageUrl,
+        title: product?.title,
+        price: product?.salePrice,
         color: false,
         hascolor: true,
       } as any)
@@ -393,8 +396,10 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
                                 inWishlist={inWishlist}
                             /> */}
             </TouchableOpacity>
+            <Text>{!isStockExist && 'Out Of Stock'}</Text>
             <View>
               <Button
+                disabled = {!isStockExist}
                 size={"lg"}
                 title="Add to Cart"
                 color={theme.dark ? COLORS.white : COLORS.primary}

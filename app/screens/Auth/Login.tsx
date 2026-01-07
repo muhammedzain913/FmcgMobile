@@ -49,7 +49,7 @@ const Login = ({ navigation }: LoginScreenProps) => {
       setLoading(true);
       const resultAction = await dispatch(loginUser(loginData));
       const userData = unwrapResult(resultAction);
-      navigation.navigate("DrawerNavigation", { screen: "Home" });
+      // navigation.navigate("DrawerNavigation", { screen: "Home" });
     } catch (error: any) {
       Alert.alert("Login Failed", error || "Something went wrong");
       console.log("this is the login error", error.message);
@@ -320,7 +320,6 @@ const Login = ({ navigation }: LoginScreenProps) => {
                 textDecorationLine: "underline",
               }}
             >
-              {" "}
               Create an account
             </Text>
           </TouchableOpacity>

@@ -18,7 +18,7 @@ import Cardstyle1 from "../../components/Card/Cardstyle1";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
 import { StackScreenProps } from "@react-navigation/stack";
 import BottomSheet2 from "../Components/BottomSheet2";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { openDrawer } from "../../redux/actions/drawerAction";
 import { addTowishList } from "../../redux/reducer/wishListReducer";
 import { ApiClient } from "../../redux/api";
@@ -134,13 +134,20 @@ type HomeScreenProps = StackScreenProps<RootStackParamList, "Home">;
 
 const Home = ({ navigation }: HomeScreenProps) => {
   const [banner, setBanner] = useState<any>({});
+  const address = useSelector((x: any) => x.user.defaultAddress);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [products, setProducts] = useState<[]>();
   const [categories, setCategories] = useState<[]>();
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [displayedProducts, setDisplayedProducts] = useState<any[]>();
   const [dealCategory, setDealCategory] = useState<any>();
   const [dealCategoryProducts, setDealCategoryProducts] = useState<any[]>();
+  const [searchQuery,setSearchQuety] = useState<string>('');
+
+  useEffect(() => {
+    console.log("user info", address);
+  });
 
   useEffect(() => {
     const fetcchBanner = async () => {
@@ -158,10 +165,14 @@ const Home = ({ navigation }: HomeScreenProps) => {
   }, []);
 
   useEffect(() => {
+    if (!address) return;
+    if (!address.governorate) return;
     const fetchProducts = async () => {
       try {
-        const response = await apiPath.get(`${Url}/api/products`);
-        console.log("product api", response.data);
+        const response = await apiPath.get(
+          `${Url}/api/products?gov=${address.governorate}&city=${address.city}&block=${address.block}&search =${searchQuery}`
+        );
+        console.log("product api", response.data.length);
         setProducts(response.data);
         setDisplayedProducts(response.data);
       } catch (error: any) {
@@ -171,7 +182,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
       }
     };
     fetchProducts();
-  }, []);
+  }, [searchQuery]);
 
   useEffect(() => {
     const setDealProducts = async () => {
@@ -235,7 +246,6 @@ const Home = ({ navigation }: HomeScreenProps) => {
 
   return (
     <View style={{ backgroundColor: colors.card, flex: 1 }}>
-      <Text></Text>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View
           style={[
@@ -270,25 +280,52 @@ const Home = ({ navigation }: HomeScreenProps) => {
                 source={IMAGES.shose}
               />
             </View>
-            <TouchableOpacity
-              onPress={() => navigation.navigate("Notification")}
+
+            <View>
+              {/* <Text>{address.governorate}</Text> */}
+              <TouchableOpacity
+                onPress={() => navigation.navigate("Notification")}
+                style={{
+                  height: 35,
+                  width: 35,
+                  borderRadius: 8,
+                  backgroundColor: theme.dark
+                    ? "rgba(255,255,255,0.10)"
+                    : COLORS.background,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Image
+                  style={{ height: 20, width: 20, tintColor: colors.title }}
+                  source={IMAGES.ball}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate("UserLocation");
+            }}
+          >
+            <View
               style={{
-                height: 35,
-                width: 35,
-                borderRadius: 8,
-                backgroundColor: theme.dark
-                  ? "rgba(255,255,255,0.10)"
-                  : COLORS.background,
+                marginTop: 10,
+                flexDirection: "row",
+                justifyContent: "space-between",
                 alignItems: "center",
-                justifyContent: "center",
               }}
             >
+              <Text>
+                {address.governorate}, {address.city}, {address.block}
+              </Text>
               <Image
-                style={{ height: 20, width: 20, tintColor: colors.title }}
-                source={IMAGES.ball}
+                style={{ height: 13, width: 13 }}
+                source={require("../../assets/images/icons/greater-than.png")}
               />
-            </TouchableOpacity>
-          </View>
+            </View>
+          </TouchableOpacity>
           <View
             style={{
               flexDirection: "row",
@@ -316,6 +353,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
                     fontSize: 16,
                   },
                 ]}
+                onChangeText={(e : string) => {console.log('term',e),setSearchQuety(e)}}
               />
             </View>
             <TouchableOpacity
@@ -509,7 +547,11 @@ const Home = ({ navigation }: HomeScreenProps) => {
                     offer={data.offer}
                     hascolor={data.hascolor}
                     onPress1={() => addItemToWishList(data)}
-                    onPress={() => navigation.navigate("ProductsDetails")}
+                    onPress={() => {
+                      navigation.navigate("ProductsDetails", {
+                        productId: data.slug,
+                      });
+                    }}
                   />
                 </View>
               </>
@@ -553,10 +595,16 @@ const Home = ({ navigation }: HomeScreenProps) => {
               >
                 <TouchableOpacity
                   onPress={() => {
+                    setSelectedCategory("All");
                     handleCategoryChange();
                   }}
                   style={{
-                    backgroundColor: colors.background,
+                    backgroundColor:
+                      selectedCategory === "All"
+                        ? colors.title
+                        : theme.dark
+                        ? "rgba(255,255,255,0.10)"
+                        : colors.background,
                     height: 38,
                     alignItems: "center",
                     justifyContent: "center",
@@ -571,7 +619,12 @@ const Home = ({ navigation }: HomeScreenProps) => {
                     style={{
                       ...FONTS.fontMedium,
                       fontSize: 13,
-                      color: colors.title,
+                      color:
+                        selectedCategory === "All"
+                          ? theme.dark
+                            ? COLORS.title
+                            : colors.card
+                          : colors.title,
                     }}
                   >
                     All
@@ -581,15 +634,17 @@ const Home = ({ navigation }: HomeScreenProps) => {
                   return (
                     <TouchableOpacity
                       onPress={() => {
+                        setSelectedCategory(data.title);
                         handleCategoryChange(data.id);
                       }}
                       key={index}
                       style={{
-                        backgroundColor: data.active
-                          ? colors.title
-                          : theme.dark
-                          ? "rgba(255,255,255,0.10)"
-                          : colors.background,
+                        backgroundColor:
+                          selectedCategory === data.title
+                            ? colors.title
+                            : theme.dark
+                            ? "rgba(255,255,255,0.10)"
+                            : colors.background,
                         height: 38,
                         alignItems: "center",
                         justifyContent: "center",
@@ -604,11 +659,12 @@ const Home = ({ navigation }: HomeScreenProps) => {
                         style={{
                           ...FONTS.fontMedium,
                           fontSize: 13,
-                          color: data.active
-                            ? theme.dark
-                              ? COLORS.title
-                              : colors.card
-                            : colors.title,
+                          color:
+                            selectedCategory === data.title
+                              ? theme.dark
+                                ? COLORS.title
+                                : colors.card
+                              : colors.title,
                         }}
                       >
                         {data.title}

@@ -15,9 +15,9 @@ import { useSelector } from "react-redux";
 type PaymentScreenProps = StackScreenProps<RootStackParamList, "Payment">;
 
 const Payment = ({ navigation }: PaymentScreenProps) => {
-  const address = useSelector((x) => x.user.defaultAddress);
+  const address = useSelector((x: any) => x.user.defaultAddress);
 
-  const cartItems = useSelector((x) => x.cart.cart);
+  const cartItems = useSelector((x: any) => x.cart.cart);
 
   useEffect(() => {
     console.log("address", address);
@@ -28,7 +28,7 @@ const Payment = ({ navigation }: PaymentScreenProps) => {
   const { colors }: { colors: any } = theme;
   return (
     <View style={{ backgroundColor: colors.card, flex: 1 }}>
-      <Header title="Checkout" leftIcon="back" titleRight />
+      <Header title="Select Payment Method" leftIcon="back" titleRight />
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View style={[GlobalStyleSheet.container, { flex: 1 }]}>
           <View
