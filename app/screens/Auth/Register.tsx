@@ -9,6 +9,7 @@ import {
   Alert,
   StyleSheet,
   ActivityIndicator,
+  ImageBackground,
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import { COLORS, FONTS } from "../../constants/theme";
@@ -73,322 +74,335 @@ const Register = ({ navigation }: RegisterScreenProps) => {
   }
 
   return (
-    <View style={{ backgroundColor: colors.card, flex: 1 }}>
+    <View style={{ backgroundColor: " #1E123D", flex: 1 }}>
       <ScrollView
         nestedScrollEnabled
-        contentContainerStyle={{ flexGrow: 1 }}
+        contentContainerStyle={{ flexGrow: 1, backgroundColor: "#1E123D" }}
         showsVerticalScrollIndicator={false}
       >
-        <View style={[GlobalStyleSheet.container, { padding: 0 }]}>
+        {/* <View style={[GlobalStyleSheet.container, { padding: 0,backgroundColor:'#1E123D' }]}> */}
+        <ImageBackground
+          imageStyle={{ opacity: 0.2 }}
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            flex: 1,
+            backgroundColor: "#1E123D",
+            paddingBottom : 30
+          }}
+          resizeMode="cover"
+          source={require("../../assets/images/bg.png")}
+        >
           <View
             style={{
-              height: undefined,
-              width: "100%",
-              aspectRatio: 1 / 0.5,
-              backgroundColor: COLORS.secondary,
-              borderBottomLeftRadius: 40,
-              borderBottomRightRadius: 40,
+              width: 65,
+              height: 28,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              paddingHorizontal: 10,
+              flex: 1,
+              borderRadius: 61,
+              backgroundColor: "rgba(43, 66, 72, 0.5)",
+              alignSelf: "flex-end",
+              position: "absolute",
+              right: 20,
+              top: 30,
             }}
           >
-            <View style={{ marginTop: -30, marginLeft: 5 }}>
+            <TouchableOpacity>
               <Text
-                style={[
-                  FONTS.fontJostExtraLight,
-                  { fontSize: 105, color: "rgba(255,255,255,0.50)" },
-                ]}
+                style={{
+                  fontFamily: "Lato-SemiBold",
+                  fontSize: 15,
+                  lineHeight: 15,
+                  letterSpacing: -0.45,
+                  color: "#FFFFFF",
+                  textAlign: "center",
+                }}
               >
-                SHOES
+                Skip
               </Text>
-              <Text
-                style={[
-                  FONTS.fontBold,
-                  {
-                    fontSize: 100,
-                    color: "rgba(255,255,255,0.50)",
-                    marginTop: Platform.OS === "android" ? -40 : -60,
-                  },
-                ]}
-              >
-                SHOES
-              </Text>
-            </View>
-            <View style={{ position: "absolute", top: 10, left: 10 }}>
-              <TouchableOpacity
-                onPress={() => navigation.goBack()}
-                style={[
-                  GlobalStyleSheet.backbtn,
-                  {
-                    backgroundColor: theme.dark ? COLORS.primary : colors.card,
-                  },
-                ]}
-              >
-                <Ionicons size={24} color={colors.title} name="chevron-back" />
-              </TouchableOpacity>
-            </View>
-            <View
+            </TouchableOpacity>
+          </View>
+
+          <View>
+            <Image
+              resizeMode="contain"
+              style={{ width: "70%", height: undefined, aspectRatio: 1 }}
+              source={require("../../assets/images/brand/sooper.png")}
+            />
+          </View>
+
+          <View style={{ justifyContent: "center", alignItems: "center" }}>
+            <Text
               style={{
-                position: "absolute",
-                height: "100%",
-                width: "100%",
-                left: Platform.OS === "android" ? 70 : 50,
-                top: Platform.OS === "android" ? -50 : 0,
+                fontFamily: "Lato-Bold", // or "Lato" if weight mapping is used
+                fontSize: 24,
+                lineHeight: 32,
+                color: "#FFFFFF",
+                textAlign: "center",
               }}
             >
-              <Image
-                style={{
-                  height: Platform.OS === "android" ? "170%" : "130%",
-                  width: "100%",
-                  aspectRatio: 1 / 1,
-                  resizeMode: "contain",
-                }}
-                source={IMAGES.item2}
-              />
-            </View>
-          </View>
-          <View style={{ flex: 1 }}>
-            <View
-              style={[GlobalStyleSheet.container, { paddingHorizontal: 20 }]}
+              Get Started
+            </Text>
+            <Text
+              style={{
+                fontFamily: "Lato-Regular", // or "Lato" + fontWeight
+                fontSize: 15,
+                lineHeight: 22,
+                letterSpacing: -0.3, // ✅ converted from -2%
+                color: "#FFFFFF",
+                textAlign: "center",
+              }}
             >
-              <View style={{ marginTop: 60 }}>
-                <Text
-                  style={[
-                    FONTS.fontMedium,
-                    { fontSize: 24, color: colors.title },
-                  ]}
-                >
-                  Create Your Account
-                </Text>
-                <Text
-                  style={[
-                    FONTS.fontRegular,
-                    { fontSize: 15, color: colors.title },
-                  ]}
-                >
-                  Welcome Back! Please Enter Your Details
-                </Text>
-              </View>
-
-              <GooglePlacesAutocomplete
-                fetchDetails={true}
-                enablePoweredByContainer={false}
-                query={{
-                  key: "AIzaSyAWxAHguNNLfRqbJLnpCpeFpoZ9MvOxoeI",
-                  language: "en",
-                }}
-                onNotFound={() => {
-                  console.log("Not");
-                }}
-                onFail={() => {
-                  console.log("failed");
-                }}
-                placeholder="Search for a place"
-                onPress={(data, details = null) => {
-                  // 'details' is provided when fetchDetails = true
-                  console.log(data, details);
-                }}
-                styles={{
-                  listView: { height: 0 }, // disable list
-                }}
-              />
-
-              <View style={{ marginTop: 20 }}>
-                <View>
-                  <Input
-                    backround
-                    inputLg
-                    placeholder="Name"
-                    onChangeText={(text: string) => {
-                      handleInputChange("name", text);
-                    }}
-                    icon={
-                      <Feather
-                        style={{}}
-                        name={"user"}
-                        size={20}
-                        color={colors.title}
-                      />
-                    }
-                  />
-                </View>
-                <View style={{ marginTop: 15 }}>
-                  <Input
-                    backround
-                    inputLg
-                    placeholder="Email Address"
-                    onChangeText={(text: string) => {
-                      handleInputChange("email", text);
-                    }}
-                    icon={
-                      <Feather
-                        style={{}}
-                        name={"mail"}
-                        size={20}
-                        color={colors.title}
-                      />
-                    }
-                  />
-                </View>
-
-                <View style={{ marginTop: 15 }}>
-                  <Input
-                    backround
-                    inputLg
-                    type={"password"}
-                    placeholder="Password"
-                    onChangeText={(value) =>
-                      handleInputChange("password", value)
-                    }
-                    icon={
-                      <Feather
-                        style={{}}
-                        name={"lock"}
-                        size={20}
-                        color={colors.title}
-                      />
-                    }
-                  />
-
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      margin: 10,
-                    }}
-                  >
-                    <Checkbox
-                      //style={{}}
-                      value={isChecked}
-                      onValueChange={setChecked}
-                      color={
-                        isChecked
-                          ? theme.dark
-                            ? COLORS.primary
-                            : colors.title
-                          : undefined
-                      }
-                    />
-                    <Text
-                      style={{
-                        ...FONTS.fontRegular,
-                        fontSize: 15,
-                        color: colors.title,
-                        textAlign: "left",
-                      }}
-                    >
-                      {" "}
-                      I agree to all Term, Privacy and Fees
-                    </Text>
-                  </View>
-                </View>
-              </View>
-              <View style={{ marginTop: 20, marginBottom: 20 }}>
-                {loading ? (
-                  <ActivityIndicator size="large" color={COLORS.primary} />
-                ) : (
-                  <Button
-                    title="Sign Up"
-                    color={theme.dark ? COLORS.white : COLORS.primary}
-                    text={theme.dark ? COLORS.primary : COLORS.white}
-                    onPress={onSubmit}
-                  />
-                )}
-              </View>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  marginBottom: 20,
-                }}
-              >
-                <View
-                  style={{
-                    height: 1,
-                    flex: 1,
-                    backgroundColor: colors.title,
-                  }}
-                />
-                <Text
-                  style={{
-                    ...FONTS.fontMedium,
-                    color: colors.title,
-                    marginHorizontal: 15,
-                    fontSize: 13,
-                  }}
-                >
-                  Or continue with
-                </Text>
-                <View
-                  style={{
-                    height: 1,
-                    flex: 1,
-                    backgroundColor: colors.title,
-                  }}
-                />
-              </View>
-              <View style={GlobalStyleSheet.row}>
-                <View style={[GlobalStyleSheet.col50, { marginBottom: 20 }]}>
-                  <SocialBtn
-                    icon={
-                      <Image
-                        style={{ height: 20, width: 20, resizeMode: "contain" }}
-                        source={IMAGES.google2}
-                      />
-                    }
-                    color={colors.card}
-                    rounded
-                    text="Google"
-                    //gap
-                  />
-                </View>
-                <View style={[GlobalStyleSheet.col50, { marginBottom: 20 }]}>
-                  <SocialBtn
-                    icon={
-                      <FontAwesome
-                        name="apple"
-                        size={20}
-                        color={colors.title}
-                      />
-                    }
-                    color={colors.card}
-                    rounded
-                    text="Apple"
-                  />
-                </View>
-              </View>
-            </View>
+              Log In using Phone, Google or Apple ID  
+            </Text>
           </View>
-        </View>
+        </ImageBackground>
+
         <View
           style={{
-            alignItems: "center",
-            flexDirection: "row",
-            justifyContent: "center",
-            position: "absolute",
-            width: "100%",
-            left: 0,
-            right: 0,
-            bottom: 10,
+            borderTopRightRadius: 18,
+            borderTopLeftRadius: 18,
+            backgroundColor: "white",
+            paddingTop: 28,
+            paddingHorizontal: 16,
+            rowGap: 8,
           }}
         >
-          <Text
-            style={{ ...FONTS.fontRegular, fontSize: 15, color: colors.title }}
+          <Input
+            backround
+            inputLg
+            placeholder="Name"
+            onChangeText={(text: string) => {
+              handleInputChange("name", text);
+            }}
+            // icon={
+            //   <Feather
+            //     style={{}}
+            //     name={"user"}
+            //     size={20}
+            //     color={colors.title}
+            //   />
+            // }
+          />
+
+          <View>
+            <Input
+              backround
+              inputLg
+              placeholder="Email Address"
+              onChangeText={(text: string) => {
+                handleInputChange("email", text);
+              }}
+              // icon={
+              //   <Feather
+              //     style={{}}
+              //     name={"mail"}
+              //     size={20}
+              //     color={colors.title}
+              //   />
+              // }
+            />
+          </View>
+
+          <View>
+            <Input
+              backround
+              inputLg
+              type={"password"}
+              placeholder="Password"
+              onChangeText={(value) => handleInputChange("password", value)}
+              // icon={
+              //   <Feather
+              //     style={{}}
+              //     name={"lock"}
+              //     size={20}
+              //     color={colors.title}
+              //   />
+              // }
+            />
+
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                margin: 10,
+              }}
+            >
+              <Checkbox
+                //style={{}}
+                value={isChecked}
+                onValueChange={setChecked}
+                color={
+                  isChecked
+                    ? theme.dark
+                      ? COLORS.primary
+                      : colors.title
+                    : undefined
+                }
+              />
+              <Text
+                style={{
+                  ...FONTS.fontRegular,
+                  fontSize: 15,
+                  color: colors.title,
+                  textAlign: "left",
+                }}
+              >
+                {" "}
+                I agree to all Term, Privacy and Fees
+              </Text>
+            </View>
+          </View>
+
+          <View style={{ marginBottom: 20 }}>
+            {loading ? (
+              <ActivityIndicator size="large" color={COLORS.primary} />
+            ) : (
+              <Button
+                title="Sign Up"
+               color={"#1E123D"}
+                // text={theme.dark ? COLORS.primary : COLORS.white}
+                onPress={onSubmit}
+              />
+            )}
+          </View>
+          {/* <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginBottom: 20,
+            }}
           >
-            Already have and account?
-          </Text>
-          <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+            <View
+              style={{
+                height: 1,
+                flex: 1,
+                backgroundColor: colors.title,
+              }}
+            />
             <Text
               style={{
                 ...FONTS.fontMedium,
-                // borderBottomWidth: 1,
-                // borderBottomColor: colors.title,
                 color: colors.title,
-                textDecorationLine: "underline",
+                marginHorizontal: 15,
+                fontSize: 13,
               }}
             >
-              Sign In
+              Or continue with
             </Text>
-          </TouchableOpacity>
+            <View
+              style={{
+                height: 1,
+                flex: 1,
+                backgroundColor: colors.title,
+              }}
+            />
+          </View> */}
+
+
+          {/* <View style={GlobalStyleSheet.row}>
+            <View style={[GlobalStyleSheet.col50, { marginBottom: 20 }]}>
+              <SocialBtn
+                icon={
+                  <Image
+                    style={{ height: 20, width: 20, resizeMode: "contain" }}
+                    source={IMAGES.google2}
+                  />
+                }
+                color={colors.card}
+                rounded
+                text="Google"
+                //gap
+              />
+            </View>
+            <View style={[GlobalStyleSheet.col50, { marginBottom: 20 }]}>
+              <SocialBtn
+                icon={
+                  <FontAwesome name="apple" size={20} color={colors.title} />
+                }
+                color={colors.card}
+                rounded
+                text="Apple"
+              />
+            </View>
+          </View> */}
+
+
+               <Text
+                    style={{
+                      fontFamily: "Lato-Medium",
+                      fontSize: 13,
+                      lineHeight: 13,
+                      letterSpacing: -0.39,
+                      color: "#545454",
+                      textAlign: "center",
+                      marginVertical: 10,
+                    }}
+                  >
+                    OR
+                  </Text>
+          
+                  <View style={{ gap: 15 }}>
+                    <View>
+                      <SocialBtn
+                        icon={
+                          <Image
+                            style={{ height: 20, width: 20, resizeMode: "contain" }}
+                            source={IMAGES.google2}
+                          />
+                        }
+                        color={colors.card}
+                        rounded
+                        text="Continue with Google"
+                        //gap
+                      />
+                    </View>
+                    <View>
+                      <SocialBtn
+                        icon={<FontAwesome name="apple" size={20} color={colors.title} />}
+                        color={colors.card}
+                        rounded
+                        text="Continue with Apple"
+                        //gap
+                      />
+                    </View>
+                  </View>
+
+          <View
+            style={{
+              alignItems: "center",
+              flexDirection: "row",
+              justifyContent: "center",
+            }}
+          >
+            <Text
+              style={{
+                ...FONTS.fontRegular,
+                fontSize: 15,
+                color: colors.title,
+              }}
+            >
+              Already have and account?
+            </Text>
+            <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+              <Text
+                style={{
+                  ...FONTS.fontMedium,
+                  // borderBottomWidth: 1,
+                  // borderBottomColor: colors.title,
+                  color: colors.title,
+                  textDecorationLine: "underline",
+                }}
+              >
+                Sign In
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
+        {/* </View> */}
       </ScrollView>
     </View>
   );
