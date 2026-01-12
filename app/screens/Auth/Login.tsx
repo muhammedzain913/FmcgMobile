@@ -5,25 +5,27 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
-  Platform,
   Alert,
+  ImageBackground,
+  StyleSheet,
   ActivityIndicator,
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
-import { COLORS, FONTS } from "../../constants/theme";
 import { GlobalStyleSheet } from "../../constants/StyleSheet";
-import { IMAGES } from "../../constants/Images";
-import { Ionicons } from "@expo/vector-icons";
-import Input from "../../components/Input/Input";
-import { Feather, FontAwesome } from "@expo/vector-icons";
-import Button from "../../components/Button/Button";
-import SocialBtn from "../../components/Socials/SocialBtn";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
 import { StackScreenProps } from "@react-navigation/stack";
 import { loginUser } from "../../redux/reducer/userReducer";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../redux/store";
 import { unwrapResult } from "@reduxjs/toolkit";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import Input from "../../components/Input/Input";
+import Button from "../../components/Button/Button";
+import SocialBtn from "../../components/Socials/SocialBtn";
+import { IMAGES } from "../../constants/Images";
+import { Feather, FontAwesome } from "@expo/vector-icons";
+import { COLORS, FONTS } from "../../constants/theme";
 
 type LoginScreenProps = StackScreenProps<RootStackParamList, "Login">;
 
@@ -66,267 +68,198 @@ const Login = ({ navigation }: LoginScreenProps) => {
   };
 
   return (
-    <View style={{ backgroundColor: colors.card, flex: 1 }}>
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        showsVerticalScrollIndicator={false}
+    <SafeAreaView
+      style={{ flex: 1, flexDirection: "column", backgroundColor: "#1E123D" }}
+    >
+      <ImageBackground
+        imageStyle={{ opacity: 0.2 }}
+        style={{
+          paddingBottom : 30,
+          justifyContent: "center",
+          alignItems: "center",
+          flex: 1,
+        }}
+        resizeMode="cover"
+        source={require("../../assets/images/bg.png")}
       >
-        <View style={[GlobalStyleSheet.container, { padding: 0 }]}>
-          <View
-            style={{
-              height: undefined,
-              width: "100%",
-              aspectRatio: 1 / 0.5,
-              backgroundColor: COLORS.secondary,
-              borderBottomLeftRadius: 40,
-              borderBottomRightRadius: 40,
-            }}
-          >
-            <View style={{ marginTop: -30, marginLeft: 5 }}>
-              <Text
-                style={[
-                  FONTS.fontJostExtraLight,
-                  { fontSize: 105, color: "rgba(255,255,255,0.50)" },
-                ]}
-              >
-                SHOES
-              </Text>
-              <Text
-                style={[
-                  FONTS.fontBold,
-                  {
-                    fontSize: 100,
-                    color: "rgba(255,255,255,0.50)",
-                    marginTop: Platform.OS === "android" ? -40 : -60,
-                  },
-                ]}
-              >
-                SHOES
-              </Text>
-            </View>
-            <View
-              style={{ position: "absolute", top: 10, left: 10, zIndex: 15 }}
-            >
-              <TouchableOpacity
-                onPress={() => navigation.goBack()}
-                style={[
-                  GlobalStyleSheet.backbtn,
-                  {
-                    backgroundColor: theme.dark ? COLORS.primary : colors.card,
-                  },
-                ]}
-              >
-                <Ionicons size={24} color={colors.title} name="chevron-back" />
-              </TouchableOpacity>
-            </View>
-            <View
-              style={{
-                position: "absolute",
-                height: "100%",
-                width: "100%",
-                left: Platform.OS === "android" ? 60 : 30,
-                top: Platform.OS === "android" ? -50 : 0,
-              }}
-            >
-              <Image
-                style={{
-                  height: Platform.OS === "android" ? "180%" : "130%",
-                  aspectRatio: 1 / 1,
-                  resizeMode: "contain",
-                }}
-                source={IMAGES.item1}
-              />
-            </View>
-          </View>
-          <View style={{ flex: 1 }}>
-            <View
-              style={[GlobalStyleSheet.container, { paddingHorizontal: 20 }]}
-            >
-              <View style={{ marginTop: 60 }}>
-                <Text
-                  style={[
-                    FONTS.fontMedium,
-                    { fontSize: 24, color: colors.title },
-                  ]}
-                >
-                  Sign In To Your Account
-                </Text>
-                <Text
-                  style={[
-                    FONTS.fontRegular,
-                    { fontSize: 15, color: colors.title },
-                  ]}
-                >
-                  Welcome Back You've Been Missed!
-                </Text>
-              </View>
-              <View style={{ marginTop: 20 }}>
-                <View>
-                  <Input
-                    backround
-                    inputLg
-                    placeholder="Email Address"
-                    onChangeText={(value) => handleInputChange("email", value)}
-                    icon={
-                      <Feather
-                        style={{}}
-                        name={"mail"}
-                        size={20}
-                        color={colors.title}
-                      />
-                    }
-                  />
-                </View>
-                <View style={{ marginTop: 15 }}>
-                  <Input
-                    backround
-                    inputLg
-                    type={"password"}
-                    placeholder="Password"
-                    onChangeText={(value) =>
-                      handleInputChange("password", value)
-                    }
-                    icon={
-                      <Feather
-                        style={{}}
-                        name={"lock"}
-                        size={20}
-                        color={colors.title}
-                      />
-                    }
-                  />
-                  <TouchableOpacity
-                    onPress={() => navigation.navigate("ForgotPassword")}
-                  >
-                    <Text
-                      style={[
-                        FONTS.fontRegular,
-                        {
-                          fontSize: 15,
-                          color: colors.title,
-                          textDecorationLine: "underline",
-                          textAlign: "right",
-                          marginTop: 5,
-                        },
-                      ]}
-                    >
-                      Forgot Password?
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            <View style={{ marginTop: 20, marginBottom: 20 }}>
-                {loading ? (
-                  <ActivityIndicator size="large" color={COLORS.primary} />
-                ) : (
-                  <Button
-                    title="Sign In"
-                    color={theme.dark ? COLORS.white : COLORS.primary}
-                    text={theme.dark ? COLORS.primary : COLORS.white}
-                    onPress={handleLogin}
-                  />
-                )}
-              </View>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  marginBottom: 30,
-                }}
-              >
-                <View
-                  style={{
-                    height: 1,
-                    flex: 1,
-                    backgroundColor: colors.title,
-                  }}
-                />
-                <Text
-                  style={{
-                    ...FONTS.fontMedium,
-                    color: colors.title,
-                    marginHorizontal: 15,
-                    fontSize: 13,
-                  }}
-                >
-                  Or continue with
-                </Text>
-                <View
-                  style={{
-                    height: 1,
-                    flex: 1,
-                    backgroundColor: colors.title,
-                  }}
-                />
-              </View>
-              <View style={GlobalStyleSheet.row}>
-                <View style={[GlobalStyleSheet.col50, { marginBottom: 20 }]}>
-                  <SocialBtn
-                    icon={
-                      <Image
-                        style={{ height: 20, width: 20, resizeMode: "contain" }}
-                        source={IMAGES.google2}
-                      />
-                    }
-                    color={colors.card}
-                    rounded
-                    text="Google"
-                    //gap
-                  />
-                </View>
-                <View style={[GlobalStyleSheet.col50, { marginBottom: 20 }]}>
-                  <SocialBtn
-                    icon={
-                      <FontAwesome
-                        name="apple"
-                        size={20}
-                        color={colors.title}
-                      />
-                    }
-                    color={colors.card}
-                    rounded
-                    text="Apple"
-                    //gap
-                  />
-                </View>
-              </View>
-            </View>
-          </View>
-        </View>
         <View
           style={{
-            alignItems: "center",
+            width: 65,
+            height: 28,
             flexDirection: "row",
+            alignItems: "center",
             justifyContent: "center",
+            paddingHorizontal: 10,
+            flex: 1,
+            borderRadius: 61,
+            backgroundColor: "rgba(43, 66, 72, 0.5)",
+            alignSelf: "flex-end",
             position: "absolute",
-            width: "100%",
-            left: 0,
-            right: 0,
-            bottom: 10,
+            right: 20,
+            top: 30,
           }}
         >
-          <Text
-            style={{ ...FONTS.fontRegular, fontSize: 15, color: colors.title }}
-          >
-            Not a member?
-          </Text>
-          <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+          <TouchableOpacity>
             <Text
               style={{
-                ...FONTS.fontMedium,
-                // borderBottomWidth: 1,
-                // borderBottomColor: colors.title,
-                color: colors.title,
-                textDecorationLine: "underline",
+                fontFamily: "Lato-SemiBold",
+                fontSize: 15,
+                lineHeight: 15,
+                letterSpacing: -0.45,
+                color: "#FFFFFF",
+                textAlign: "center",
               }}
             >
-              Create an account
+              Skip
             </Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
-    </View>
+
+        <View>
+          <Image
+            resizeMode="contain"
+            style={{ width: "70%", height: undefined, aspectRatio: 1 }}
+            source={require("../../assets/images/brand/sooper.png")}
+          />
+        </View>
+
+        <View style={{ justifyContent: "center", alignItems: "center", }}>
+          <Text
+            style={{
+              fontFamily: "Lato-Bold", // or "Lato" if weight mapping is used
+              fontSize: 24,
+              lineHeight: 32,
+              color: "#FFFFFF",
+              textAlign: "center",
+            }}
+          >
+            Get Started
+          </Text>
+          <Text
+            style={{
+              fontFamily: "Lato-Regular", // or "Lato" + fontWeight
+              fontSize: 15,
+              lineHeight: 22,
+              letterSpacing: -0.3, // ✅ converted from -2%
+              color: "#FFFFFF",
+              textAlign: "center",
+            }}
+          >
+            Log In using Phone, Google or Apple ID
+          </Text>
+        </View>
+      </ImageBackground>
+
+      <View
+        style={{
+          borderTopRightRadius: 18,
+          borderTopLeftRadius: 18,
+          backgroundColor: "white",
+          paddingTop: 28,
+          paddingHorizontal: 16,
+          rowGap: 8,
+        }}
+      >
+        <Input
+          onChangeText={(value) => handleInputChange("email", value)}
+          placeholder="Email"
+        />
+        <Input
+          onChangeText={(value) => handleInputChange("password", value)}
+          placeholder="Password"
+        />
+
+        
+        <View style={{ marginVertical: 10 }}>
+          {loading ? (
+            <ActivityIndicator size="large" color={COLORS.primary} />
+          ) : (
+            <Button color={"#1E123D"} title="Login" onPress={handleLogin} />
+          )}
+        </View>
+
+        <Text
+          style={{
+            fontFamily: "Lato-Medium",
+            fontSize: 13,
+            lineHeight: 13,
+            letterSpacing: -0.39,
+            color: "#545454",
+            textAlign: "center",
+            marginVertical: 10,
+          }}
+        >
+          OR
+        </Text>
+
+        <View style={{ gap: 15 }}>
+          <View>
+            <SocialBtn
+              icon={
+                <Image
+                  style={{ height: 20, width: 20, resizeMode: "contain" }}
+                  source={IMAGES.google2}
+                />
+              }
+              color={colors.card}
+              rounded
+              text="Continue with Google"
+              //gap
+            />
+          </View>
+          <View>
+            <SocialBtn
+              icon={<FontAwesome name="apple" size={20} color={colors.title} />}
+              color={colors.card}
+              rounded
+              text="Continue with Apple"
+              //gap
+            />
+          </View>
+        </View>
+
+        <TouchableOpacity style={{justifyContent : 'center'}} onPress={() => navigation.navigate("Register")}>
+          <Text
+            style={{
+              ...FONTS.fontMedium,
+              // borderBottomWidth: 1,
+              // borderBottomColor: colors.title,
+              color: colors.title,
+              textDecorationLine: "underline",
+              textAlign : 'center'
+            }}
+          >
+            Create an account
+          </Text>
+        </TouchableOpacity>
+
+        <Text style={styles.termsText}>
+          By Continuing, you agree to our{" "}
+          <Text style={styles.termsLink}>Terms of Use & Privacy Policy</Text>
+        </Text>
+      </View>
+    </SafeAreaView>
   );
 };
 
 export default Login;
+
+const styles = StyleSheet.create({
+  termsText: {
+    fontFamily: "Lato-Regular", // or "Lato" + fontWeight
+    fontSize: 11,
+    lineHeight: 24,
+    letterSpacing: 0,
+    color: "#000000",
+    textAlign: "center",
+  },
+
+  termsLink: {
+    fontFamily: "Lato-SemiBold", // or "Lato" + fontWeight
+    fontSize: 11,
+    lineHeight: 24,
+    letterSpacing: 0,
+    color: "#000000",
+    textDecorationLine: "underline",
+  },
+});
