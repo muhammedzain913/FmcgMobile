@@ -40,8 +40,8 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
 
   return (
     <ScrollView>
-      <TouchableWithoutFeedback onPress={handleOpen}>
-        <View ref={triggerRef}>{trigger}</View>
+      <TouchableWithoutFeedback  onPress={handleOpen}>
+        <View  ref={triggerRef}>{trigger}</View>
       </TouchableWithoutFeedback>
       {visible && (
         <Modal

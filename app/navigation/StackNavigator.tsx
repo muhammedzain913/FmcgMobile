@@ -61,19 +61,27 @@ import MyCart from "../screens/MyCart/MyCart";
 import UserLocation from "../screens/Location/UserLocation";
 import ConfirmLocation from "../screens/Location/ConfirmLocation";
 import DeliveryLocation from "../screens/Location/DeliveryLocation";
-import {LogLevel,OneSignal} from "react-native-onesignal"
+import { LogLevel, OneSignal } from "react-native-onesignal";
+import UserDeliveryAddress from "../screens/Location/UserDeliveryAddress";
 //import BottomNavigation from './BottomNavigation';
 
 const StackComponent = createStackNavigator<RootStackParamList>();
 
 const StackNavigator = () => {
-  const authState = useSelector((state : any) => state.user);
+  const authState = useSelector((state: any) => state.user);
   const defaultAddress = useSelector((x: any) => x.user?.defaultAddress);
-  
+
   // Determine initial route based on whether user has saved location
-  const initialRouteName = defaultAddress ? "DrawerNavigation" : "UserLocation";
-  
+  const isDeliveryAddressExist =
+    defaultAddress?.street !== null && defaultAddress?.building !== null;
+
+  const initialRouteName =
+    defaultAddress && isDeliveryAddressExist
+      ? "DrawerNavigation"
+      : "UserLocation";
+
   useEffect(() => {
+    console.log("true or not", isDeliveryAddressExist);
     try {
       OneSignal.Debug.setLogLevel(LogLevel.Verbose);
       OneSignal.initialize("9a5c6e06-280d-4a50-8b1c-8c95d71f2c45");
@@ -86,7 +94,7 @@ const StackNavigator = () => {
 
   useEffect(() => {
     const handleUserLogin = async () => {
-      console.log("Handling user login for OneSignal",authState.userInfo.id);
+      console.log("Handling user login for OneSignal", authState.userInfo.id);
       try {
         if (authState?.userInfo?.id) {
           console.log("Logging in user with ID:", authState.userInfo.id);
@@ -100,7 +108,7 @@ const StackNavigator = () => {
     };
 
     if (authState) {
-      console.log('yes id is there')
+      console.log("yes id is there");
       handleUserLogin();
     }
   }, [authState.userInfo?.id]);
@@ -126,6 +134,11 @@ const StackNavigator = () => {
           component={DeliveryLocation}
         />
         <StackComponent.Screen name="UserLocation" component={UserLocation} />
+        <StackComponent.Screen
+          name="UserDeliveryAddress"
+          component={UserDeliveryAddress}
+        />
+
         <StackComponent.Screen
           name="ConfirmLocation"
           component={ConfirmLocation}

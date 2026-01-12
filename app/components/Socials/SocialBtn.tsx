@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { COLORS, FONTS } from '../../constants/theme';
 import { useTheme } from '@react-navigation/native';
 
@@ -47,7 +47,7 @@ const SocialBtn = ({color, rounded, icon, text ,onpress,gap} : Props) => {
             >
                 {icon}
             </View>
-            <Text style={{...FONTS.fontRegular,color:colors.title,fontSize:16}}>{text}</Text>
+            <Text style={styles.buttonText}>{text}</Text>
         </TouchableOpacity>
     );
 };
@@ -55,3 +55,14 @@ const SocialBtn = ({color, rounded, icon, text ,onpress,gap} : Props) => {
 
 
 export default SocialBtn;
+
+const styles = StyleSheet.create({
+    buttonText : {
+          fontFamily: "Lato-SemiBold",
+    fontSize: 15,
+    lineHeight: 15,
+    letterSpacing: -0.45,
+    color: "#000000",
+    textAlign: "center",
+    }
+})

@@ -9,6 +9,7 @@ export type RootStackParamList = {
   Register: undefined;
   ForgotPassword: undefined;
   UserLocation: undefined;
+  UserDeliveryAddress : undefined;
   DeliveryLocation: undefined;
   ConfirmLocation: undefined;
   OTPAuthentication: undefined;
