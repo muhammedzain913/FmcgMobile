@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Image,
+  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -27,6 +29,7 @@ import { Url } from "../../redux/userConstant";
 import Button from "../../components/Button/Button";
 import { COLORS } from "../../constants/theme";
 import { useTheme } from "@react-navigation/native";
+import { Typography } from "../../constants/typography";
 type UserLocationScreenProps = StackScreenProps<
   RootStackParamList,
   "UserLocation"
@@ -63,15 +66,15 @@ const UserLocation = ({ navigation }: UserLocationScreenProps) => {
       const response = await dispatch(saveUserLocation(updatedLocation));
       const result = unwrapResult(response);
       console.log("Location saved successfully:", result);
-      navigation.navigate("DrawerNavigation", { screen: "Home" });
+      // navigation.navigate("DrawerNavigation", { screen: "Home" });
+      navigation.navigate('UserDeliveryAddress')
     } catch (error) {
       console.log("Error registering user:", error);
       Alert.alert(
         "Registration Error",
         "Failed to register user. Please try again."
       );
-    }
-    finally{
+    } finally {
       setLoading(false);
     }
   };
@@ -106,42 +109,77 @@ const UserLocation = ({ navigation }: UserLocationScreenProps) => {
     fetchBlocks();
   }, [city]);
 
-
-
   return (
-    <>
-      <View style={{ padding: 16 }}>
-        <Text>Select Your Governorate</Text>
-        <DropdownMenu
-          visible={govVisible}
-          handleOpen={() => setGovVisible(true)}
-          handleClose={() => setGovVisible(false)}
-          trigger={
-            <View style={styles.triggerStyle}>
-              <Text style={styles.triggerText}>
-                {governorate ? governorate.name : "Select Governerate"}
-              </Text>
-            </View>
-          }
+    <SafeAreaView
+      style={{
+        flex: 1,
+        backgroundColor: "#ffffff",
+        padding: 20,
+        flexDirection: "column",
+      }}
+    >
+      <View
+        style={{
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexDirection: "row",
+          paddingHorizontal: 20,
+        }}
+      >
+        <Image source={require("../../assets/images/icons/CaretLeft.png")} />
+        <Text
+          style={{
+            fontFamily: "Lato",
+            fontWeight: 700,
+            fontSize: 20,
+            lineHeight: 32,
+            letterSpacing: -0.48,
+            color: "#000000",
+            textAlign: "center",
+          }}
         >
-          {governorates.map((block: any, index) => {
-            return (
-              <MenuOption
-                key={index}
-                onSelect={() => {
-                  setGovernorate(block);
-                  setGovVisible(false);
-                }}
-              >
-                <Text>{block.name}</Text>
-              </MenuOption>
-            );
-          })}
-        </DropdownMenu>
+          Set up location
+        </Text>
+        <View></View>
+      </View>
+
+      <View style={{ gap: 10, marginTop: 50 }}>
+        <View style={{ gap: 5 }}>
+          <Text style={[Typography.titleMedium]}>CHOOSE GOVERNORATE *</Text>
+          <DropdownMenu
+            visible={govVisible}
+            handleOpen={() => setGovVisible(true)}
+            handleClose={() => setGovVisible(false)}
+            trigger={
+              <View style={styles.triggerStyle}>
+                <Text style={styles.triggerText}>
+                  {governorate ? governorate.name : "Select Governerate"}
+                </Text>
+                <Image
+                  source={require("../../assets/images/icons/dropicon.png")}
+                />
+              </View>
+            }
+          >
+            {governorates.map((block: any, index) => {
+              return (
+                <MenuOption
+                  key={index}
+                  onSelect={() => {
+                    setGovernorate(block);
+                    setGovVisible(false);
+                  }}
+                >
+                  <Text>{block.name}</Text>
+                </MenuOption>
+              );
+            })}
+          </DropdownMenu>
+        </View>
 
         {cities && cities.length > 0 && (
-          <>
-            <Text>Select Your City</Text>
+          <View style={{ gap: 5 }}>
+            <Text style={[Typography.titleMedium]}>CHOOSE CITY *</Text>
             <DropdownMenu
               visible={cityVisible}
               handleOpen={() => setCityVisible(true)}
@@ -151,6 +189,9 @@ const UserLocation = ({ navigation }: UserLocationScreenProps) => {
                   <Text style={styles.triggerText}>
                     {city ? city.name : "Select City"}
                   </Text>
+                  <Image
+                    source={require("../../assets/images/icons/dropicon.png")}
+                  />
                 </View>
               }
             >
@@ -173,12 +214,12 @@ const UserLocation = ({ navigation }: UserLocationScreenProps) => {
                 })}
               </ScrollView>
             </DropdownMenu>
-          </>
+          </View>
         )}
 
         {blocks && blocks.length > 0 && (
-          <>
-            <Text>Select Your Block</Text>
+          <View style={{ gap: 5 }}>
+            <Text style={[Typography.titleMedium]}>CHOOSE BLOCK *</Text>
             <DropdownMenu
               visible={blockVisible}
               handleOpen={() => setBlockVisible(true)}
@@ -188,6 +229,9 @@ const UserLocation = ({ navigation }: UserLocationScreenProps) => {
                   <Text style={styles.triggerText}>
                     {block ? block.name : "Select Block"}
                   </Text>
+                  <Image
+                    source={require("../../assets/images/icons/dropicon.png")}
+                  />
                 </View>
               }
             >
@@ -210,7 +254,7 @@ const UserLocation = ({ navigation }: UserLocationScreenProps) => {
                 })}
               </ScrollView>
             </DropdownMenu>
-          </>
+          </View>
         )}
       </View>
 
@@ -220,13 +264,13 @@ const UserLocation = ({ navigation }: UserLocationScreenProps) => {
         ) : (
           <Button
             title="Save"
-            color={theme.dark ? COLORS.white : COLORS.primary}
+            color={"#1E123D"}
             text={theme.dark ? COLORS.primary : COLORS.white}
             onPress={navigateToNextScreen}
           />
         )}
       </View>
-    </>
+    </SafeAreaView>
   );
 };
 
@@ -251,16 +295,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5fcff",
   },
   triggerStyle: {
-    height: 40,
-    backgroundColor: "white",
+    width: "100%",
+    height: 48,
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    width: wp("90%"),
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 5,
-    borderWidth: 0.5,
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#F0F0F0",
+    borderRadius: 8,
   },
   triggerText: {
     fontSize: 16,
