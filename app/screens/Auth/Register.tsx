@@ -5,7 +5,6 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
-  Platform,
   Alert,
   StyleSheet,
   ActivityIndicator,
@@ -13,11 +12,9 @@ import {
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import { COLORS, FONTS } from "../../constants/theme";
-import { GlobalStyleSheet } from "../../constants/StyleSheet";
 import { IMAGES } from "../../constants/Images";
-import { Ionicons } from "@expo/vector-icons";
 import Input from "../../components/Input/Input";
-import { Feather, FontAwesome } from "@expo/vector-icons";
+import { FontAwesome } from "@expo/vector-icons";
 import Button from "../../components/Button/Button";
 import SocialBtn from "../../components/Socials/SocialBtn";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
@@ -26,7 +23,6 @@ import Checkbox from "expo-checkbox";
 import { useDispatch } from "react-redux";
 import { registerUser } from "../../redux/reducer/userReducer";
 import { AppDispatch } from "../../redux/store";
-import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import { unwrapResult } from "@reduxjs/toolkit";
 
 type RegisterScreenProps = StackScreenProps<RootStackParamList, "Register">;
@@ -82,13 +78,13 @@ const Register = ({ navigation }: RegisterScreenProps) => {
       >
         {/* <View style={[GlobalStyleSheet.container, { padding: 0,backgroundColor:'#1E123D' }]}> */}
         <ImageBackground
-          imageStyle={{ opacity: 0.2 }}
+          imageStyle={{ opacity: 0.1, transform: [{ scale: 2 }] }}
           style={{
             justifyContent: "center",
             alignItems: "center",
             flex: 1,
             backgroundColor: "#1E123D",
-            paddingBottom : 30
+            paddingBottom: 30,
           }}
           resizeMode="cover"
           source={require("../../assets/images/bg.png")}
@@ -156,7 +152,7 @@ const Register = ({ navigation }: RegisterScreenProps) => {
                 textAlign: "center",
               }}
             >
-              Log In using Phone, Google or Apple ID  
+              Log In using Phone, Google or Apple ID
             </Text>
           </View>
         </ImageBackground>
@@ -172,56 +168,29 @@ const Register = ({ navigation }: RegisterScreenProps) => {
           }}
         >
           <Input
-            backround
-            inputLg
             placeholder="Name"
             onChangeText={(text: string) => {
               handleInputChange("name", text);
             }}
-            // icon={
-            //   <Feather
-            //     style={{}}
-            //     name={"user"}
-            //     size={20}
-            //     color={colors.title}
-            //   />
-            // }
+  
           />
 
           <View>
             <Input
-              backround
-              inputLg
               placeholder="Email Address"
               onChangeText={(text: string) => {
                 handleInputChange("email", text);
               }}
-              // icon={
-              //   <Feather
-              //     style={{}}
-              //     name={"mail"}
-              //     size={20}
-              //     color={colors.title}
-              //   />
-              // }
+
             />
           </View>
 
           <View>
             <Input
-              backround
-              inputLg
               type={"password"}
               placeholder="Password"
               onChangeText={(value) => handleInputChange("password", value)}
-              // icon={
-              //   <Feather
-              //     style={{}}
-              //     name={"lock"}
-              //     size={20}
-              //     color={colors.title}
-              //   />
-              // }
+              
             />
 
             <View
@@ -262,49 +231,31 @@ const Register = ({ navigation }: RegisterScreenProps) => {
               <ActivityIndicator size="large" color={COLORS.primary} />
             ) : (
               <Button
+                variant="decorate"
                 title="Sign Up"
-               color={"#1E123D"}
+                color={"#1E123D"}
                 // text={theme.dark ? COLORS.primary : COLORS.white}
                 onPress={onSubmit}
               />
             )}
           </View>
-          {/* <View
+        
+          <Text
             style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginBottom: 20,
+              fontFamily: "Lato-Medium",
+              fontSize: 13,
+              lineHeight: 13,
+              letterSpacing: -0.39,
+              color: "#545454",
+              textAlign: "center",
+              marginVertical: 10,
             }}
           >
-            <View
-              style={{
-                height: 1,
-                flex: 1,
-                backgroundColor: colors.title,
-              }}
-            />
-            <Text
-              style={{
-                ...FONTS.fontMedium,
-                color: colors.title,
-                marginHorizontal: 15,
-                fontSize: 13,
-              }}
-            >
-              Or continue with
-            </Text>
-            <View
-              style={{
-                height: 1,
-                flex: 1,
-                backgroundColor: colors.title,
-              }}
-            />
-          </View> */}
+            OR
+          </Text>
 
-
-          {/* <View style={GlobalStyleSheet.row}>
-            <View style={[GlobalStyleSheet.col50, { marginBottom: 20 }]}>
+          <View style={{ gap: 15 }}>
+            <View>
               <SocialBtn
                 icon={
                   <Image
@@ -314,62 +265,22 @@ const Register = ({ navigation }: RegisterScreenProps) => {
                 }
                 color={colors.card}
                 rounded
-                text="Google"
+                text="Continue with Google"
                 //gap
               />
             </View>
-            <View style={[GlobalStyleSheet.col50, { marginBottom: 20 }]}>
+            <View>
               <SocialBtn
                 icon={
                   <FontAwesome name="apple" size={20} color={colors.title} />
                 }
                 color={colors.card}
                 rounded
-                text="Apple"
+                text="Continue with Apple"
+                //gap
               />
             </View>
-          </View> */}
-
-
-               <Text
-                    style={{
-                      fontFamily: "Lato-Medium",
-                      fontSize: 13,
-                      lineHeight: 13,
-                      letterSpacing: -0.39,
-                      color: "#545454",
-                      textAlign: "center",
-                      marginVertical: 10,
-                    }}
-                  >
-                    OR
-                  </Text>
-          
-                  <View style={{ gap: 15 }}>
-                    <View>
-                      <SocialBtn
-                        icon={
-                          <Image
-                            style={{ height: 20, width: 20, resizeMode: "contain" }}
-                            source={IMAGES.google2}
-                          />
-                        }
-                        color={colors.card}
-                        rounded
-                        text="Continue with Google"
-                        //gap
-                      />
-                    </View>
-                    <View>
-                      <SocialBtn
-                        icon={<FontAwesome name="apple" size={20} color={colors.title} />}
-                        color={colors.card}
-                        rounded
-                        text="Continue with Apple"
-                        //gap
-                      />
-                    </View>
-                  </View>
+          </View>
 
           <View
             style={{

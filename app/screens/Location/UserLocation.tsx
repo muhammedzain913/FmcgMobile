@@ -30,6 +30,8 @@ import Button from "../../components/Button/Button";
 import { COLORS } from "../../constants/theme";
 import { useTheme } from "@react-navigation/native";
 import { Typography } from "../../constants/typography";
+import { useLocationSelector } from "../../hooks/useLocationSelector";
+import { useSaveUserLocation } from "../../hooks/useSaveUserLocation";
 type UserLocationScreenProps = StackScreenProps<
   RootStackParamList,
   "UserLocation"
@@ -38,76 +40,63 @@ type UserLocationScreenProps = StackScreenProps<
 const apiPath = ApiClient();
 
 const UserLocation = ({ navigation }: UserLocationScreenProps) => {
-  const [governorates, setGovernorates] = useState([]);
   const dispatch = useDispatch<AppDispatch>();
   const userId = useSelector((x: any) => x?.user?.userInfo.id);
-  const [governorate, setGovernorate] = useState<any>({});
-  const [cities, setCities] = useState<any[]>([]);
-  const [city, setCity] = useState<any>({});
-  const [blocks, setBlocks] = useState<any[]>([]);
-  const [govVisible, setGovVisible] = useState(false);
-  const [cityVisible, setCityVisible] = useState(false);
-  const [blockVisible, setBlockVisible] = useState(false);
-  const [block, setBlock] = useState<any>({});
+  const { saveLocation } = useSaveUserLocation();
+
   const [loading, setLoading] = useState(false);
   const theme = useTheme();
 
-  const navigateToNextScreen = async () => {
-    const updatedLocation = {
-      userId,
-      country: "Kuwait",
-      governorate: governorate.name,
-      city: city.name,
-      block: block.name,
-    };
+  const {
+    governorates,
+    cities,
+    blocks,
 
+    governorate,
+    city,
+    block,
+
+    setGovernorate,
+    setCity,
+    setBlock,
+
+    govVisible,
+    cityVisible,
+    blockVisible,
+
+    setGovVisible,
+    setCityVisible,
+    setBlockVisible,
+  } = useLocationSelector();
+
+
+
+  const onContinue = () => {
+    setLoading(true)
     try {
-      setLoading(true);
-      const response = await dispatch(saveUserLocation(updatedLocation));
-      const result = unwrapResult(response);
-      console.log("Location saved successfully:", result);
-      // navigation.navigate("DrawerNavigation", { screen: "Home" });
-      navigation.navigate('UserDeliveryAddress')
+      saveLocation({
+        payload: {
+          userId,
+          country: "Kuwait",
+          governorate: governorate.id,
+          city: city.id,
+          block: block.id,
+        },
+        onSuccess: () => {
+          console.log('SUCCESS SUCCESS')
+          navigation.navigate("UserDeliveryAddress");
+        },
+        onError: () => {
+          Alert.alert("Error", "Failed to save location");
+        },
+      });
     } catch (error) {
-      console.log("Error registering user:", error);
-      Alert.alert(
-        "Registration Error",
-        "Failed to register user. Please try again."
-      );
-    } finally {
-      setLoading(false);
+
+    }
+    finally {
+        setLoading(false)
     }
   };
-
-  useEffect(() => {
-    const fetchGovernertes = async () => {
-      const response = await apiPath.get(`${Url}/api/governorates`);
-      setGovernorates(response.data);
-    };
-    fetchGovernertes();
-  }, []);
-
-  useEffect(() => {
-    const fetchCities = async () => {
-      const id = governorate.id;
-      const response = await apiPath.get(
-        `${Url}/api/governorates/${id}/cities`
-      );
-      console.log(response);
-      setCities(response.data);
-      setCity(null);
-    };
-    fetchCities();
-  }, [governorate]);
-
-  useEffect(() => {
-    const fetchBlocks = async () => {
-      const response = await apiPath.get(`${Url}/api/cities/${city.id}/blocks`);
-      setBlocks(response.data);
-      setBlock(null);
-    };
-    fetchBlocks();
-  }, [city]);
 
   return (
     <SafeAreaView
@@ -126,11 +115,23 @@ const UserLocation = ({ navigation }: UserLocationScreenProps) => {
           paddingHorizontal: 20,
         }}
       >
-        <Image source={require("../../assets/images/icons/CaretLeft.png")} />
+        <View
+          style={{
+            borderWidth: 0.2,
+            width: 38,
+            height: 38,
+            justifyContent: "center",
+            alignItems: "center",
+            borderRadius: 8,
+            borderColor: "grey",
+          }}
+        >
+          <Image source={require("../../assets/images/icons/CaretLeft.png")} />
+        </View>
         <Text
           style={{
             fontFamily: "Lato",
-            fontWeight: 700,
+            fontWeight: 600,
             fontSize: 20,
             lineHeight: 32,
             letterSpacing: -0.48,
@@ -167,6 +168,8 @@ const UserLocation = ({ navigation }: UserLocationScreenProps) => {
                   key={index}
                   onSelect={() => {
                     setGovernorate(block);
+                    setCity(null);
+                    setBlock(null);
                     setGovVisible(false);
                   }}
                 >
@@ -205,6 +208,7 @@ const UserLocation = ({ navigation }: UserLocationScreenProps) => {
                       key={index}
                       onSelect={() => {
                         setCity(city);
+                        setBlock(null);
                         setCityVisible(false);
                       }}
                     >
@@ -263,10 +267,11 @@ const UserLocation = ({ navigation }: UserLocationScreenProps) => {
           <ActivityIndicator size="large" color={COLORS.primary} />
         ) : (
           <Button
+            variant="dark"
             title="Save"
             color={"#1E123D"}
             text={theme.dark ? COLORS.primary : COLORS.white}
-            onPress={navigateToNextScreen}
+            onPress={onContinue}
           />
         )}
       </View>

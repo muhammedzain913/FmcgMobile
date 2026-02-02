@@ -24,7 +24,7 @@ export default MenuOption;
 
 const styles = StyleSheet.create({
   menuOption: {
-    padding : 15,
+    padding : 5,
     width: wp("90%"),
     height: hp("6%"),
     backgroundColor: "white",

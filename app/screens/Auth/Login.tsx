@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  ScrollView,
   Image,
   TouchableOpacity,
   Alert,
@@ -11,7 +10,6 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
-import { GlobalStyleSheet } from "../../constants/StyleSheet";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
 import { StackScreenProps } from "@react-navigation/stack";
 import { loginUser } from "../../redux/reducer/userReducer";
@@ -19,13 +17,13 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../redux/store";
 import { unwrapResult } from "@reduxjs/toolkit";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { SafeAreaProvider } from "react-native-safe-area-context";
 import Input from "../../components/Input/Input";
 import Button from "../../components/Button/Button";
 import SocialBtn from "../../components/Socials/SocialBtn";
 import { IMAGES } from "../../constants/Images";
-import { Feather, FontAwesome } from "@expo/vector-icons";
+import { FontAwesome } from "@expo/vector-icons";
 import { COLORS, FONTS } from "../../constants/theme";
+import { StatusBar } from "expo-status-bar";
 
 type LoginScreenProps = StackScreenProps<RootStackParamList, "Login">;
 
@@ -71,16 +69,19 @@ const Login = ({ navigation }: LoginScreenProps) => {
     <SafeAreaView
       style={{ flex: 1, flexDirection: "column", backgroundColor: "#1E123D" }}
     >
+      <StatusBar backgroundColor="#1E123D"/>
       <ImageBackground
-        imageStyle={{ opacity: 0.2 }}
+        imageStyle={{ opacity: 0.1,transform: [{ scale: 2 }],}}
         style={{
           paddingBottom : 30,
           justifyContent: "center",
           alignItems: "center",
           flex: 1,
+          
         }}
         resizeMode="cover"
-        source={require("../../assets/images/bg.png")}
+        
+        source={require("../../assets/images/imgbckgrnd.png")}
       >
         <View
           style={{
@@ -174,7 +175,7 @@ const Login = ({ navigation }: LoginScreenProps) => {
           {loading ? (
             <ActivityIndicator size="large" color={COLORS.primary} />
           ) : (
-            <Button color={"#1E123D"} title="Login" onPress={handleLogin} />
+            <Button variant="decorate" color={"#1E123D"} title="Login" onPress={handleLogin} />
           )}
         </View>
 

@@ -5,6 +5,12 @@ export type RootStackParamList = {
   DrawerNavigation: NavigatorScreenParams<BottomTabParamList>;
   Demo: undefined;
   OnBoarding: undefined;
+  AllCategories : undefined;
+  Categories : undefined;
+  Brands : undefined;
+  ShopByBrand : undefined;
+  OrderSuccess : undefined;
+  Product : undefined;
   Login: undefined;
   Register: undefined;
   ForgotPassword: undefined;

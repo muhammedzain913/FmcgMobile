@@ -1,3 +1,7 @@
+interface Category {
+  title : string
+}
+
 export interface Product {
   id: string;
   title: string;
@@ -9,5 +13,7 @@ export interface Product {
   createdAt?: string;
   updatedAt?: string;
   productImages: string[];
-  productStock : number
+  productStock : number;
+  unit : number;
+  category : Category
 }

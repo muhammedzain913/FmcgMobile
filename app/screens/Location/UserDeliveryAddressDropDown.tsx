@@ -29,19 +29,18 @@ import { StackScreenProps } from "@react-navigation/stack";
 import { LocationRequest } from "../../types/requests/locationRequest";
 import { StatusBar } from "expo-status-bar";
 
-type UserDeliveryAddressScreenProps = StackScreenProps<
-  RootStackParamList,
-  "UserDeliveryAddress"
->;
+type Props = {
+  onChangeLocation: () => void;
+};
 
-const UserDeliveryAddress = ({
-  navigation,
-}: UserDeliveryAddressScreenProps) => {
+const UserDeliveryAddressDropDown = ({
+  onChangeLocation,
+}: Props) => {
   const [loading, setLoading] = useState(false);
   const defaultAddress = useSelector((x: any) => x.user.defaultAddress);
   const { saveLocation } = useSaveUserLocation();
   const userId = useSelector((x: any) => x?.user?.userInfo.id);
-  const [addressType,setAddressType] = useState<string>("");
+  const [addressType, setAddressType] = useState<string>("");
   const isOpen = useSharedValue(false);
 
   const [savedAddress, setSavedAddress] = useState<LocationRequest>({
@@ -97,6 +96,10 @@ const UserDeliveryAddress = ({
     );
   }, [governorate, city, block]);
 
+  useEffect(() => {
+    console.log("default", defaultAddress);
+  });
+
   const onSaveAddress = () => {
     saveLocation({
       payload: {
@@ -109,10 +112,10 @@ const UserDeliveryAddress = ({
         building: savedAddress.building,
       },
       onSuccess: () => {
-        navigation.reset({
-          index: 0,
-          routes: [{ name: "DrawerNavigation" }],
-        });
+        // navigation.reset({
+        //   index: 0,
+        //   routes: [{ name: "DrawerNavigation" }],
+        // });
       },
       onError: () => {
         Alert.alert("Error", "Failed to save address");
@@ -132,184 +135,150 @@ const UserDeliveryAddress = ({
       governorate?.name,
     );
   }, []);
-
   return (
     <>
       <KeyboardAvoidingView
-        style={{ flex: 1, backgroundColor: "#1E123D" }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
         keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
       >
-        <StatusBar translucent={true} backgroundColor="#1E123D" style="light" />
         <ScrollView
-          contentContainerStyle={{ flexGrow: 1, padding: 20 }}
+          contentContainerStyle={{ flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <ImageBackground
-            imageStyle={{ opacity: 0.1 }}
-            style={{
-              flex: 1,
-            }}
-            resizeMode="cover"
-            source={require("../../assets/images/bg.png")}
-          >
-            <View style={{ gap: 30 }}>
-              <View style={{ gap: 50 }}>
-                <View
-                  style={{
-                    justifyContent: "center",
-                    alignItems: "center",
-                    borderColor: "#F0F0F0",
-                    borderRadius: 8,
-                    borderWidth: 1,
-                    width: 36,
-                    height: 36,
-                  }}
-                >
-                  <Image
-                    source={require("../../assets/images/icons/wbackbtn.png")}
-                  />
-                </View>
-
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    borderBottomWidth: 1,
-                    borderBottomColor: "grey",
-                    paddingBottom: 20,
-                  }}
-                >
-                  <View style={{ gap: 10 }}>
-                    <View
+          <View style={{ gap: 30 }}>
+            <View style={{ gap: 50 }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  borderBottomWidth: 1,
+                  borderBottomColor: "grey",
+                  paddingBottom: 20,
+                }}
+              >
+                <View style={{ gap: 10 }}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      gap: 10,
+                      alignItems: "center",
+                    }}
+                  >
+                    <Image
+                      source={require("../../assets/images/icons/locationblack.png")}
+                    />
+                    <Text
                       style={{
-                        flexDirection: "row",
-                        gap: 10,
-                        alignItems: "center",
+                        fontFamily: "Lato",
+                        fontWeight: 600,
+                        fontStyle: "normal",
+                        fontSize: 20,
+                        color: "#000",
                       }}
                     >
-                      <Image
-                        source={require("../../assets/images/icons/locationaddress.png")}
-                      />
-                      <Text
-                        style={{
-                          fontFamily: "Lato",
-                          fontWeight: 600,
-                          fontStyle: "normal",
-                          fontSize: 20,
-                          color: "#FFFFFF",
-                        }}
-                      >
-                        {governorate?.name}
-                      </Text>
-                    </View>
-
-                    <View>
-                      <Text
-                        style={{
-                          fontFamily: "Lato",
-                          fontWeight: 600,
-                          fontStyle: "normal",
-                          fontSize: 15,
-                          color: "#FFFFFF",
-                        }}
-                      >
-                        {city?.name} , Block {block?.name}
-                      </Text>
-                    </View>
+                      {governorate?.name}
+                    </Text>
                   </View>
 
-                  <TouchableOpacity onPress={toggleSheet}>
-                    <View
+                  <View>
+                    <Text
                       style={{
-                        width: 70,
-                        height: 30,
-                        borderColor: "#F0F0F0",
-                        borderRadius: 8,
-                        borderWidth: 1,
-                        justifyContent: "center",
-                        alignItems: "center",
+                        fontFamily: "Lato",
+                        fontWeight: 600,
+                        fontStyle: "normal",
+                        fontSize: 15,
+                        color: "#000",
                       }}
                     >
-                      <Text
-                        style={{
-                          fontFamily: "Lato",
-                          fontWeight: 600,
-                          fontStyle: "normal",
-                          fontSize: 12,
-                          color: "#FFFFFF",
-                        }}
-                      >
-                        Change
-                      </Text>
-                    </View>
+                      {city?.name} , Block {block?.name}
+                    </Text>
+                  </View>
+                </View>
+
+                <TouchableOpacity onPress={() => {toggleSheet(),onChangeLocation()}}>
+                  <View
+                    style={{
+                      width: 70,
+                      height: 30,
+                      borderColor: "#000",
+                      borderRadius: 8,
+                      borderWidth: 1,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontFamily: "Lato",
+                        fontWeight: 600,
+                        fontStyle: "normal",
+                        fontSize: 12,
+                        color: "#000",
+                      }}
+                    >
+                      Change
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={{ gap: 15 }}>
+              <Input
+                value={defaultAddress?.street}
+                onChangeText={(value) => handleChange(value, "street")}
+                placeholder="Street"
+              />
+              <Input
+                value={defaultAddress?.phone}
+                onChangeText={(value) => handleChange(value, "phone")}
+                placeholder="Phone"
+              />
+              <Input
+                onChangeText={(value) => handleChange(value, "building")}
+                value={defaultAddress?.building}
+                multiline={true}
+                numberOfLines={5}
+                placeholder="Flat / House no / Building name *"
+              />
+            </View>
+
+            <View>
+              <View>
+                <Text style={[Typography.titleMedium, { color: "#000" }]}>
+                  Save As
+                </Text>
+              </View>
+              <View style={{ flexDirection: "row", gap: 10 }}>
+                <View style={styles.buttonView}>
+                  <TouchableOpacity onPress={() => setAddressType("Home")}>
+                    <Text style={styles.buttonText}>Home</Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.buttonView}>
+                  <TouchableOpacity onPress={() => setAddressType("Work")}>
+                    <Text style={styles.buttonText}>Work</Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.buttonView}>
+                  <TouchableOpacity onPress={() => setAddressType("Other")}>
+                    <Text style={styles.buttonText}>Other</Text>
                   </TouchableOpacity>
                 </View>
               </View>
-
-              <View style={{ gap: 15 }}>
-                <Input
-                  onChangeText={(value) => handleChange(value, "street")}
-                  variant="dark"
-                  placeholder="Street"
-                />
-                <Input
-                  onChangeText={(value) => handleChange(value, "phone")}
-                  variant="dark"
-                  placeholder="Phone"
-                />
-                <Input
-                  onChangeText={(value) => handleChange(value, "building")}
-                  multiline={true}
-                  numberOfLines={5}
-                  variant="dark"
-                  placeholder="Flat / House no / Building name *"
-                />
-                {/* <Input
-                multiline={true}
-                numberOfLines={5}
-                variant="dark"
-                placeholder="Directions to reach"
-              /> */}
-              </View>
-
-              <View>
-                <View>
-                  <Text style={[Typography.titleMedium, { color: "white" }]}>
-                    Save As
-                  </Text>
-                </View>
-                <View style={{ flexDirection: "row", gap: 10 }}>
-                  <View style={styles.buttonView}>
-                    <TouchableOpacity onPress={() => setAddressType('Home')}>
-                      <Text style={styles.buttonText}>Home</Text>
-                    </TouchableOpacity>
-                  </View>
-                  <View style={styles.buttonView}>
-                    <TouchableOpacity onPress={() => setAddressType('Work')}>
-                      <Text style={{ color: "#FFFFFF" }}>Work</Text>
-                    </TouchableOpacity>
-                  </View>
-                  <View style={styles.buttonView}>
-                    <TouchableOpacity onPress={() => setAddressType('Other')}>
-                      <Text style={{ color: "#FFFFFF" }}>Other</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </View>
             </View>
-          </ImageBackground>
+          </View>
 
           <View style={{ marginVertical: 10 }}>
             {loading ? (
               <ActivityIndicator size="large" color={COLORS.primary} />
             ) : (
               <Button
-                variant="non"
-                text={"black"}
-                color={"white"}
+                variant=""
+                text={"#fff"}
+                color={"rgba(30, 18, 61, 1)"}
                 title="Save Address"
                 onPress={() => {
                   onSaveAddress();
@@ -319,9 +288,11 @@ const UserDeliveryAddress = ({
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-
+{/* 
       <LocationBottomSheet isOpen={isOpen} toggleSheet={toggleSheet}>
-        <Animated.View style={{ flex: 1 }}>
+        <Animated.View
+          style={{ flex: 1, paddingHorizontal: 20, paddingVertical: 20 }}
+        >
           <Text>Choose governorate</Text>
           <DropdownMenu
             visible={govVisible}
@@ -428,31 +399,32 @@ const UserDeliveryAddress = ({
               })}
             </ScrollView>
           </DropdownMenu>
+
+          <Button
+            variant="non"
+            color={"#1E123D"}
+            title="Continue"
+            onPress={() => {
+              isOpen.value = false;
+            }}
+          />
         </Animated.View>
-        <Button
-          variant="non"
-          color={"#1E123D"}
-          title="Continue"
-          onPress={() => {
-            isOpen.value = false;
-          }}
-        />
-      </LocationBottomSheet>
+      </LocationBottomSheet> */}
     </>
   );
 };
 
-export default UserDeliveryAddress;
+export default UserDeliveryAddressDropDown;
 
 const styles = StyleSheet.create({
   buttonView: {
     width: 78,
     height: 32,
     borderRadius: 100,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
-    borderColor: "#FFFFFF",
+    borderColor: "#000",
     borderWidth: 1,
   },
   triggerStyle: {
@@ -471,9 +443,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   buttonText: {
-    color: "#FFFFFF",
+    color: "#000",
   },
-
   flex: {
     flex: 1,
   },

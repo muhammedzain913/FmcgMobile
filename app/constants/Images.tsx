@@ -1,5 +1,11 @@
 export const IMAGES = {
-    
+    milma: require('../assets/images/milma.png'),
+    elite: require('../assets/images/elite.png'),
+    muralya: require('../assets/images/muralya.png'),
+    milmaghee : require('../assets/images/milmaghee.png'),
+    milmacurd : require('../assets/images/milmacurd.png'),
+    smoothis : require('../assets/images/smoothis.png'),
+    chickoo : require('../assets/images/chickoo.png'),
     user : require('../assets/images/user.png'),
     card : require('../assets/images/card.png'),
     card1 : require('../assets/images/card1.png'),

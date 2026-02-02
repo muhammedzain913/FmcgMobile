@@ -4,9 +4,6 @@ import axios from "axios";
 import { PURGE } from "redux-persist";
 import { ApiClient } from "../api";
 import axiosConfig from "../axios";
-import { store } from "../store";
-import { SavedAddress } from "../../types/savedAddress";
-import { BaseLocation } from "../../types/location";
 import { LocationRequest } from "../../types/requests/locationRequest";
 import { LocationResponse } from "../../types/response/locationResponse";
 

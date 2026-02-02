@@ -22,101 +22,230 @@ import { Url } from "../../redux/userConstant";
 import { convertIsoDateToNormal } from "../../utils/convertIsoDateToNormal";
 import { subTotal } from "../../utils/subTotal";
 import { generateSlug } from "../../utils/generateSlug";
+import { StatusBar } from "expo-status-bar";
+import Button from "../../components/Button/Button";
 const apiPath = ApiClient();
 
-const MyorderData = [
+const myOrders = [
   {
-    id: "21",
-    image: IMAGES.item9,
-    title: "Echo Vibe Urban Runners",
-    price: "$179",
-    delevery: "FREE Delivery",
-    offer: "40% OFF",
-    btntitle: "Track Order",
-  },
-  {
-    id: "22",
-    image: IMAGES.item10,
-    title: "Swift Glide Sprinter Soles",
-    price: "$199",
-    delevery: "FREE Delivery",
-    offer: "40% OFF",
-    btntitle: "Track Order",
-  },
-  {
-    id: "23",
-    image: IMAGES.item11,
-    title: "Sky Burst Skyline Burst Shoes",
-    price: "$149",
-    delevery: "FREE Delivery",
-    offer: "40% OFF",
-    btntitle: "Track Order",
-  },
-  {
-    id: "24",
-    image: IMAGES.item12,
-    title: "Zen Dash Active Flex Shoes",
-    price: "$299",
-    delevery: "FREE Delivery",
-    offer: "40% OFF",
-    btntitle: "Track Order",
-  },
-  {
-    id: "25",
-    image: IMAGES.item13,
-    title: "Nova Stride Street Stompers",
-    price: "$99",
-    delevery: "FREE Delivery",
-    offer: "40% OFF",
-    btntitle: "Track Order",
-  },
-];
+    id: "694e71b171b7e92cb6560fb3",
+    userId: "692ea5d5da21c31031bdaf58",
+    vendorId: "692ff1a6622aea5e762aa28e",
+    email: "manmadan@gmail.com",
+    phone: "9847235308",
 
-const CompletedData = [
-  {
-    id: "26",
-    image: IMAGES.item13,
-    title: "Swift Glide Sprinter Soles",
-    price: "$199",
-    delevery: "FREE Delivery",
-    offer: "40% OFF",
-    btntitle: "Write Review",
+    streetAddress: "Katt",
+    city: "Andalus",
+    country: "Kuwait",
+
+    shippingCost: 0,
+    orderNumber: "I8AQ2VDV",
+    paymentMethod: "Cash On Delivery",
+
+    orderStatus: "PROCESSING", // PROCESSING | ON_THE_WAY | DELIVERED
+    deliveryAgentStatus: "ASSIGNED",
+
+    createdAt: "2025-12-26T11:29:53.591Z",
+    updatedAt: "2025-12-26T11:43:39.173Z",
+
+    deliveryAgentId: "693927f1ab03e3710719fc84",
+
+    orderItems: [
+      {
+        id: "69392c7a1f8d6c000d47e6a2",
+        orderId: "694e71b171b7e92cb6560fb3",
+        productId: "692ff417622aea5e762aa292",
+        vendorId: "692ff1a6622aea5e762aa28e",
+
+        title: "Wheat Flour",
+        quantity: 2,
+        price: 45,
+
+        createdAt: "2025-12-10T08:16:58.365Z",
+        updatedAt: "2025-12-10T08:16:58.365Z",
+      },
+
+      {
+        id: "69392c7a1f8d6c000d47e6a3",
+        orderId: "694e71b171b7e92cb6560fb3",
+        productId: "692ff417622aea5e762aa293",
+        vendorId: "692ff1a6622aea5e762aa28e",
+
+        title: "Amul Butter 2L",
+        imageUrl: "https://utfs.io/f/butter-image-example.jpeg",
+
+        quantity: 1,
+        price: 123,
+
+        createdAt: "2025-12-10T08:17:58.365Z",
+        updatedAt: "2025-12-10T08:17:58.365Z",
+      },
+    ],
   },
   {
-    id: "27",
-    image: IMAGES.item12,
-    title: "Sky Burst Skyline Burst Shoes",
-    price: "$299",
-    delevery: "FREE Delivery",
-    offer: "40% OFF",
-    btntitle: "Write Review",
+    id: "694e71b171b7e92cb6560fb3",
+    userId: "692ea5d5da21c31031bdaf58",
+    vendorId: "692ff1a6622aea5e762aa28e",
+    email: "manmadan@gmail.com",
+    phone: "9847235308",
+
+    streetAddress: "Katt",
+    city: "Andalus",
+    country: "Kuwait",
+
+    shippingCost: 0,
+    orderNumber: "I8AQ2VDV",
+    paymentMethod: "Cash On Delivery",
+
+    orderStatus: "PROCESSING", // PROCESSING | ON_THE_WAY | DELIVERED
+    deliveryAgentStatus: "ASSIGNED",
+
+    createdAt: "2025-12-26T11:29:53.591Z",
+    updatedAt: "2025-12-26T11:43:39.173Z",
+
+    deliveryAgentId: "693927f1ab03e3710719fc84",
+
+    orderItems: [
+      {
+        id: "69392c7a1f8d6c000d47e6a2",
+        orderId: "694e71b171b7e92cb6560fb3",
+        productId: "692ff417622aea5e762aa292",
+        vendorId: "692ff1a6622aea5e762aa28e",
+
+        title: "Wheat Flour",
+        quantity: 2,
+        price: 45,
+
+        createdAt: "2025-12-10T08:16:58.365Z",
+        updatedAt: "2025-12-10T08:16:58.365Z",
+      },
+
+      {
+        id: "69392c7a1f8d6c000d47e6a3",
+        orderId: "694e71b171b7e92cb6560fb3",
+        productId: "692ff417622aea5e762aa293",
+        vendorId: "692ff1a6622aea5e762aa28e",
+
+        title: "Amul Butter 2L",
+        imageUrl: "https://utfs.io/f/butter-image-example.jpeg",
+
+        quantity: 1,
+        price: 123,
+
+        createdAt: "2025-12-10T08:17:58.365Z",
+        updatedAt: "2025-12-10T08:17:58.365Z",
+      },
+    ],
   },
   {
-    id: "28",
-    image: IMAGES.item11,
-    title: "Zen Dash Active Flex Shoes",
-    price: "$49",
-    delevery: "FREE Delivery",
-    offer: "40% OFF",
-    btntitle: "Write Review",
+    id: "694e71b171b7e92cb6560fb3",
+    userId: "692ea5d5da21c31031bdaf58",
+    vendorId: "692ff1a6622aea5e762aa28e",
+    email: "manmadan@gmail.com",
+    phone: "9847235308",
+
+    streetAddress: "Katt",
+    city: "Andalus",
+    country: "Kuwait",
+
+    shippingCost: 0,
+    orderNumber: "I8AQ2VDV",
+    paymentMethod: "Cash On Delivery",
+
+    orderStatus: "PROCESSING", // PROCESSING | ON_THE_WAY | DELIVERED
+    deliveryAgentStatus: "ASSIGNED",
+
+    createdAt: "2025-12-26T11:29:53.591Z",
+    updatedAt: "2025-12-26T11:43:39.173Z",
+
+    deliveryAgentId: "693927f1ab03e3710719fc84",
+
+    orderItems: [
+      {
+        id: "69392c7a1f8d6c000d47e6a2",
+        orderId: "694e71b171b7e92cb6560fb3",
+        productId: "692ff417622aea5e762aa292",
+        vendorId: "692ff1a6622aea5e762aa28e",
+
+        title: "Wheat Flour",
+        quantity: 2,
+        price: 45,
+
+        createdAt: "2025-12-10T08:16:58.365Z",
+        updatedAt: "2025-12-10T08:16:58.365Z",
+      },
+
+      {
+        id: "69392c7a1f8d6c000d47e6a3",
+        orderId: "694e71b171b7e92cb6560fb3",
+        productId: "692ff417622aea5e762aa293",
+        vendorId: "692ff1a6622aea5e762aa28e",
+
+        title: "Amul Butter 2L",
+        imageUrl: "https://utfs.io/f/butter-image-example.jpeg",
+
+        quantity: 1,
+        price: 123,
+
+        createdAt: "2025-12-10T08:17:58.365Z",
+        updatedAt: "2025-12-10T08:17:58.365Z",
+      },
+    ],
   },
   {
-    id: "29",
-    image: IMAGES.item10,
-    title: "Echo Vibe Urban Runners",
-    price: "$399",
-    delevery: "FREE Delivery",
-    offer: "40% OFF",
-    btntitle: "Write Review",
-  },
-  {
-    id: "30",
-    image: IMAGES.item9,
-    title: "Nova Stride Street Stompers",
-    price: "$199",
-    delevery: "FREE Delivery",
-    offer: "40% OFF",
-    btntitle: "Write Review",
+    id: "694e71b171b7e92cb6560fb3",
+    userId: "692ea5d5da21c31031bdaf58",
+    vendorId: "692ff1a6622aea5e762aa28e",
+    email: "manmadan@gmail.com",
+    phone: "9847235308",
+
+    streetAddress: "Katt",
+    city: "Andalus",
+    country: "Kuwait",
+
+    shippingCost: 0,
+    orderNumber: "I8AQ2VDV",
+    paymentMethod: "Cash On Delivery",
+
+    orderStatus: "PROCESSING", // PROCESSING | ON_THE_WAY | DELIVERED
+    deliveryAgentStatus: "ASSIGNED",
+
+    createdAt: "2025-12-26T11:29:53.591Z",
+    updatedAt: "2025-12-26T11:43:39.173Z",
+
+    deliveryAgentId: "693927f1ab03e3710719fc84",
+
+    orderItems: [
+      {
+        id: "69392c7a1f8d6c000d47e6a2",
+        orderId: "694e71b171b7e92cb6560fb3",
+        productId: "692ff417622aea5e762aa292",
+        vendorId: "692ff1a6622aea5e762aa28e",
+
+        title: "Wheat Flour",
+        quantity: 2,
+        price: 45,
+
+        createdAt: "2025-12-10T08:16:58.365Z",
+        updatedAt: "2025-12-10T08:16:58.365Z",
+      },
+
+      {
+        id: "69392c7a1f8d6c000d47e6a3",
+        orderId: "694e71b171b7e92cb6560fb3",
+        productId: "692ff417622aea5e762aa293",
+        vendorId: "692ff1a6622aea5e762aa28e",
+
+        title: "Amul Butter 2L",
+        imageUrl: "https://utfs.io/f/butter-image-example.jpeg",
+
+        quantity: 1,
+        price: 123,
+
+        createdAt: "2025-12-10T08:17:58.365Z",
+        updatedAt: "2025-12-10T08:17:58.365Z",
+      },
+    ],
   },
 ];
 
@@ -148,12 +277,11 @@ const Myorder = ({ navigation }: MyorderScreenProps) => {
     dispatch(addTowishList(data));
   };
 
-
   useEffect(() => {
     const fetchOrders = async () => {
       try {
         const response = await apiPath.get(
-          `${Url}/api/orders/user/${userInfo.id}`
+          `${Url}/api/orders/user/${userInfo.id}`,
         );
         setOrders(response.data);
       } catch (error: any) {
@@ -172,388 +300,141 @@ const Myorder = ({ navigation }: MyorderScreenProps) => {
   };
 
   return (
-    <View style={{ backgroundColor: colors.card, flex: 1 }}>
-      <Header title="My Order" leftIcon="back" titleRight />
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View style={GlobalStyleSheet.container}>
-          <View style={{ flexDirection: "row", gap: 10, marginRight: 10 }}>
-            <TouchableOpacity
-              onPress={() => onPressTouch(0)}
-              style={[
-                GlobalStyleSheet.TouchableOpacity2,
-                {
-                  backgroundColor:
-                    currentIndex === 0 ? colors.title : colors.card,
-                  borderColor: currentIndex === 0 ? colors.title : colors.title,
-                },
-              ]}
-            >
-              <Text
-                style={{
-                  ...FONTS.fontRegular,
-                  fontSize: 19,
-                  color:
-                    currentIndex === 0
-                      ? theme.dark
-                        ? COLORS.title
-                        : colors.card
-                      : colors.title,
-                }}
-              >
-                Ongoing
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => onPressTouch(1)}
-              style={[
-                GlobalStyleSheet.TouchableOpacity2,
-                {
-                  backgroundColor:
-                    currentIndex === 1 ? colors.title : colors.card,
-                  borderColor: currentIndex === 1 ? colors.title : colors.title,
-                },
-              ]}
-            >
-              <Text
-                style={{
-                  ...FONTS.fontRegular,
-                  fontSize: 19,
-                  color:
-                    currentIndex === 1
-                      ? theme.dark
-                        ? COLORS.title
-                        : colors.card
-                      : colors.title,
-                }}
-              >
-                Completed
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <ScrollView
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          ref={scrollRef}
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-            { useNativeDriver: false }
-          )}
-          onMomentumScrollEnd={(e: any) => {
-            if (
-              e.nativeEvent.contentOffset.x.toFixed(0) == SIZES.width.toFixed(0)
-            ) {
-              setCurrentIndex(1);
-            } else if (e.nativeEvent.contentOffset.x.toFixed(0) == 0) {
-              setCurrentIndex(0);
-            } else {
-              setCurrentIndex(0);
-            }
+    <View style={{ flex: 1, backgroundColor: "rgba(250, 250, 250, 1)" }}>
+      <StatusBar translucent backgroundColor="transparent" />
+      <ScrollView contentContainerStyle={{ gap: 20 }}>
+        <View
+          style={{
+            paddingHorizontal: 20,
+            backgroundColor: "white",
+            paddingVertical: 30,
           }}
         >
-          <View style={{ width: SIZES.width }}>
-            <View style={[GlobalStyleSheet.container, { paddingTop: 0 }]}>
-              <View style={{ marginHorizontal: -15 }}>
-                <ScrollView showsVerticalScrollIndicator={false}>
-                  {orders?.map((order: any, index: number) => {
-                    return (
-                      <>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 20,
+              justifyContent: "space-between",
+              backgroundColor: "#ffff",
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row", // Flow: Horizontal
+                alignItems: "center", // Inner alignment
+                height: 40, // Fixed height // Padding
+                paddingVertical: 7.78,
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: "grey",
+                backgroundColor: "rgba(255, 255, 255, 0.6)", // Required for blur effect
+                width: 40,
+                justifyContent: "center",
+              }}
+            >
+              <Image
+                style={{ height: 20, width: 15, marginTop: 4 }}
+                source={require("../../assets/images/icons/CaretLeft.png")}
+              />
+            </View>
+            <View style={{ position: "absolute", left: 0, right: 0 }}>
+              <Text
+                style={{
+                  fontFamily: "Lato", // preferred if font file exists
+                  fontSize: 20,
+                  lineHeight: 32,
+                  letterSpacing: -0.48, // -3% of 16px = -0.48
+                  color: "#000000",
+                  textAlign: "center",
+                  fontWeight: "700",
+                }}
+              >
+                My Cart
+              </Text>
+            </View>
+            <View></View>
+          </View>
+        </View>
+        <View style={{ paddingHorizontal: 20, gap: 30 }}>
+          <Text style={{ fontSize: 15, fontWeight: 600 }}>Active Orders</Text>
+          {orders?.map((item: any, index: number) => {
+            return (
+              <>
+                <View
+                  style={{
+                    backgroundColor: "#fff",
+                    paddingHorizontal: 10,
+                    paddingVertical: 20,
+                    gap: 10,
+                    position: "relative",
+                  }}
+                >
+                  <View
+                    style={{
+                      backgroundColor: "black",
+                      position: "absolute",
+                      top: 0,
+                      right: 0,
+                      paddingHorizontal: 10,
+                      paddingVertical: 2,
+                      borderTopRightRadius: 8,
+                      borderBottomLeftRadius: 8,
+                    }}
+                  >
+                    <Text style={{ color: "#fff", fontSize: 10 }}>
+                      On The Way
+                    </Text>
+                  </View>
+
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <View style={{ gap: 10 }}>
+                      <Text style={{}}>ORDER DETAILS</Text>
+                    </View>
+                    <View style={{}}>
+                      <Text>{item.createdAt}</Text>
+                    </View>
+                  </View>
+                  <Image
+                    style={{ width: 350 }}
+                    source={require("../../assets/images/line.png")}
+                  />
+
+                  <View style={{ gap: 10 }}>
+                    {item.orderItems.map((item: any, index: number) => {
+                      return (
                         <View
                           style={{
-                            backgroundColor: "#fff",
-                            borderRadius: 10,
-                            padding: 16,
-                            marginBottom: 20,
-                            borderWidth: 1,
-                            borderColor: "#eee",
-                            shadowColor: "#000",
-                            shadowOpacity: 0.05,
-                            shadowOffset: { width: 0, height: 2 },
-                            shadowRadius: 4,
-                            elevation: 2,
+                            flexDirection: "row",
+                            justifyContent: "space-between",
                           }}
                         >
-                          {/* Order Header */}
-                          <View style={{ marginBottom: 10 }}>
-                            <Text
-                              style={{
-                                fontSize: 16,
-                                fontWeight: "700",
-                                color: "#111",
-                                marginBottom: 4,
-                              }}
-                            >
-                              Order #{order.orderNumber}
-                            </Text>
-                            <Text style={{ fontSize: 13, color: "#666" }}>
-                              Date: {convertIsoDateToNormal(order.createdAt)}
-                            </Text>
-                          </View>
-
-                          {/* Subtotal & Status */}
-                          <View
-                            style={{
-                              flexDirection: "row",
-                              justifyContent: "space-between",
-                              marginTop: 8,
-                            }}
-                          >
-                            <View>
-                              <Text style={{ fontSize: 13, color: "#999" }}>
-                                Subtotal
-                              </Text>
-                              <Text
-                                style={{
-                                  fontSize: 15,
-                                  fontWeight: "600",
-                                  color: "#111",
-                                  marginTop: 2,
-                                }}
-                              >
-                                ${getSubTotal(order.orderItems)}
-                              </Text>
-                            </View>
-
-                            <View
-                              style={{
-                                backgroundColor:
-                                  order.orderStatus === "Completed"
-                                    ? "#DCFCE7"
-                                    : order.orderStatus === "Pending"
-                                    ? "#FEF9C3"
-                                    : "#E0F2FE",
-                                borderRadius: 20,
-                                paddingVertical: 5,
-                                paddingHorizontal: 15,
-                                alignSelf: "center",
-                              }}
-                            >
-                              <Text
-                                style={{
-                                  fontSize: 13,
-                                  fontWeight: "600",
-                                  color:
-                                    order.orderStatus === "Completed"
-                                      ? "#166534"
-                                      : order.orderStatus === "Pending"
-                                      ? "#854D0E"
-                                      : "#1E40AF",
-                                }}
-                              >
-                                {order.orderStatus}
-                              </Text>
-                            </View>
-                          </View>
+                          <Text>{item.title}</Text>
+                          <Text>{item.price}</Text>
                         </View>
+                      );
+                    })}
+                  </View>
 
-                        <ScrollView
-                          style={{
-                            flex: 1,
-                            paddingHorizontal: 16,
-                            paddingVertical: 24,
-                          }}
-                          showsVerticalScrollIndicator={false}
-                        >
-                          {order.orderItems.map((item: any, i: number) => {
-                            const slug = generateSlug(item.title);
-                            return (
-                              <View
-                                key={i}
-                                style={{
-                                  flexDirection: "row",
-                                  marginBottom: 30,
-                                  borderBottomWidth: 1,
-                                  borderBottomColor: "#eee",
-                                  paddingBottom: 10,
-                                }}
-                              >
-                                {/* Product Image */}
-                                <Image
-                                  source={{ uri: item.imageUrl }}
-                                  style={{
-                                    width: 100,
-                                    height: 100,
-                                    borderRadius: 10,
-                                    resizeMode: "cover",
-                                  }}
-                                />
-
-                                {/* Product Details */}
-                                <View
-                                  style={{
-                                    flex: 1,
-                                    marginLeft: 15,
-                                    justifyContent: "space-between",
-                                  }}
-                                >
-                                  <View>
-                                    <Text
-                                      style={{
-                                        fontSize: 16,
-                                        fontWeight: "700",
-                                        color: "#111",
-                                      }}
-                                    >
-                                      {item.title}
-                                    </Text>
-
-                                    <View
-                                      style={{
-                                        flexDirection: "row",
-                                        justifyContent: "space-between",
-                                        marginTop: 10,
-                                      }}
-                                    >
-                                      <Text
-                                        style={{ fontSize: 14, color: "#777" }}
-                                      >
-                                        Qty: {item.quantity}
-                                      </Text>
-                                      <Text
-                                        style={{
-                                          fontSize: 16,
-                                          fontWeight: "700",
-                                          color: "#111",
-                                        }}
-                                      >
-                                        ${item.price}
-                                      </Text>
-                                    </View>
-                                  </View>
-
-                                  {/* Links */}
-                                  <View
-                                    style={{
-                                      flexDirection: "row",
-                                      marginTop: 10,
-                                    }}
-                                  >
-                                    <TouchableOpacity
-                                      onPress={() =>
-                                        navigation.navigate("ProductDetails", {
-                                          slug,
-                                        })
-                                      }
-                                    >
-                                      <Text
-                                        style={{
-                                          fontSize: 14,
-                                          color: "#555",
-                                          marginRight: 10,
-                                        }}
-                                      >
-                                        View Product
-                                      </Text>
-                                    </TouchableOpacity>
-
-                                    <Text style={{ color: "#ccc" }}>|</Text>
-
-                                    <TouchableOpacity onPress={() => {}}>
-                                      <Text
-                                        style={{
-                                          fontSize: 14,
-                                          color: "#555",
-                                          marginLeft: 10,
-                                        }}
-                                      >
-                                        Similar Product
-                                      </Text>
-                                    </TouchableOpacity>
-                                  </View>
-                                </View>
-                              </View>
-                            );
-                          })}
-
-                          {/* Buttons */}
-                          <View style={{ flexDirection: "row", marginTop: 20 }}>
-                            <TouchableOpacity
-                              style={{
-                                flex: 1,
-                                backgroundColor: "#fff",
-                                borderColor: "#ccc",
-                                borderWidth: 1,
-                                paddingVertical: 12,
-                                borderRadius: 8,
-                                alignItems: "center",
-                                marginRight: 10,
-                              }}
-                              onPress={() => {navigation.navigate('Trackorder',{
-                                orderId : order.id
-                              })}}
-                            >
-                              <Text
-                                style={{
-                                  fontSize: 14,
-                                  fontWeight: "700",
-                                  color: "#111",
-                                }}
-                              >
-                                Track Order
-                              </Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                              style={{
-                                flex: 1,
-                                backgroundColor: "#fff",
-                                borderColor: "#ccc",
-                                borderWidth: 1,
-                                paddingVertical: 12,
-                                borderRadius: 8,
-                                alignItems: "center",
-                              }}
-                              onPress={() =>
-                                navigation.navigate("Invoice", { id: order.id })
-                              }
-                            >
-                              <Text
-                                style={{
-                                  fontSize: 14,
-                                  fontWeight: "700",
-                                  color: "#111",
-                                }}
-                              >
-                                View Invoice
-                              </Text>
-                            </TouchableOpacity>
-                          </View>
-                        </ScrollView>
-                      </>
-                    );
-                  })}
-                </ScrollView>
-              </View>
-            </View>
-          </View>
-          <View style={{ width: SIZES.width }}>
-            <View style={[GlobalStyleSheet.container, { paddingTop: 0 }]}>
-              <View style={{ marginHorizontal: -15 }}>
-                <ScrollView showsVerticalScrollIndicator={false}>
-                  {CompletedData.map((data: any, index) => {
-                    return (
-                      <Cardstyle2
-                        id={data.id}
-                        key={index}
-                        title={data.title}
-                        price={data.price}
-                        delevery={data.delevery}
-                        // image={data.image}
-                        offer={data.offer}
-                        removelikebtn
-                        btntitle={data.btntitle}
-                        onPress1={() => addItemToWishList(data)}
-                        onPress={() => navigation.navigate("Writereview")}
-                      />
-                    );
-                  })}
-                </ScrollView>
-              </View>
-            </View>
-          </View>
-        </ScrollView>
+                  <Button
+                    onPress={() => {
+                      navigation.navigate("Trackorder", {
+                        orderId: item.id,
+                      });
+                    }}
+                    title="Track Order"
+                    color={"rgba(30, 18, 61, 1)"}
+                  ></Button>
+                </View>
+              </>
+            );
+          })}
+        </View>
       </ScrollView>
     </View>
   );

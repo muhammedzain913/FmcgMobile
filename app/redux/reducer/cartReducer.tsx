@@ -56,6 +56,11 @@ export const selectCartTotalQuantity = (state : any) =>
 export const selectCartTotalPrice = (state : any) =>
   state.cart.cart.reduce((sum : number, { price, quantity } : {price : number ,quantity : number}) => sum + price * quantity, 0);
 
+export const selectCartItemById = (id: string | number) => (state: any) =>
+  state.cart.cart.find((item: any) => item.id === id);
+
+
+
 export const {
   addToCart,
   removeFromCart,

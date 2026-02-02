@@ -21,7 +21,8 @@
         "foregroundImage": "./assets/soopersplashimg.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.muhammedzain.footflare"
+      "package": "com.muhammedzain.footflare",
+      "softwareKeyboardLayoutMode": "pan"
     },
     "web": {
       "favicon": "./assets/favicon.png"

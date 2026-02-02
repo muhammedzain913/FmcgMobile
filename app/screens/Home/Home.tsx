@@ -5,134 +5,48 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
+  ImageBackground,
+  StyleSheet,
   TextInput,
-  Platform,
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
-import { AntDesign } from "@expo/vector-icons"; // Using AntDesign for arrow
 import { GlobalStyleSheet } from "../../constants/StyleSheet";
 import { IMAGES } from "../../constants/Images";
-import { COLORS, FONTS } from "../../constants/theme";
-import Button from "../../components/Button/Button";
-import Cardstyle1 from "../../components/Card/Cardstyle1";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
 import { StackScreenProps } from "@react-navigation/stack";
 import BottomSheet2 from "../Components/BottomSheet2";
 import { useDispatch, useSelector } from "react-redux";
-import { openDrawer } from "../../redux/actions/drawerAction";
-import { addTowishList } from "../../redux/reducer/wishListReducer";
 import { ApiClient } from "../../redux/api";
 import { Url } from "../../redux/userConstant";
+import { useLocationSelector } from "../../hooks/useLocationSelector";
+import { LinearGradient } from "expo-linear-gradient";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
+import ProductCard from "../Product/ProductCard";
+import { FONTS } from "../../constants/theme";
+import {
+  addToCart,
+  selectCartTotalQuantity,
+} from "../../redux/reducer/cartReducer";
+import { AppDispatch } from "../../redux/store";
+import Animated, { useSharedValue } from "react-native-reanimated";
+import LocationBottomSheet from "../../components/BottomSheet/LocationBottomSheet";
+import UserDeliveryAddress from "../Location/UserDeliveryAddress";
+import UserDeliveryAddressDropDown from "../Location/UserDeliveryAddressDropDown";
+import DropdownMenu from "../../components/DropDown/DropDownMenu";
+import MenuOption from "../../components/DropDown/MenuOption";
+import { heightPercentageToDP as hp } from "react-native-responsive-screen";
+import Button from "../../components/Button/Button";
 
 const apiPath = ApiClient();
-
-const brandData = [
-  {
-    title: "Nike",
-    image: IMAGES.brand1,
-  },
-  {
-    title: "Adidas",
-    image: IMAGES.brand2,
-  },
-  {
-    title: "Reebok",
-    image: IMAGES.brand3,
-  },
-  {
-    title: "Puma",
-    image: IMAGES.brand4,
-  },
-  {
-    title: "Bata",
-    image: IMAGES.brand5,
-  },
-  {
-    title: "Nike",
-    image: IMAGES.brand1,
-  },
-  {
-    title: "Adidas",
-    image: IMAGES.brand2,
-  },
-  {
-    title: "Reebok",
-    image: IMAGES.brand3,
-  },
-  {
-    title: "Puma",
-    image: IMAGES.brand4,
-  },
-  {
-    title: "Bata",
-    image: IMAGES.brand5,
-  },
-];
-
-const ArrivalData = [
-  {
-    title: "All",
-    active: true,
-  },
-  {
-    title: "Child",
-  },
-  {
-    title: "Man",
-  },
-  {
-    title: "Woman",
-  },
-  {
-    title: "Dress",
-  },
-  {
-    title: "unisex",
-  },
-];
-
-const cardData = [
-  {
-    id: "0",
-    image: IMAGES.item5,
-    title: "Swift Glide Sprinter Soles",
-    price: "$199",
-    offer: "30% OFF",
-    color: false,
-    hascolor: false,
-  },
-  {
-    id: "1",
-    image: IMAGES.item6,
-    title: "Echo Vibe Urban Runners",
-    price: "$149",
-    //offer:"30% OFF"
-    color: false,
-    hascolor: true,
-  },
-  {
-    id: "2",
-    image: IMAGES.item7,
-    title: "Zen Dash Active Flex Shoes",
-    price: "$299",
-    //offer:"30% OFF"
-    color: false,
-    hascolor: true,
-  },
-  {
-    id: "3",
-    image: IMAGES.item8,
-    title: "Nova Stride Street Stompers",
-    price: "$99",
-    offer: "70% OFF",
-    color: true,
-    hascolor: false,
-  },
-];
 
 type HomeScreenProps = StackScreenProps<RootStackParamList, "Home">;
 
 const Home = ({ navigation }: HomeScreenProps) => {
+  const defaultAddress = useSelector((x: any) => x?.user?.defaultAddress);
+  const isOpen = useSharedValue(false);
+  const isOpenEdit = useSharedValue(false);
+  const dispatch = useDispatch<AppDispatch>();
   const [banner, setBanner] = useState<any>({});
   const address = useSelector((x: any) => x.user.defaultAddress);
   const [loading, setLoading] = useState(true);
@@ -143,11 +57,38 @@ const Home = ({ navigation }: HomeScreenProps) => {
   const [displayedProducts, setDisplayedProducts] = useState<any[]>();
   const [dealCategory, setDealCategory] = useState<any>();
   const [dealCategoryProducts, setDealCategoryProducts] = useState<any[]>();
-  const [searchQuery,setSearchQuety] = useState<string>('');
+  const [searchQuery, setSearchQuety] = useState<string>("");
+  const totalQuantity = useSelector(selectCartTotalQuantity);
+  const [view, setView] = useState<"LIST" | "EDIT" | "LOCATION">("LIST");
+  const toggleSheet = () => {
+    isOpen.value = !isOpen.value;
+  };
 
-  useEffect(() => {
-    console.log("user info", address);
-  });
+  const toggleSheetEdit = () => {
+    isOpenEdit.value = !isOpenEdit.value;
+  };
+
+  const {
+    governorates,
+    cities,
+    blocks,
+
+    governorate,
+    city,
+    block,
+
+    setGovernorate,
+    setCity,
+    setBlock,
+
+    govVisible,
+    cityVisible,
+    blockVisible,
+
+    setGovVisible,
+    setCityVisible,
+    setBlockVisible,
+  } = useLocationSelector();
 
   useEffect(() => {
     const fetcchBanner = async () => {
@@ -170,7 +111,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
     const fetchProducts = async () => {
       try {
         const response = await apiPath.get(
-          `${Url}/api/products?gov=${address.governorate}&city=${address.city}&block=${address.block}&search =${searchQuery}`
+          `${Url}/api/products?gov=${address.governorate.name}&city=${address.city.name}&block=${address.block.name}&search =${searchQuery}`,
         );
         console.log("product api", response.data.length);
         setProducts(response.data);
@@ -188,7 +129,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
     const setDealProducts = async () => {
       try {
         const dealProducts = products?.filter(
-          (p: any) => p.categoryId === dealCategory.id
+          (p: any) => p.categoryId === dealCategory.id,
         );
         setDealCategoryProducts(dealProducts);
       } catch (error: any) {
@@ -217,21 +158,23 @@ const Home = ({ navigation }: HomeScreenProps) => {
     fetchCategory();
   }, []);
 
-  const handleCategoryChange = (categoryId?: string) => {
-    console.log("ID", categoryId);
-    if (categoryId === undefined) {
-      setDisplayedProducts(products);
-      return;
-    }
-    const productsOfCategoryById = products?.filter(
-      (p: any) => p.category.id === categoryId
-    );
-
-    console.log("filtered", productsOfCategoryById);
-    setDisplayedProducts(productsOfCategoryById);
-  };
-
-  const dispatch = useDispatch();
+  const brandData = [
+    {
+      imagePath: IMAGES.elite,
+    },
+    {
+      imagePath: IMAGES.muralya,
+    },
+    {
+      imagePath: IMAGES.milma,
+    },
+    {
+      imagePath: IMAGES.milma,
+    },
+    {
+      imagePath: IMAGES.milma,
+    },
+  ];
 
   const theme = useTheme();
   const { colors }: { colors: any } = theme;
@@ -240,324 +183,208 @@ const Home = ({ navigation }: HomeScreenProps) => {
 
   const sheetRef = useRef<any>(null);
 
-  const addItemToWishList = (data: any) => {
-    dispatch(addTowishList(data));
+  const addItemToCart = (product: any) => {
+    // const selectedImage = swiperimageData[currentSlide].image;
+    console.log("adding items..");
+    dispatch(
+      addToCart({
+        id: product?.id,
+        image: product?.imageUrl,
+        title: product?.title,
+        price: product?.salePrice,
+        slug: product?.slug,
+        color: false,
+        hascolor: false,
+        vendorId: product?.userId,
+      } as any),
+    );
   };
 
   return (
-    <View style={{ backgroundColor: colors.card, flex: 1 }}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+    <SafeAreaView style={{ backgroundColor: colors.card, flex: 1 }}>
+      <StatusBar translucent={true} backgroundColor="#1E123D" style="light" />
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: totalQuantity > 0 ? 100 : 20 }}
+        showsVerticalScrollIndicator={false}
+      >
         <View
-          style={[
-            GlobalStyleSheet.container,
-            { paddingHorizontal: 20, marginTop: 5, marginBottom: 10 },
-          ]}
+          style={{
+            borderBottomLeftRadius: 30,
+            borderBottomRightRadius: 30,
+            overflow: "hidden",
+          }}
         >
-          <View
-            style={[
-              GlobalStyleSheet.row,
-              { alignItems: "center", justifyContent: "space-between" },
-            ]}
+          <LinearGradient
+            // Button Linear Gradient
+            colors={["rgba(30, 18, 61, 1)", "rgba(12, 0, 40, 1)"]}
           >
-            <TouchableOpacity
-              style={{ margin: 5 }}
-              // onPress={() => dispatch(openDrawer())}
-              onPress={() => navigation.openDrawer()}
+            <ImageBackground
+              style={{ flex: 1, padding: 20, paddingTop: 100 }}
+              source={require("../../assets/images/maskgroup.png")}
             >
-              <Image
-                style={{ height: 16, width: 16, tintColor: colors.title }}
-                source={IMAGES.grid3}
-              />
-            </TouchableOpacity>
-            <View>
-              <Image
-                style={{
-                  height: 25,
-                  width: 50,
-                  resizeMode: "contain",
-                  tintColor: colors.title,
-                }}
-                source={IMAGES.shose}
-              />
-            </View>
-
-            <View>
-              {/* <Text>{address.governorate}</Text> */}
-              <TouchableOpacity
-                onPress={() => navigation.navigate("Notification")}
-                style={{
-                  height: 35,
-                  width: 35,
-                  borderRadius: 8,
-                  backgroundColor: theme.dark
-                    ? "rgba(255,255,255,0.10)"
-                    : COLORS.background,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Image
-                  style={{ height: 20, width: 20, tintColor: colors.title }}
-                  source={IMAGES.ball}
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate("UserLocation");
-            }}
-          >
-            <View
-              style={{
-                marginTop: 10,
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <Text>
-                {address.governorate}, {address.city}, {address.block}
-              </Text>
-              <Image
-                style={{ height: 13, width: 13 }}
-                source={require("../../assets/images/icons/greater-than.png")}
-              />
-            </View>
-          </TouchableOpacity>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              marginTop: 20,
-              gap: 10,
-              marginHorizontal: -5,
-            }}
-          >
-            <View style={{ flex: 1 }}>
-              <TextInput
-                placeholder="Search Product"
-                placeholderTextColor={"#666666"}
-                style={[
-                  FONTS.fontRegular,
-                  {
-                    height: 50,
-                    width: "100%",
-                    borderWidth: 1,
-                    borderColor: colors.border,
-                    borderRadius: 8,
-                    paddingHorizontal: 20,
-                    color: colors.title,
-                    fontSize: 16,
-                  },
-                ]}
-                onChangeText={(e : string) => {console.log('term',e),setSearchQuety(e)}}
-              />
-            </View>
-            <TouchableOpacity
-              style={{
-                height: 50,
-                width: 50,
-                backgroundColor: theme.dark
-                  ? "rgba(255,255,255,0.10)"
-                  : colors.title,
-                borderRadius: 8,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-              onPress={() => sheetRef.current.openSheet("filter")}
-            >
-              <Image
-                style={{ height: 24, width: 24, resizeMode: "contain" }}
-                source={IMAGES.grid4}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={{ backgroundColor: COLORS.secondary }}>
-          <View style={[GlobalStyleSheet.container, { paddingHorizontal: 30 }]}>
-            <View
-              style={{
-                marginTop: -15,
-                marginBottom: -15,
-                marginLeft: -15,
-                marginRight: -15,
-                position: "relative",
-                alignItems: "center",
-              }}
-            >
-              <View
-                style={[
-                  {
-                    backgroundColor: theme.dark
-                      ? COLORS.background
-                      : colors.card,
-                    borderTopLeftRadius: 200,
-                    borderTopRightRadius: 200,
-                    position: "absolute",
-                    left: 35,
-                    right: 35,
-                    top: 15,
-                    bottom: 0,
-                  },
-                  Platform.OS === "web" && { bottom: -10 },
-                ]}
-              />
-              <Image
-                style={[
-                  {
-                    height: undefined,
-                    width: "100%",
-                    aspectRatio: 1 / 1,
-                  },
-                  Platform.OS === "web" && { height: null },
-                ]}
-                source={{ uri: banner.imageUrl }}
-              />
-            </View>
-            {/* </View> */}
-          </View>
-        </View>
-
-        {/* <View style={{ backgroundColor: COLORS.secondary, marginTop: 50 }}>
-          <View style={[GlobalStyleSheet.container, { paddingHorizontal: 30 }]}>
-            <View
-              style={{
-                marginTop: -15,
-                marginBottom: -15,
-                marginLeft: -15,
-                marginRight: -15,
-                position: "relative",
-                alignItems: "center",
-              }}
-            >
-              <View
-                style={[
-                  {
-                    backgroundColor: theme.dark
-                      ? COLORS.background
-                      : colors.card,
-                    borderTopLeftRadius: 200,
-                    borderTopRightRadius: 200,
-                    position: "absolute",
-                    left: 35,
-                    right: 35,
-                    top: 15,
-                    bottom: 0,
-                  },
-                  Platform.OS === "web" && { bottom: -10 },
-                ]}
-              />
-              <Image
-                style={[
-                  {
-                    height: undefined,
-                    width: "100%",
-                    aspectRatio: 1 / 1,
-                  },
-                  Platform.OS === "web" && { height: null },
-                ]}
-                source={{ uri: dealCategory?.imageUrl }}
-              />
-
-              <TouchableOpacity
-                onPress={() => {
-                  navigation.navigate("Products", {
-                    categoryId: dealCategory.id,
-                    categoryName: dealCategory.title,
-                  });
-                }}
-                style={{
-                  position: "absolute",
-                  bottom: 10,
-                  right: 10,
-                  backgroundColor: COLORS.primary,
-                  padding: 10,
-                  borderRadius: 50,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <AntDesign name="arrowright" size={24} color="#fff" />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View> */}
-
-        <View
-          style={[
-            GlobalStyleSheet.container,
-            {
-              paddingHorizontal: 20,
-              paddingBottom: 10,
-              flexDirection: "row",
-              justifyContent: "space-between",
-            },
-          ]}
-        >
-          <View style={{}}>
-            <Text
-              style={[FONTS.fontMedium, { fontSize: 18, color: colors.title }]}
-            >
-              Deal
-            </Text>
-          </View>
-          <View style={{}}>
-            <TouchableOpacity
-              onPress={() => {
-                navigation.navigate("Products", {
-                  categoryId: dealCategory.id,
-                  categoryName: dealCategory.title,
-                });
-              }}
-            >
-              <Text
-                style={[
-                  FONTS.fontMedium,
-                  { fontSize: 18, color: colors.title },
-                ]}
-              >
-                See All
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 10, paddingBottom: 70 }}
-        >
-          {dealCategoryProducts?.map((data: any, index: any) => {
-            return (
-              <>
+              <View style={{ marginBottom: 20 }}>
                 <View
-                  key={index}
-                  style={{ width: 160, height: 220, marginRight: 10 }}
+                  style={{
+                    flexDirection: "row",
+                    gap: 10,
+                    alignItems: "center",
+                  }}
                 >
-                  <Cardstyle1
-                    id={data.id}
-                    title={data.title}
-                    image={data.imageUrl}
-                    price={data.salePrice}
-                    color={data.color}
-                    offer={data.offer}
-                    hascolor={data.hascolor}
-                    onPress1={() => addItemToWishList(data)}
+                  <Image
+                    style={{ height: 24, width: 24, resizeMode: "contain" }}
+                    source={require("../../assets/images/icons/locationaddress.png")}
+                  />
+                  <Text
+                    style={{
+                      fontFamily: "Lato",
+                      fontSize: 20,
+                      fontWeight: "700",
+                      lineHeight: 28,
+                      color: "#FFFFFF",
+                    }}
+                  >
+                    {governorate?.name}
+                  </Text>
+
+                  <TouchableOpacity
                     onPress={() => {
-                      navigation.navigate("ProductsDetails", {
-                        productId: data.slug,
-                      });
+                      (toggleSheet(), setView("LIST"));
+                    }}
+                  >
+                    <Image
+                      style={{ height: 24, width: 24, resizeMode: "contain" }}
+                      source={require("../../assets/images/icons/DropdownIcon.png")}
+                    />
+                  </TouchableOpacity>
+                </View>
+
+                <View>
+                  <Text
+                    style={{
+                      fontFamily: "Lato",
+                      fontSize: 13,
+                      fontWeight: "400",
+                      lineHeight: 28,
+                      color: "rgba(217, 217, 217, 1)",
+                    }}
+                  >
+                    {city?.name} , Block {block?.name}
+                  </Text>
+                </View>
+              </View>
+
+              <LinearGradient
+                // Button Linear Gradient
+                colors={["rgba(255, 255, 255, 1)", "rgba(184, 184, 184, 1)"]}
+              ></LinearGradient>
+
+              <LinearGradient
+                colors={["rgba(255,255,255,1)", "rgba(184,184,184,1)"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.gradientBorder}
+              >
+                <View style={styles.searchBoxCotainer}>
+                  {/* Search Icon */}
+                  <Image
+                    source={require("../../assets/images/icons/searchiconimg.png")}
+                    style={styles.icon}
+                  />
+
+                  {/* Divider */}
+                  <View style={styles.searchBoxDivider} />
+
+                  {/* Text */}
+
+                  <TextInput
+                    placeholder="Search Product"
+                    placeholderTextColor={"#666666"}
+                    style={[
+                      FONTS.fontRegular,
+                      {
+                        height: 50,
+                        width: "100%",
+                        borderWidth: 1,
+                        borderColor: colors.border,
+                        borderRadius: 8,
+                        color: colors.title,
+                        fontSize: 16,
+                      },
+                    ]}
+                    onChangeText={(e: string) => {
+                      (console.log("term", e), setSearchQuety(e));
                     }}
                   />
                 </View>
-              </>
-            );
-          })}
-        </ScrollView>
+              </LinearGradient>
+            </ImageBackground>
+
+            <ImageBackground
+              imageStyle={{ opacity: 0.2 }}
+              style={{ padding: 20 }}
+              source={require("../../assets/images/bg.png")}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <View>
+                  <Text
+                    style={{
+                      fontFamily: "Lato-SemiBold", // or "Lato" with fontWeight if mapped
+                      fontSize: 18,
+                      // lineHeight: 12, // 100% of fontSize
+                      letterSpacing: -0.36, // -3% of 12px → 12 * -0.03
+                      color: "#FFFFFF",
+                    }}
+                  >
+                    Grocery Kit -
+                  </Text>
+
+                  <Text
+                    style={{
+                      color: "#FFFFFF",
+                      fontSize: 24,
+                      fontWeight: "700",
+                    }}
+                  >
+                    Flat 50% Off!
+                  </Text>
+
+                  <View
+                    style={{
+                      borderRadius: 20,
+                      overflow: "hidden",
+                      borderColor: "#FFFFFF",
+                      borderWidth: 1,
+                      width: 150,
+                      height: 40,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      marginTop: 10,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontFamily: "Lato-ExtraBold", // preferred if font file exists
+                        fontSize: 16,
+                        // lineHeight: 10,
+                        // letterSpacing: 0,
+                        color: "#FFFFFF",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      KNOW MORE
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </ImageBackground>
+          </LinearGradient>
+        </View>
 
         <View
           style={[
@@ -565,158 +392,677 @@ const Home = ({ navigation }: HomeScreenProps) => {
             { paddingHorizontal: 20, paddingBottom: 10 },
           ]}
         >
-          <View style={{}}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              backgroundColor: "transparent",
+            }}
+          >
             <Text
-              style={[FONTS.fontMedium, { fontSize: 18, color: colors.title }]}
+              style={{
+                fontFamily: "Lato",
+                fontSize: 15,
+                fontWeight: "700", // Bold
+                lineHeight: 20,
+                letterSpacing: -0.39, // -3% of 13px ≈ -0.39
+                color: "rgba(31, 31, 31, 1)",
+                textTransform: "uppercase", // Cap height look
+              }}
             >
-              New Arrival
+              Categories
             </Text>
-          </View>
-        </View>
-        <View
-          style={[
-            GlobalStyleSheet.container,
-            { paddingHorizontal: 20, paddingVertical: 0 },
-          ]}
-        >
-          <View style={{ marginHorizontal: -15 }}>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 15 }}
+
+            <TouchableOpacity
+              onPress={() => navigation.navigate("AllCategories")}
             >
               <View
                 style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 10,
-                  marginRight: 10,
+                  flexDirection: "row", // Flow: Horizontal
+                  alignItems: "center", // Inner alignment
+                  height: 30, // Fixed height
+                  paddingVertical: 7.78,
+                  paddingHorizontal: 10,
+                  borderRadius: 8,
+                  borderWidth: 1,
+                  borderColor: "rgba(240, 240, 240, 1)",
+                  backgroundColor: "rgba(255, 255, 255, 0.6)", // Required for blur effect
                 }}
               >
-                <TouchableOpacity
-                  onPress={() => {
-                    setSelectedCategory("All");
-                    handleCategoryChange();
-                  }}
-                  style={{
-                    backgroundColor:
-                      selectedCategory === "All"
-                        ? colors.title
-                        : theme.dark
-                        ? "rgba(255,255,255,0.10)"
-                        : colors.background,
-                    height: 38,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    borderRadius: 8,
-                    // borderColor: theme.dark ? COLORS.white : colors.borderColor,
-                    //marginTop: 10,
-                    paddingHorizontal: 20,
-                    paddingVertical: 5,
-                  }}
-                >
-                  <Text
-                    style={{
-                      ...FONTS.fontMedium,
-                      fontSize: 13,
-                      color:
-                        selectedCategory === "All"
-                          ? theme.dark
-                            ? COLORS.title
-                            : colors.card
-                          : colors.title,
+                <Image
+                  style={{ height: 10, width: 10, marginTop: 4 }}
+                  source={require("../../assets/images/icons/top-right.png")}
+                />
+              </View>
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView
+            contentContainerStyle={{
+              flexDirection: "row",
+              gap: 15,
+              marginTop: 20,
+            }}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+          >
+            {categories?.map((data: any, index: any) => {
+              return (
+                <View key={index} style={{ gap: 5, width: 95 }}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      navigation.navigate("Categories");
                     }}
                   >
-                    All
-                  </Text>
-                </TouchableOpacity>
-                {categories?.map((data: any, index) => {
-                  return (
-                    <TouchableOpacity
-                      onPress={() => {
-                        setSelectedCategory(data.title);
-                        handleCategoryChange(data.id);
-                      }}
-                      key={index}
+                    <View
                       style={{
-                        backgroundColor:
-                          selectedCategory === data.title
-                            ? colors.title
-                            : theme.dark
-                            ? "rgba(255,255,255,0.10)"
-                            : colors.background,
-                        height: 38,
-                        alignItems: "center",
+                        backgroundColor: "rgba(245, 245, 245, 1)",
+                        borderRadius: 15,
                         justifyContent: "center",
-                        borderRadius: 8,
-                        // borderColor: theme.dark ? COLORS.white : colors.borderColor,
-                        //marginTop: 10,
-                        paddingHorizontal: 20,
+                        alignItems: "center",
                         paddingVertical: 5,
                       }}
                     >
+                      <Image
+                        style={{ width: 85, height: 85 }}
+                        source={require("../../assets/images/item/fruitcatimage.png")}
+                      />
+                    </View>
+                    <View>
                       <Text
                         style={{
-                          ...FONTS.fontMedium,
-                          fontSize: 13,
-                          color:
-                            selectedCategory === data.title
-                              ? theme.dark
-                                ? COLORS.title
-                                : colors.card
-                              : colors.title,
+                          fontFamily: "Lato",
+                          fontSize: 15,
+                          fontWeight: "600", // SemiBold
+                          color: "rgba(0, 0, 0, 1)",
+                          textAlign: "center",
                         }}
                       >
                         {data.title}
                       </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            </ScrollView>
-          </View>
-        </View>
-        <View style={[GlobalStyleSheet.container, { paddingHorizontal: 20 }]}>
-          <View style={[GlobalStyleSheet.row]}>
-            {displayedProducts?.map((data: any, index) => {
-              return (
-                <View
-                  style={[GlobalStyleSheet.col50, { marginBottom: 20 }]}
-                  key={index}
-                >
-                  <Cardstyle1
-                    id={data.id}
-                    title={data.title}
-                    image={data.imageUrl}
-                    price={data.salePrice}
-                    offer={data.offer}
-                    color={data.color}
-                    hascolor={data.hascolor}
-                    onPress1={() =>
-                      navigation.navigate("ProductsDetails", {
-                        productId: data.slug,
-                      })
-                    }
-                    onPress2={() =>
-                      navigation.navigate("ProductsDetails", {
-                        productId: data.slug,
-                      })
-                    }
-                    onPress={() =>
-                      navigation.navigate("ProductsDetails", {
-                        productId: data.slug,
-                      })
-                    }
-                  />
+                    </View>
+                  </TouchableOpacity>
                 </View>
               );
             })}
+          </ScrollView>
+        </View>
+
+        <View
+          style={[
+            GlobalStyleSheet.container,
+            { paddingHorizontal: 20, paddingBottom: 10 },
+          ]}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: "Lato",
+                fontSize: 15,
+                fontWeight: "700", // Bold
+                lineHeight: 20,
+                letterSpacing: -0.39, // -3% of 13px ≈ -0.39
+                color: "rgba(31, 31, 31, 1)",
+                textTransform: "uppercase", // Cap height look
+              }}
+            >
+              PRODUCTS
+            </Text>
+
+            <View
+              style={{
+                flexDirection: "row", // Flow: Horizontal
+                alignItems: "center", // Inner alignment
+                height: 30, // Fixed height
+                paddingVertical: 7.78,
+                paddingHorizontal: 10,
+                borderRadius: 8,
+                borderWidth: 1,
+
+                borderColor: "rgba(240, 240, 240, 1)",
+                backgroundColor: "rgba(255, 255, 255, 0.6)",
+              }}
+            >
+              <Image
+                style={{ height: 10, width: 10, marginTop: 4 }}
+                source={require("../../assets/images/icons/top-right.png")}
+              />
+            </View>
           </View>
+
+          <ScrollView
+            contentContainerStyle={{gap : 15}}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+          >
+            {displayedProducts?.map((data: any) => {
+              return (
+                <View style={{width : '20%'}}>
+                  <ProductCard addToCart={addItemToCart} product={data} />
+                </View>
+              );
+            })}
+          </ScrollView>
+        </View>
+
+        <View
+          style={[
+            GlobalStyleSheet.container,
+            { paddingHorizontal: 20, paddingBottom: 10 },
+          ]}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: "Lato",
+                fontSize: 15,
+                fontWeight: "700", // Bold
+                lineHeight: 20,
+                letterSpacing: -0.39, // -3% of 13px ≈ -0.39
+                color: "rgba(31, 31, 31, 1)",
+                textTransform: "uppercase", // Cap height look
+              }}
+            >
+              SHOP BY BRANDS
+            </Text>
+
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("Brands");
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row", // Flow: Horizontal
+                  alignItems: "center", // Inner alignment
+                  height: 30, // Fixed height
+                  paddingVertical: 7.78,
+                  paddingHorizontal: 10,
+                  borderRadius: 8,
+                  borderWidth: 1,
+
+                  borderColor: "rgba(240, 240, 240, 1)",
+                  backgroundColor: "rgba(255, 255, 255, 0.6)",
+                }}
+              >
+                <Image
+                  style={{ height: 10, width: 10, marginTop: 4 }}
+                  source={require("../../assets/images/icons/top-right.png")}
+                />
+              </View>
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView
+            contentContainerStyle={{
+              flexDirection: "row",
+              gap: 20,
+              marginTop: 20,
+            }}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+          >
+            {brandData?.map((data: any) => {
+              return (
+                <View
+                  style={{
+                    borderWidth: 1,
+                    borderRadius: 8,
+                    borderColor: "rgba(245, 245, 245, 1)",
+                    paddingHorizontal: 20,
+                    paddingVertical: 10,
+                  }}
+                >
+                  <TouchableOpacity onPress={() => {navigation.navigate('ShopByBrand')}}>
+                  <Image
+                    style={{ width: 100, height: 50 }}
+                    source={data.imagePath}
+                  />
+                  </TouchableOpacity>
+                </View>
+              );
+            })}
+          </ScrollView>
         </View>
       </ScrollView>
       <BottomSheet2 ref={sheetRef} />
-    </View>
+
+      {totalQuantity > 0 && (
+        <View
+          style={{
+            position: "absolute",
+            left: 30,
+            right: 30,
+            bottom: 16,
+            borderRadius: 12,
+            backgroundColor: "#FFFFFF",
+            overflow: "hidden",
+            shadowColor: "rgb(115, 158, 123)",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.1,
+            shadowRadius: 20,
+            elevation: 8,
+          }}
+        >
+          <LinearGradient
+            style={{
+              paddingVertical: 20,
+              paddingHorizontal: 20,
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+            colors={["rgba(134, 235, 193, 0.25)", "rgba(255,255,255,0)"]}
+            start={{ x: 0.5, y: 0 }}
+            end={{ x: 0.5, y: 1 }}
+          >
+            <View
+              style={{ flexDirection: "row", gap: 10, alignItems: "center" }}
+            >
+              <Text
+                style={{
+                  color: "rgba(5, 155, 93, 1)",
+                  fontSize: 15,
+                  fontWeight: 600,
+                }}
+              >
+                {totalQuantity} Items Added
+              </Text>
+              <Image source={require("../../assets/images/smstar.png")} />
+            </View>
+            <View
+              style={{
+                backgroundColor: "rgba(5, 155, 93, 1)",
+                flexDirection: "row",
+                gap: 10,
+                paddingHorizontal: 10,
+                paddingVertical: 5,
+                borderRadius: 8,
+              }}
+            >
+              <TouchableOpacity
+                onPress={() => {
+                  navigation.navigate("MyCart");
+                }}
+              >
+                <Text style={{ color: "#fff" }}>View Cart</Text>
+              </TouchableOpacity>
+              <Image
+                source={require("../../assets/images/icons/ShoppingBag.png")}
+              />
+            </View>
+          </LinearGradient>
+        </View>
+      )}
+
+      <LocationBottomSheet isOpen={isOpen} toggleSheet={toggleSheet}>
+        {view === "LIST" && (
+          <Animated.View
+            style={{
+              flex: 1,
+              backgroundColor: "rgba(255, 255, 255, 1)",
+              gap: 10,
+              paddingHorizontal: 20,
+              paddingVertical: 50,
+            }}
+          >
+            <View style={{position : 'absolute',top : 20,right : 30,}}>
+              <TouchableOpacity onPress={toggleSheet}>
+                <Text>Close</Text>
+              </TouchableOpacity>
+            </View>
+            <Text>CHANGE ADDRESS</Text>
+
+            <View
+              style={{
+                backgroundColor: "#fff",
+                borderRadius: 12,
+                padding: 16,
+                marginBottom: 16,
+                shadowColor: "#705656",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.06,
+                shadowRadius: 6,
+                elevation: 6,
+              }}
+            >
+              <View
+                style={{
+                  backgroundColor: "#fff",
+                  paddingHorizontal: 10,
+                  paddingVertical: 10,
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    gap: 10,
+                    alignSelf: "flex-end",
+                  }}
+                >
+                  <TouchableOpacity
+                    onPress={() => {
+                      (toggleSheetEdit(), setView("EDIT"));
+                    }}
+                  >
+                    <Text>Edit</Text>
+                  </TouchableOpacity>
+                  <Text style={{ color: "red" }}>Remove</Text>
+                </View>
+                <View style={{ flexDirection: "row", gap: 10 }}>
+                  <View
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderWidth: 1,
+                      borderColor: "rgba(240, 240, 240, 1)",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      borderRadius: 100,
+                    }}
+                  >
+                    <Image
+                      source={require("../../assets/images/icons/House.png")}
+                    />
+                  </View>
+
+                  <View style={{ gap: 5 }}>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 5,
+                      }}
+                    >
+                      <Image
+                        style={{ resizeMode: "contain" }}
+                        source={require("../../assets/images/icons/locationblackl.png")}
+                      />
+                      <Text>HOME</Text>
+                    </View>
+                    <View style={{ gap: 5 }}>
+                      <Text>
+                        {governorate?.name}, {city?.name}, {block?.name}
+                      </Text>
+                      <Text>
+                        {defaultAddress?.street}, {defaultAddress?.building},{" "}
+                        {defaultAddress?.phone}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </Animated.View>
+        )}
+
+        {view === "EDIT" && (
+          <View style={{ paddingHorizontal: 20, paddingVertical: 20 }}>
+            <UserDeliveryAddressDropDown
+              onChangeLocation={() => {
+                setView("LOCATION");
+              }}
+            />
+          </View>
+        )}
+
+        {view === "LOCATION" && (
+          <Animated.View
+            style={{ flex: 1, paddingHorizontal: 20, paddingVertical: 20 }}
+          >
+            <Text>Choose governorate</Text>
+            <DropdownMenu
+              visible={govVisible}
+              handleOpen={() => setGovVisible(true)}
+              handleClose={() => setGovVisible(false)}
+              trigger={
+                <View style={styles.triggerStyle}>
+                  <Text style={styles.triggerText}>
+                    {governorate ? governorate?.name : "Select Governerate"}
+                  </Text>
+                  <Image
+                    source={require("../../assets/images/icons/dropicon.png")}
+                  />
+                </View>
+              }
+            >
+              {governorates.map((block: any, index) => {
+                return (
+                  <MenuOption
+                    key={index}
+                    onSelect={() => {
+                      setGovernorate(block);
+                      setCity(null);
+                      setBlock(null);
+                    }}
+                  >
+                    <Text>{block?.name}</Text>
+                  </MenuOption>
+                );
+              })}
+            </DropdownMenu>
+
+            <Text>Choose city</Text>
+
+            <DropdownMenu
+              visible={cityVisible}
+              handleOpen={() => setCityVisible(true)}
+              handleClose={() => setCityVisible(false)}
+              trigger={
+                <View style={styles.triggerStyle}>
+                  <Text style={styles.triggerText}>
+                    {city ? city?.name : "Select City"}
+                  </Text>
+                  <Image
+                    source={require("../../assets/images/icons/dropicon.png")}
+                  />
+                </View>
+              }
+            >
+              <ScrollView
+                style={{ maxHeight: hp("40%") }}
+                nestedScrollEnabled={true}
+              >
+                {cities.map((city, index) => {
+                  return (
+                    <MenuOption
+                      key={index}
+                      onSelect={() => {
+                        setCity(city);
+                        setCityVisible(false);
+                        setBlock(null);
+                      }}
+                    >
+                      <Text>{city?.name}</Text>
+                    </MenuOption>
+                  );
+                })}
+              </ScrollView>
+            </DropdownMenu>
+
+            <Text>Choose city</Text>
+
+            <DropdownMenu
+              visible={blockVisible}
+              handleOpen={() => setBlockVisible(true)}
+              handleClose={() => setBlockVisible(false)}
+              trigger={
+                <View style={styles.triggerStyle}>
+                  <Text style={styles.triggerText}>
+                    {block ? block.name : "Select Block"}
+                  </Text>
+                  <Image
+                    source={require("../../assets/images/icons/dropicon.png")}
+                  />
+                </View>
+              }
+            >
+              <ScrollView
+                style={{ maxHeight: hp("40%") }}
+                nestedScrollEnabled={true}
+              >
+                {blocks.map((block, index) => {
+                  return (
+                    <MenuOption
+                      key={index}
+                      onSelect={() => {
+                        setBlock(block);
+                        setBlockVisible(false);
+                      }}
+                    >
+                      <Text>{block?.name}</Text>
+                    </MenuOption>
+                  );
+                })}
+              </ScrollView>
+            </DropdownMenu>
+
+            <Button
+              variant="non"
+              color={"#1E123D"}
+              title="Continue"
+              onPress={() => {
+                isOpen.value = false;
+              }}
+            />
+          </Animated.View>
+        )}
+      </LocationBottomSheet>
+
+      {/* <LocationBottomSheet isOpen={isOpenEdit} toggleSheet={toggleSheetEdit}> */}
+      {/* <View style={{alignSelf :'flex-end',bottom : 10}}>
+            <TouchableOpacity onPress={toggleSheetEdit}><Text>Close</Text></TouchableOpacity>
+          </View> */}
+      {/* </LocationBottomSheet> */}
+    </SafeAreaView>
   );
 };
 
 export default Home;
+
+const styles = StyleSheet.create({
+  container: {
+    marginTop: 20,
+    height: 500,
+    backgroundColor: "#1E123D",
+    position: "relative",
+    overflow: "hidden",
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+  },
+
+  backgroundImage: {
+    ...StyleSheet.absoluteFillObject,
+  },
+
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "#1E123D",
+    opacity: 0.85, // tweak: 0.8–0.9 for best match
+  },
+
+  content: {
+    flex: 1,
+    padding: 20,
+    zIndex: 2,
+  },
+  divider: {
+    width: 1,
+    height: "60%",
+    backgroundColor: "rgba(255,255,255,0.35)",
+    marginHorizontal: 12,
+  },
+  containerW: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "orange",
+  },
+  background: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    height: 300,
+  },
+  button: {
+    padding: 15,
+    alignItems: "center",
+    borderRadius: 5,
+  },
+  text: {
+    backgroundColor: "transparent",
+    fontSize: 15,
+    color: "#fff",
+  },
+  gradientBorder: {
+    borderRadius: 8,
+    padding: 1, // border thickness = 1px
+    shadowColor: "#FFFFFF",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 25,
+    elevation: 6, // Android shadow
+  },
+
+  searchBoxCotainer: {
+    height: 48,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    gap: 8,
+    borderRadius: 8,
+    backgroundColor: "rgba(44, 33, 71, 1)",
+  },
+
+  icon: {
+    width: 18,
+    height: 18,
+    tintColor: "#FFFFFF",
+  },
+
+  searchBoxDivider: {
+    width: 1,
+    height: 20,
+    backgroundColor: "rgba(255,255,255,0.35)",
+  },
+
+  placeholder: {
+    fontFamily: "Lato",
+    fontSize: 15,
+    color: "#FFFFFF",
+  },
+
+  highlight: {
+    color: "#FFC107", // yellow "Snacks"
+    fontWeight: "600",
+  },
+  triggerStyle: {
+    width: "100%",
+    height: 48,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#F0F0F0",
+    borderRadius: 8,
+  },
+  triggerText: {
+    fontSize: 16,
+  },
+});

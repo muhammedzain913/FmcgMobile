@@ -10,7 +10,7 @@ type Props = {
   size?: any;
   text?: any;
   disabled?: boolean;
-
+  variant: string;
 };
 
 const Button = ({
@@ -21,7 +21,7 @@ const Button = ({
   size,
   text,
   disabled,
-
+  variant,
 }: Props) => {
   return (
     <TouchableOpacity activeOpacity={0.8} onPress={onPress} disabled={disabled}>
@@ -60,7 +60,7 @@ const Button = ({
               size === "lg" && {
                 fontSize: 18,
               },
-              color && { color: 'white' },
+              color && { color: "white" },
               text && { color: text },
             ]}
           >
@@ -68,48 +68,50 @@ const Button = ({
           </Text>
         </View>
 
-        <View>
-          <View style={{ flexDirection: "row" }}>
-            <View
-              style={{
-                backgroundColor: "#FDC302",
-                height: 24,
-                width: 24,
-                borderRadius: 50,
-                top: 10,
-              }}
-            ></View>
-            <View
-              style={{
-                backgroundColor: "#6A3DD0",
-                height: 54,
-                width: 54,
-                borderRadius: 50,
-                bottom: 22,
-              }}
-            ></View>
+        {variant === "decorate" ? (
+          <View>
+            <View style={{ flexDirection: "row" }}>
+              <View
+                style={{
+                  backgroundColor: "#FDC302",
+                  height: 24,
+                  width: 24,
+                  borderRadius: 50,
+                  top: 10,
+                }}
+              ></View>
+              <View
+                style={{
+                  backgroundColor: "#6A3DD0",
+                  height: 54,
+                  width: 54,
+                  borderRadius: 50,
+                  bottom: 22,
+                }}
+              ></View>
+            </View>
+            <View style={{ flexDirection: "row", left: 25, gap: 10 }}>
+              <View
+                style={{
+                  backgroundColor: "#F7700B",
+                  height: 12,
+                  width: 12,
+                  borderRadius: 50,
+                  bottom: 15,
+                }}
+              ></View>
+              <View
+                style={{
+                  backgroundColor: "#059B5D",
+                  height: 25,
+                  width: 25,
+                  borderRadius: 50,
+                  bottom: 20,
+                }}
+              ></View>
+            </View>
           </View>
-          <View style={{ flexDirection: "row", left: 25, gap: 10 }}>
-            <View
-              style={{
-                backgroundColor: "#F7700B",
-                height: 12,
-                width: 12,
-                borderRadius: 50,
-                bottom: 15,
-              }}
-            ></View>
-            <View
-              style={{
-                backgroundColor: "#059B5D",
-                height: 25,
-                width: 25,
-                borderRadius: 50,
-                bottom: 20,
-              }}
-            ></View>
-          </View>
-        </View>
+        ) : null}
       </View>
     </TouchableOpacity>
   );

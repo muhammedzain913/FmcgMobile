@@ -65,7 +65,7 @@ export const SIZES = {
 
 export const FONTS = {
 	fontLg: { fontSize: SIZES.fontLg, color: COLORS.text, lineHeight: 20, fontFamily: 'JostRegular' },
-	font: { fontSize: SIZES.font, color: COLORS.text, lineHeight: 20, fontFamily: 'JostRegular' },
+	font: { fontSize: SIZES.font, color: COLORS.card, lineHeight: 20, fontFamily: 'JostRegular' },
 	fontSm: { fontSize: SIZES.fontSm, color: COLORS.text, lineHeight: 18, fontFamily: 'JostRegular' },
 	fontXs: { fontSize: SIZES.fontXs, color: COLORS.text, lineHeight: 14, fontFamily: 'JostRegular' },
 	h1: { fontSize: SIZES.h1, color: COLORS.title, fontFamily: 'JostSemiBold' },

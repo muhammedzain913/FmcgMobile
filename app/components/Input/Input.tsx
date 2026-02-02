@@ -74,9 +74,8 @@ const Input = ({
       <Text
         style={{
           fontFamily: "Lato-Medium", // preferred if you loaded font files
-          fontSize: 13,
-          lineHeight: 13,
-          letterSpacing: -0.39,
+          fontSize: 14,
+          fontWeight:500 ,
           color: variant === 'default' ? 'white' : variant === 'dark' ? '#FFFFFF' : 'black',
           textTransform: "uppercase",
         }}
@@ -89,7 +88,7 @@ const Input = ({
           {
             backgroundColor: variant === 'default' ? 'white' : variant === 'dark' ? '#291E47' : 'white',
             borderColor: colors.border,
-            color: colors.title,
+            color: variant === 'dark' ? '#ffff' : colors.title,
             fontSize: backround ? 18 : 14,
           },
           numberOfLines && {
@@ -146,7 +145,7 @@ const Input = ({
 const styles = StyleSheet.create({
   input: {
     ...FONTS.font,
-    height: 60,
+    height: 50,
     backgroundColor: "#FFFFFF",
     borderRadius: 8,
     paddingHorizontal: 15,
@@ -154,11 +153,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#F0F0F0",
     color: COLORS.white,
+    
+    
   },
   passBtn: {
     position: "absolute",
     right: 0,
-    top: 0,
+    top: 25,
     height: 48,
     width: 48,
     alignItems: "center",
