@@ -144,7 +144,8 @@ const Register = ({ navigation }: RegisterScreenProps) => {
             </Text>
             <Text
               style={{
-                fontFamily: "Lato-Regular", // or "Lato" + fontWeight
+                fontFamily: "Lato-Regular",
+                fontWeight: "400", // Explicitly set to normal weight
                 fontSize: 15,
                 lineHeight: 22,
                 letterSpacing: -0.3, // ✅ converted from -2%
@@ -172,7 +173,6 @@ const Register = ({ navigation }: RegisterScreenProps) => {
             onChangeText={(text: string) => {
               handleInputChange("name", text);
             }}
-  
           />
 
           <View>
@@ -181,7 +181,6 @@ const Register = ({ navigation }: RegisterScreenProps) => {
               onChangeText={(text: string) => {
                 handleInputChange("email", text);
               }}
-
             />
           </View>
 
@@ -190,7 +189,6 @@ const Register = ({ navigation }: RegisterScreenProps) => {
               type={"password"}
               placeholder="Password"
               onChangeText={(value) => handleInputChange("password", value)}
-              
             />
 
             <View
@@ -239,7 +237,7 @@ const Register = ({ navigation }: RegisterScreenProps) => {
               />
             )}
           </View>
-        
+
           <Text
             style={{
               fontFamily: "Lato-Medium",
@@ -254,7 +252,7 @@ const Register = ({ navigation }: RegisterScreenProps) => {
             OR
           </Text>
 
-          <View style={{ gap: 15 }}>
+          <View style={{ gap: 15 ,paddingBottom : 30 }}>
             <View>
               <SocialBtn
                 icon={
@@ -280,37 +278,37 @@ const Register = ({ navigation }: RegisterScreenProps) => {
                 //gap
               />
             </View>
-          </View>
 
-          <View
-            style={{
-              alignItems: "center",
-              flexDirection: "row",
-              justifyContent: "center",
-            }}
-          >
-            <Text
+            <View
               style={{
-                ...FONTS.fontRegular,
-                fontSize: 15,
-                color: colors.title,
+                alignItems: "center",
+                flexDirection: "row",
+                justifyContent: "center",
               }}
             >
-              Already have and account?
-            </Text>
-            <TouchableOpacity onPress={() => navigation.navigate("Login")}>
               <Text
                 style={{
-                  ...FONTS.fontMedium,
-                  // borderBottomWidth: 1,
-                  // borderBottomColor: colors.title,
+                  ...FONTS.fontRegular,
+                  fontSize: 15,
                   color: colors.title,
-                  textDecorationLine: "underline",
                 }}
               >
-                Sign In
+                Already have an account?
               </Text>
-            </TouchableOpacity>
+              <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+                <Text
+                  style={{
+                    ...FONTS.fontMedium,
+                    // borderBottomWidth: 1,
+                    // borderBottomColor: colors.title,
+                    color: colors.title,
+                    textDecorationLine: "underline",
+                  }}
+                >
+                  Sign In
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
         {/* </View> */}

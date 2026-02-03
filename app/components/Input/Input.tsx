@@ -90,6 +90,7 @@ const Input = ({
             borderColor: colors.border,
             color: variant === 'dark' ? '#ffff' : colors.title,
             fontSize: backround ? 18 : 14,
+            fontFamily : 'Lato-Regular'
           },
           numberOfLines && {
             height: 120,
@@ -115,7 +116,7 @@ const Input = ({
         multiline={multiline ? multiline : false}
         secureTextEntry={type === "password" ? showPass : false}
         value={value}
-        placeholder={'Enter Here'}
+        placeholder={'Enter' +' '+ placeholder}
         defaultValue={defaultValue}
         onChangeText={onChangeText}
         onFocus={onFocus}
@@ -125,6 +126,7 @@ const Input = ({
         placeholderTextColor={
           variant === 'dark' ? "rgba(255,255,255,.5)" : "rgba(0,0,0,.4)"
         }
+        
       />
       {type === "password" && (
         <TouchableOpacity

@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, ReactNode } from 'react';
-import { View, Modal, StyleSheet, TouchableWithoutFeedback, ScrollView } from 'react-native';
+import { View, Modal, StyleSheet, TouchableWithoutFeedback, ScrollView, Animated, Vibration, Platform } from 'react-native';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
@@ -25,23 +25,89 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
 }) => {
   const triggerRef = useRef<View>(null);
   const [position, setPosition] = useState({x: 0, y: 0, width: 0});
+  const slideAnim = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const pressAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (visible) {
+      // Reset animations
+      slideAnim.setValue(0);
+      fadeAnim.setValue(0);
+      
+      // Start animations when dropdown opens
+      Animated.parallel([
+        Animated.timing(slideAnim, {
+          toValue: 1,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      // Reset when closing
+      slideAnim.setValue(0);
+      fadeAnim.setValue(0);
+    }
+  }, [visible]);
 
   useEffect(() => {
     if (triggerRef.current && visible) {
-      triggerRef.current.measure((fx, fy, width, height, px, py) => {
+      // Use measureInWindow for accurate positioning relative to screen
+      triggerRef.current.measureInWindow((x, y, width, height) => {
         setPosition({
-          x: px,
-          y: py + height,
+          x: x,
+          y: y + height + 4, // Add 4px gap below trigger
           width: width,
         });
       });
     }
   }, [visible]);
 
+  const translateY = slideAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-10, 0], // Slide down from 10px above
+  });
+
+  const handleOpenWithFeedback = () => {
+    // Add haptic feedback when opening dropdown
+    if (Platform.OS === 'ios') {
+      // Light impact feedback for iOS
+      Vibration.vibrate(10);
+    } else {
+      // Short vibration for Android
+      Vibration.vibrate(50);
+    }
+    
+    // Add press animation
+    Animated.sequence([
+      Animated.timing(pressAnim, {
+        toValue: 0.95,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(pressAnim, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+    
+    handleOpen();
+  };
+
   return (
     <>
-      <TouchableWithoutFeedback  onPress={handleOpen}>
-        <View  ref={triggerRef}>{trigger}</View>
+      <TouchableWithoutFeedback onPress={handleOpenWithFeedback}>
+        <View ref={triggerRef}>
+          <Animated.View style={{ transform: [{ scale: pressAnim }] }}>
+            {trigger}
+          </Animated.View>
+        </View>
       </TouchableWithoutFeedback>
       {visible && (
         <Modal
@@ -51,17 +117,19 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
           onRequestClose={handleClose}>
           <TouchableWithoutFeedback onPress={handleClose}>
             <View style={styles.modalOverlay}>
-              <View
+              <Animated.View
                 style={[
                   styles.menu,
                   {
                     top: position.y,
-                    left: position.x + position.width / 2 - wp("90%") / 2,
-                    width: wp("90%"),
+                    left: position.x,
+                    width: position.width || wp("90%"),
+                    opacity: fadeAnim,
+                    transform: [{ translateY }],
                   },
                 ]}>
                 {children}
-              </View>
+              </Animated.View>
             </View>
           </TouchableWithoutFeedback>
         </Modal>
@@ -82,15 +150,15 @@ const styles = StyleSheet.create({
   },
   menu: {
     position: 'absolute',
-    width: 80,
     backgroundColor: 'white',
-    borderRadius: 5,
+    borderRadius: 8,
     padding: 10,
     shadowColor: '#000',
     shadowOffset: {width: 0, height : 2},
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 4,
+    maxHeight: hp('50%'), // Limit max height to prevent overflow
   },
   menuOption: {
     padding: 5,

@@ -69,18 +69,16 @@ const Login = ({ navigation }: LoginScreenProps) => {
     <SafeAreaView
       style={{ flex: 1, flexDirection: "column", backgroundColor: "#1E123D" }}
     >
-      <StatusBar backgroundColor="#1E123D"/>
+      <StatusBar backgroundColor="#1E123D" />
       <ImageBackground
-        imageStyle={{ opacity: 0.1,transform: [{ scale: 2 }],}}
+        imageStyle={{ opacity: 0.1, transform: [{ scale: 2 }] }}
         style={{
-          paddingBottom : 30,
+          paddingBottom: 30,
           justifyContent: "center",
           alignItems: "center",
           flex: 1,
-          
         }}
         resizeMode="cover"
-        
         source={require("../../assets/images/imgbckgrnd.png")}
       >
         <View
@@ -124,7 +122,7 @@ const Login = ({ navigation }: LoginScreenProps) => {
           />
         </View>
 
-        <View style={{ justifyContent: "center", alignItems: "center", }}>
+        <View style={{ justifyContent: "center", alignItems: "center" }}>
           <Text
             style={{
               fontFamily: "Lato-Bold", // or "Lato" if weight mapping is used
@@ -138,7 +136,8 @@ const Login = ({ navigation }: LoginScreenProps) => {
           </Text>
           <Text
             style={{
-              fontFamily: "Lato-Regular", // or "Lato" + fontWeight
+              fontFamily: "Lato-Regular",
+              fontWeight: "400", // Explicitly set to normal weight
               fontSize: 15,
               lineHeight: 22,
               letterSpacing: -0.3, // ✅ converted from -2%
@@ -159,6 +158,7 @@ const Login = ({ navigation }: LoginScreenProps) => {
           paddingTop: 28,
           paddingHorizontal: 16,
           rowGap: 8,
+          flexBasis: "60%",
         }}
       >
         <Input
@@ -170,12 +170,16 @@ const Login = ({ navigation }: LoginScreenProps) => {
           placeholder="Password"
         />
 
-        
         <View style={{ marginVertical: 10 }}>
           {loading ? (
             <ActivityIndicator size="large" color={COLORS.primary} />
           ) : (
-            <Button variant="decorate" color={"#1E123D"} title="Login" onPress={handleLogin} />
+            <Button
+              variant="decorate"
+              color={"#1E123D"}
+              title="Login"
+              onPress={handleLogin}
+            />
           )}
         </View>
 
@@ -193,51 +197,62 @@ const Login = ({ navigation }: LoginScreenProps) => {
           OR
         </Text>
 
-        <View style={{ gap: 15 }}>
-          <View>
-            <SocialBtn
-              icon={
-                <Image
-                  style={{ height: 20, width: 20, resizeMode: "contain" }}
-                  source={IMAGES.google2}
-                />
-              }
-              color={colors.card}
-              rounded
-              text="Continue with Google"
-              //gap
-            />
+        <View style={{gap : 30}}>
+          <View style={{ gap: 15 }}>
+            <View>
+              <SocialBtn
+                icon={
+                  <Image
+                    style={{ height: 20, width: 20, resizeMode: "contain" }}
+                    source={IMAGES.google2}
+                  />
+                }
+                color={colors.card}
+                rounded
+                text="Continue with Google"
+                //gap
+              />
+            </View>
+            <View>
+              <SocialBtn
+                icon={
+                  <FontAwesome name="apple" size={20} color={colors.title} />
+                }
+                color={colors.card}
+                rounded
+                text="Continue with Apple"
+                //gap
+              />
+            </View>
           </View>
+
           <View>
-            <SocialBtn
-              icon={<FontAwesome name="apple" size={20} color={colors.title} />}
-              color={colors.card}
-              rounded
-              text="Continue with Apple"
-              //gap
-            />
+            <TouchableOpacity
+              style={{ justifyContent: "center" }}
+              onPress={() => navigation.navigate("Register")}
+            >
+              <Text
+                style={{
+                  ...FONTS.fontMedium,
+                  // borderBottomWidth: 1,
+                  // borderBottomColor: colors.title,
+                  color: colors.title,
+                  textDecorationLine: "underline",
+                  textAlign: "center",
+                }}
+              >
+                Create an account
+              </Text>
+            </TouchableOpacity>
+
+            <Text style={styles.termsText}>
+              By Continuing, you agree to our{" "}
+              <Text style={styles.termsLink}>
+                Terms of Use & Privacy Policy
+              </Text>
+            </Text>
           </View>
         </View>
-
-        <TouchableOpacity style={{justifyContent : 'center'}} onPress={() => navigation.navigate("Register")}>
-          <Text
-            style={{
-              ...FONTS.fontMedium,
-              // borderBottomWidth: 1,
-              // borderBottomColor: colors.title,
-              color: colors.title,
-              textDecorationLine: "underline",
-              textAlign : 'center'
-            }}
-          >
-            Create an account
-          </Text>
-        </TouchableOpacity>
-
-        <Text style={styles.termsText}>
-          By Continuing, you agree to our{" "}
-          <Text style={styles.termsLink}>Terms of Use & Privacy Policy</Text>
-        </Text>
       </View>
     </SafeAreaView>
   );
@@ -247,7 +262,8 @@ export default Login;
 
 const styles = StyleSheet.create({
   termsText: {
-    fontFamily: "Lato-Regular", // or "Lato" + fontWeight
+    fontFamily: "Lato-Regular",
+    fontWeight: "400", // Explicitly set to normal weight
     fontSize: 11,
     lineHeight: 24,
     letterSpacing: 0,

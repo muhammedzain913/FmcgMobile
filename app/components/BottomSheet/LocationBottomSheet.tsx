@@ -68,14 +68,15 @@ export default LocationBottomSheet;
 
 const sheetStyles = StyleSheet.create({
   sheet: {
-
     width: "100%",
     position: "absolute",
-    minHeight : 500,
+    maxHeight: "90%",
+    minHeight: 500,
     bottom: 0,
     borderTopRightRadius: 20,
     borderTopLeftRadius: 20,
     zIndex: 2,
+    overflow: "hidden",
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,

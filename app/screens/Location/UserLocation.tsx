@@ -69,10 +69,8 @@ const UserLocation = ({ navigation }: UserLocationScreenProps) => {
     setBlockVisible,
   } = useLocationSelector();
 
-
-
   const onContinue = () => {
-    setLoading(true)
+    setLoading(true);
     try {
       saveLocation({
         payload: {
@@ -83,7 +81,7 @@ const UserLocation = ({ navigation }: UserLocationScreenProps) => {
           block: block.id,
         },
         onSuccess: () => {
-          console.log('SUCCESS SUCCESS')
+          console.log("SUCCESS SUCCESS");
           navigation.navigate("UserDeliveryAddress");
         },
         onError: () => {
@@ -91,10 +89,8 @@ const UserLocation = ({ navigation }: UserLocationScreenProps) => {
         },
       });
     } catch (error) {
-
-    }
-    finally {
-        setLoading(false)
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -112,7 +108,7 @@ const UserLocation = ({ navigation }: UserLocationScreenProps) => {
           justifyContent: "space-between",
           alignItems: "center",
           flexDirection: "row",
-          paddingHorizontal: 20,
+          // paddingHorizontal: 20,
         }}
       >
         <View
@@ -129,17 +125,16 @@ const UserLocation = ({ navigation }: UserLocationScreenProps) => {
           <Image source={require("../../assets/images/icons/CaretLeft.png")} />
         </View>
         <Text
-          style={{
-            fontFamily: "Lato",
-            fontWeight: 600,
-            fontSize: 20,
-            lineHeight: 32,
-            letterSpacing: -0.48,
-            color: "#000000",
-            textAlign: "center",
-          }}
+          style={[
+            Typography.headerText,
+            {
+             
+              color: "#000000",
+              textAlign: "center",
+            },
+          ]}
         >
-          Set up location
+          Select Your Location
         </Text>
         <View></View>
       </View>
@@ -312,6 +307,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   triggerText: {
+    fontFamily : 'Lato-Regular',
     fontSize: 16,
   },
 });

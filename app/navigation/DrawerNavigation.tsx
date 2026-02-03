@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import BottomNavigation from "./BottomNavigation";
-import { SafeAreaView } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "@react-navigation/native";
 import DrawerMenu from "../layout/DrawerMenu";
 import { useDispatch } from "react-redux";
@@ -16,7 +16,7 @@ const DrawerNavigation = () => {
 
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.card }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.card }} edges={[]}>
       <Drawer.Navigator
         initialRouteName="BottomNavigation"
         screenOptions={{

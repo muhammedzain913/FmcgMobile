@@ -20,7 +20,7 @@ import { ApiClient } from "../../redux/api";
 import { Url } from "../../redux/userConstant";
 import { useLocationSelector } from "../../hooks/useLocationSelector";
 import { LinearGradient } from "expo-linear-gradient";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import ProductCard from "../Product/ProductCard";
 import { FONTS } from "../../constants/theme";
@@ -43,6 +43,7 @@ const apiPath = ApiClient();
 type HomeScreenProps = StackScreenProps<RootStackParamList, "Home">;
 
 const Home = ({ navigation }: HomeScreenProps) => {
+  const insets = useSafeAreaInsets();
   const defaultAddress = useSelector((x: any) => x?.user?.defaultAddress);
   const isOpen = useSharedValue(false);
   const isOpenEdit = useSharedValue(false);
@@ -201,7 +202,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
   };
 
   return (
-    <SafeAreaView style={{ backgroundColor: colors.card, flex: 1 }}>
+    <SafeAreaView style={{ backgroundColor: colors.card, flex: 1 }} edges={[]}>
       <StatusBar translucent={true} backgroundColor="#1E123D" style="light" />
       <ScrollView
         contentContainerStyle={{ paddingBottom: totalQuantity > 0 ? 100 : 20 }}
@@ -219,7 +220,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
             colors={["rgba(30, 18, 61, 1)", "rgba(12, 0, 40, 1)"]}
           >
             <ImageBackground
-              style={{ flex: 1, padding: 20, paddingTop: 100 }}
+              style={{ flex: 1, padding: 20, paddingTop: Math.max(insets.top + 20, 40) }}
               source={require("../../assets/images/maskgroup.png")}
             >
               <View style={{ marginBottom: 20 }}>

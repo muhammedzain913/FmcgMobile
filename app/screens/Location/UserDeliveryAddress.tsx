@@ -41,7 +41,7 @@ const UserDeliveryAddress = ({
   const defaultAddress = useSelector((x: any) => x.user.defaultAddress);
   const { saveLocation } = useSaveUserLocation();
   const userId = useSelector((x: any) => x?.user?.userInfo.id);
-  const [addressType,setAddressType] = useState<string>("");
+  const [addressType, setAddressType] = useState<string>("");
   const isOpen = useSharedValue(false);
 
   const [savedAddress, setSavedAddress] = useState<LocationRequest>({
@@ -195,9 +195,7 @@ const UserDeliveryAddress = ({
                       />
                       <Text
                         style={{
-                          fontFamily: "Lato",
-                          fontWeight: 600,
-                          fontStyle: "normal",
+                          fontFamily: "Lato-SemiBold",
                           fontSize: 20,
                           color: "#FFFFFF",
                         }}
@@ -209,9 +207,7 @@ const UserDeliveryAddress = ({
                     <View>
                       <Text
                         style={{
-                          fontFamily: "Lato",
-                          fontWeight: 600,
-                          fontStyle: "normal",
+                          fontFamily: "Lato-Regular",
                           fontSize: 15,
                           color: "#FFFFFF",
                         }}
@@ -235,7 +231,7 @@ const UserDeliveryAddress = ({
                     >
                       <Text
                         style={{
-                          fontFamily: "Lato",
+                          fontFamily: "Lato-Medium",
                           fontWeight: 600,
                           fontStyle: "normal",
                           fontSize: 12,
@@ -283,17 +279,19 @@ const UserDeliveryAddress = ({
                 </View>
                 <View style={{ flexDirection: "row", gap: 10 }}>
                   <View style={styles.buttonView}>
-                    <TouchableOpacity onPress={() => setAddressType('Home')}>
+                    <TouchableOpacity style={{flexDirection : 'row',gap :5}} onPress={() => setAddressType("Home")}>
+                       <Image source={require('../../assets/images/icons/House.png')}/>
                       <Text style={styles.buttonText}>Home</Text>
                     </TouchableOpacity>
                   </View>
                   <View style={styles.buttonView}>
-                    <TouchableOpacity onPress={() => setAddressType('Work')}>
+                    <TouchableOpacity style={{flexDirection : 'row',gap :5}} onPress={() => setAddressType("Work")}>
+                      <Image source={require('../../assets/images/icons/ToteSimple.png')}/>
                       <Text style={{ color: "#FFFFFF" }}>Work</Text>
                     </TouchableOpacity>
                   </View>
                   <View style={styles.buttonView}>
-                    <TouchableOpacity onPress={() => setAddressType('Other')}>
+                    <TouchableOpacity onPress={() => setAddressType("Other")}>
                       <Text style={{ color: "#FFFFFF" }}>Other</Text>
                     </TouchableOpacity>
                   </View>
@@ -307,7 +305,7 @@ const UserDeliveryAddress = ({
               <ActivityIndicator size="large" color={COLORS.primary} />
             ) : (
               <Button
-                variant="non"
+                variant="decorate"
                 text={"black"}
                 color={"white"}
                 title="Save Address"
@@ -321,122 +319,128 @@ const UserDeliveryAddress = ({
       </KeyboardAvoidingView>
 
       <LocationBottomSheet isOpen={isOpen} toggleSheet={toggleSheet}>
-        <Animated.View style={{ flex: 1 }}>
-          <Text>Choose governorate</Text>
-          <DropdownMenu
-            visible={govVisible}
-            handleOpen={() => setGovVisible(true)}
-            handleClose={() => setGovVisible(false)}
-            trigger={
-              <View style={styles.triggerStyle}>
-                <Text style={styles.triggerText}>
-                  {governorate ? governorate?.name : "Select Governerate"}
-                </Text>
-                <Image
-                  source={require("../../assets/images/icons/dropicon.png")}
-                />
-              </View>
-            }
+        <ScrollView contentContainerStyle={{ paddingBottom: 400 }}>
+          <Animated.View
+            style={{ flex: 1, paddingVertical: 60, paddingHorizontal: 20 }}
           >
-            {governorates.map((block: any, index) => {
-              return (
-                <MenuOption
-                  key={index}
-                  onSelect={() => {
-                    setGovernorate(block);
-                    setCity(null);
-                    setBlock(null);
-                  }}
-                >
-                  <Text>{block?.name}</Text>
-                </MenuOption>
-              );
-            })}
-          </DropdownMenu>
-
-          <Text>Choose city</Text>
-
-          <DropdownMenu
-            visible={cityVisible}
-            handleOpen={() => setCityVisible(true)}
-            handleClose={() => setCityVisible(false)}
-            trigger={
-              <View style={styles.triggerStyle}>
-                <Text style={styles.triggerText}>
-                  {city ? city?.name : "Select City"}
-                </Text>
-                <Image
-                  source={require("../../assets/images/icons/dropicon.png")}
-                />
-              </View>
-            }
-          >
-            <ScrollView
-              style={{ maxHeight: hp("40%") }}
-              nestedScrollEnabled={true}
+            <Text style={[Typography.titleMedium]}>CHOOSE GOVERNORATE</Text>
+            <DropdownMenu
+              visible={govVisible}
+              handleOpen={() => setGovVisible(true)}
+              handleClose={() => setGovVisible(false)}
+              trigger={
+                <View style={styles.triggerStyle}>
+                  <Text style={styles.triggerText}>
+                    {governorate ? governorate?.name : "Select Governerate"}
+                  </Text>
+                  <Image
+                    source={require("../../assets/images/icons/dropicon.png")}
+                  />
+                </View>
+              }
             >
-              {cities.map((city, index) => {
+              {governorates.map((block: any, index) => {
                 return (
                   <MenuOption
                     key={index}
                     onSelect={() => {
-                      setCity(city);
-                      setCityVisible(false);
+                      setGovernorate(block);
+                      setCity(null);
                       setBlock(null);
-                    }}
-                  >
-                    <Text>{city?.name}</Text>
-                  </MenuOption>
-                );
-              })}
-            </ScrollView>
-          </DropdownMenu>
-
-          <Text>Choose city</Text>
-
-          <DropdownMenu
-            visible={blockVisible}
-            handleOpen={() => setBlockVisible(true)}
-            handleClose={() => setBlockVisible(false)}
-            trigger={
-              <View style={styles.triggerStyle}>
-                <Text style={styles.triggerText}>
-                  {block ? block.name : "Select Block"}
-                </Text>
-                <Image
-                  source={require("../../assets/images/icons/dropicon.png")}
-                />
-              </View>
-            }
-          >
-            <ScrollView
-              style={{ maxHeight: hp("40%") }}
-              nestedScrollEnabled={true}
-            >
-              {blocks.map((block, index) => {
-                return (
-                  <MenuOption
-                    key={index}
-                    onSelect={() => {
-                      setBlock(block);
-                      setBlockVisible(false);
                     }}
                   >
                     <Text>{block?.name}</Text>
                   </MenuOption>
                 );
               })}
-            </ScrollView>
-          </DropdownMenu>
+            </DropdownMenu>
+
+            <Text style={[Typography.titleMedium]}>CHOOSE CITY</Text>
+
+            <DropdownMenu
+              visible={cityVisible}
+              handleOpen={() => setCityVisible(true)}
+              handleClose={() => setCityVisible(false)}
+              trigger={
+                <View style={styles.triggerStyle}>
+                  <Text style={styles.triggerText}>
+                    {city ? city?.name : "Select City"}
+                  </Text>
+                  <Image
+                    source={require("../../assets/images/icons/dropicon.png")}
+                  />
+                </View>
+              }
+            >
+              <ScrollView
+                style={{ maxHeight: hp("40%") }}
+                nestedScrollEnabled={true}
+              >
+                {cities.map((city, index) => {
+                  return (
+                    <MenuOption
+                      key={index}
+                      onSelect={() => {
+                        setCity(city);
+                        setCityVisible(false);
+                        setBlock(null);
+                      }}
+                    >
+                      <Text>{city?.name}</Text>
+                    </MenuOption>
+                  );
+                })}
+              </ScrollView>
+            </DropdownMenu>
+
+            <Text style={[Typography.titleMedium]}>CHOOSE BLOCK</Text>
+
+            <DropdownMenu
+              visible={blockVisible}
+              handleOpen={() => setBlockVisible(true)}
+              handleClose={() => setBlockVisible(false)}
+              trigger={
+                <View style={styles.triggerStyle}>
+                  <Text style={styles.triggerText}>
+                    {block ? block.name : "Select Block"}
+                  </Text>
+                  <Image
+                    source={require("../../assets/images/icons/dropicon.png")}
+                  />
+                </View>
+              }
+            >
+              <ScrollView
+                style={{ maxHeight: hp("40%") }}
+                nestedScrollEnabled={true}
+              >
+                {blocks.map((block, index) => {
+                  return (
+                    <MenuOption
+                      key={index}
+                      onSelect={() => {
+                        setBlock(block);
+                        setBlockVisible(false);
+                      }}
+                    >
+                      <Text>{block?.name}</Text>
+                    </MenuOption>
+                  );
+                })}
+              </ScrollView>
+            </DropdownMenu>
+          </Animated.View>
+        </ScrollView>
+        <Animated.View style={{ paddingHorizontal: 20, paddingVertical: 20 }}>
+          <Button
+            variant="non"
+            color={"#1E123D"}
+            title="Continue"
+            onPress={() => {
+              isOpen.value = false;
+            }}
+          />
         </Animated.View>
-        <Button
-          variant="non"
-          color={"#1E123D"}
-          title="Continue"
-          onPress={() => {
-            isOpen.value = false;
-          }}
-        />
       </LocationBottomSheet>
     </>
   );
@@ -468,6 +472,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   triggerText: {
+    fontFamily: "Lato-Regular",
     fontSize: 16,
   },
   buttonText: {

@@ -124,7 +124,7 @@ const StackNavigator = () => {
   }, [isDeliveryAddressExist]);
 
   return (
-    <SafeAreaView style={{ width: "100%", flex: 1 }}>
+    <SafeAreaView style={{ width: "100%", flex: 1 }} edges={[]}>
       {/* <StatusBar style="auto" /> */}
       <StackComponent.Navigator
         initialRouteName={initialRouteName}

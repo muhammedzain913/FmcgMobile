@@ -62,6 +62,7 @@ const Button = ({
               },
               color && { color: "white" },
               text && { color: text },
+              { fontFamily: "Lato-SemiBold" }, // Ensure fontFamily is applied last
             ]}
           >
             {title}
@@ -128,7 +129,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   buttnTitle: {
-    ...FONTS.fontRegular,
+    fontFamily : 'Lato-SemiBold',
     fontSize: 18,
     color: "#000",
     lineHeight: 24,
