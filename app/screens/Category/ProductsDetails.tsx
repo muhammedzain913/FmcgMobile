@@ -437,7 +437,7 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
             {DUMMY_PRODUCTS?.map((data: any, index: any) => {
               return (
                 <>
-                  <ProductCard product={data} />
+                  <ProductCard product={data} addToCart={() => {}} navigation={navigation} />
                 </>
               );
             })}

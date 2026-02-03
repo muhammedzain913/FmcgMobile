@@ -156,6 +156,8 @@ const UserDeliveryAddress = ({
           >
             <View style={{ gap: 30 }}>
               <View style={{ gap: 50 }}>
+
+                   <TouchableOpacity onPress={() => {navigation.goBack()}}>
                 <View
                   style={{
                     justifyContent: "center",
@@ -171,6 +173,7 @@ const UserDeliveryAddress = ({
                     source={require("../../assets/images/icons/wbackbtn.png")}
                   />
                 </View>
+                </TouchableOpacity>
 
                 <View
                   style={{
@@ -191,7 +194,8 @@ const UserDeliveryAddress = ({
                       }}
                     >
                       <Image
-                        source={require("../../assets/images/icons/locationaddress.png")}
+                        style={{width : 15, height : 15}}
+                        source={require("../../assets/images/icons/locationpin.png")}
                       />
                       <Text
                         style={{
@@ -279,20 +283,20 @@ const UserDeliveryAddress = ({
                 </View>
                 <View style={{ flexDirection: "row", gap: 10 }}>
                   <View style={styles.buttonView}>
-                    <TouchableOpacity style={{flexDirection : 'row',gap :5}} onPress={() => setAddressType("Home")}>
-                       <Image source={require('../../assets/images/icons/House.png')}/>
+                    <TouchableOpacity style={{flexDirection : 'row',gap :5,alignItems : 'center'}} onPress={() => setAddressType("Home")}>
+                       <Image style={{width : 13,height : 13}} source={require('../../assets/images/icons/homeltst.png')}/>
                       <Text style={styles.buttonText}>Home</Text>
                     </TouchableOpacity>
                   </View>
                   <View style={styles.buttonView}>
                     <TouchableOpacity style={{flexDirection : 'row',gap :5}} onPress={() => setAddressType("Work")}>
-                      <Image source={require('../../assets/images/icons/ToteSimple.png')}/>
-                      <Text style={{ color: "#FFFFFF" }}>Work</Text>
+                      <Image style={{width : 13,height : 13}} source={require('../../assets/images/icons/briefcase.png')}/>
+                      <Text style={styles.buttonText}>Work</Text>
                     </TouchableOpacity>
                   </View>
                   <View style={styles.buttonView}>
                     <TouchableOpacity onPress={() => setAddressType("Other")}>
-                      <Text style={{ color: "#FFFFFF" }}>Other</Text>
+                      <Text style={styles.buttonText}>Other</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -477,6 +481,8 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "#FFFFFF",
+    fontFamily : 'Lato-Regular',
+    fontSize : 13
   },
 
   flex: {

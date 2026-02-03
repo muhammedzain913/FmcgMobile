@@ -20,7 +20,10 @@ import { ApiClient } from "../../redux/api";
 import { Url } from "../../redux/userConstant";
 import { useLocationSelector } from "../../hooks/useLocationSelector";
 import { LinearGradient } from "expo-linear-gradient";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import ProductCard from "../Product/ProductCard";
 import { FONTS } from "../../constants/theme";
@@ -220,10 +223,15 @@ const Home = ({ navigation }: HomeScreenProps) => {
             colors={["rgba(30, 18, 61, 1)", "rgba(12, 0, 40, 1)"]}
           >
             <ImageBackground
-              style={{ flex: 1, padding: 20, paddingTop: Math.max(insets.top + 20, 40) }}
+              style={{
+                flex: 1,
+                padding: 20,
+                paddingTop: Math.max(insets.top + 20, 40),
+                gap : 20
+              }}
               source={require("../../assets/images/maskgroup.png")}
             >
-              <View style={{ marginBottom: 20 }}>
+              <View style={{ gap: 10 }}>
                 <View
                   style={{
                     flexDirection: "row",
@@ -232,41 +240,26 @@ const Home = ({ navigation }: HomeScreenProps) => {
                   }}
                 >
                   <Image
-                    style={{ height: 24, width: 24, resizeMode: "contain" }}
-                    source={require("../../assets/images/icons/locationaddress.png")}
+                    style={{ width: 15, height: 15 }}
+                    source={require("../../assets/images/icons/locationpin.png")}
                   />
                   <Text
                     style={{
-                      fontFamily: "Lato",
+                      fontFamily: "Lato-SemiBold",
                       fontSize: 20,
-                      fontWeight: "700",
-                      lineHeight: 28,
                       color: "#FFFFFF",
                     }}
                   >
                     {governorate?.name}
                   </Text>
-
-                  <TouchableOpacity
-                    onPress={() => {
-                      (toggleSheet(), setView("LIST"));
-                    }}
-                  >
-                    <Image
-                      style={{ height: 24, width: 24, resizeMode: "contain" }}
-                      source={require("../../assets/images/icons/DropdownIcon.png")}
-                    />
-                  </TouchableOpacity>
                 </View>
 
                 <View>
                   <Text
                     style={{
-                      fontFamily: "Lato",
-                      fontSize: 13,
-                      fontWeight: "400",
-                      lineHeight: 28,
-                      color: "rgba(217, 217, 217, 1)",
+                      fontFamily: "Lato-Regular",
+                      fontSize: 15,
+                      color: "#FFFFFF",
                     }}
                   >
                     {city?.name} , Block {block?.name}
@@ -336,7 +329,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
                   <Text
                     style={{
                       fontFamily: "Lato-SemiBold", // or "Lato" with fontWeight if mapped
-                      fontSize: 18,
+                      fontSize: 13,
                       // lineHeight: 12, // 100% of fontSize
                       letterSpacing: -0.36, // -3% of 12px → 12 * -0.03
                       color: "#FFFFFF",
@@ -348,7 +341,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
                   <Text
                     style={{
                       color: "#FFFFFF",
-                      fontSize: 24,
+                      fontSize: 20,
                       fontWeight: "700",
                     }}
                   >
@@ -361,8 +354,8 @@ const Home = ({ navigation }: HomeScreenProps) => {
                       overflow: "hidden",
                       borderColor: "#FFFFFF",
                       borderWidth: 1,
-                      width: 150,
-                      height: 40,
+                      width: 90,
+                      height: 26,
                       justifyContent: "center",
                       alignItems: "center",
                       marginTop: 10,
@@ -370,8 +363,8 @@ const Home = ({ navigation }: HomeScreenProps) => {
                   >
                     <Text
                       style={{
-                        fontFamily: "Lato-ExtraBold", // preferred if font file exists
-                        fontSize: 16,
+                        fontFamily: "Lato-Bold", // preferred if font file exists
+                        fontSize: 10,
                         // lineHeight: 10,
                         // letterSpacing: 0,
                         color: "#FFFFFF",
@@ -539,14 +532,18 @@ const Home = ({ navigation }: HomeScreenProps) => {
           </View>
 
           <ScrollView
-            contentContainerStyle={{gap : 15}}
+            contentContainerStyle={{ gap: 15 }}
             horizontal
             showsHorizontalScrollIndicator={false}
           >
             {displayedProducts?.map((data: any) => {
               return (
-                <View style={{width : '20%'}}>
-                  <ProductCard addToCart={addItemToCart} product={data} navigation={navigation} />
+                <View style={{ width: "20%" }}>
+                  <ProductCard
+                    addToCart={addItemToCart}
+                    product={data}
+                    navigation={navigation}
+                  />
                 </View>
               );
             })}
@@ -627,11 +624,15 @@ const Home = ({ navigation }: HomeScreenProps) => {
                     paddingVertical: 10,
                   }}
                 >
-                  <TouchableOpacity onPress={() => {navigation.navigate('ShopByBrand')}}>
-                  <Image
-                    style={{ width: 100, height: 50 }}
-                    source={data.imagePath}
-                  />
+                  <TouchableOpacity
+                    onPress={() => {
+                      navigation.navigate("ShopByBrand");
+                    }}
+                  >
+                    <Image
+                      style={{ width: 100, height: 50 }}
+                      source={data.imagePath}
+                    />
                   </TouchableOpacity>
                 </View>
               );
@@ -720,7 +721,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
               paddingVertical: 50,
             }}
           >
-            <View style={{position : 'absolute',top : 20,right : 30,}}>
+            <View style={{ position: "absolute", top: 20, right: 30 }}>
               <TouchableOpacity onPress={toggleSheet}>
                 <Text>Close</Text>
               </TouchableOpacity>

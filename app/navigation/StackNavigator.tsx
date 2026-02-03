@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { createStackNavigator } from "@react-navigation/stack";
+import { createStackNavigator, CardStyleInterpolators } from "@react-navigation/stack";
 import { RootStackParamList } from "./RootStackParamList";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -130,7 +130,24 @@ const StackNavigator = () => {
         screenOptions={{
           headerShown: false,
           cardStyle: { backgroundColor: "transparent", flex: 1 },
-          // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          // Smooth transition configuration
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          transitionSpec: {
+            open: {
+              animation: 'timing',
+              config: {
+                duration: 300,
+              },
+            },
+            close: {
+              animation: 'timing',
+              config: {
+                duration: 250,
+              },
+            },
+          },
+          gestureEnabled: true,
+          gestureDirection: 'horizontal',
         }}
       >
         <StackComponent.Screen name="Demo" component={Demo} />

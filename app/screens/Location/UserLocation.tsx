@@ -111,6 +111,7 @@ const UserLocation = ({ navigation }: UserLocationScreenProps) => {
           // paddingHorizontal: 20,
         }}
       >
+        <TouchableOpacity onPress={() => {navigation.goBack()}}>
         <View
           style={{
             borderWidth: 0.2,
@@ -124,6 +125,7 @@ const UserLocation = ({ navigation }: UserLocationScreenProps) => {
         >
           <Image source={require("../../assets/images/icons/CaretLeft.png")} />
         </View>
+        </TouchableOpacity>
         <Text
           style={[
             Typography.headerText,
