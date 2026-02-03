@@ -1,4 +1,3 @@
-import { StackScreenProps } from "@react-navigation/stack";
 import React, { useState } from "react";
 import {
   Image,
@@ -10,7 +9,7 @@ import {
 } from "react-native";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
 import { Product } from "../../types/product";
-import { useNavigation } from "@react-navigation/native";
+import { NavigationProp } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
@@ -21,29 +20,33 @@ import {
 } from "../../redux/reducer/cartReducer";
 import { AppDispatch } from "../../redux/store";
 
-type ProductCardScreenProps = {
+type ProductCardProps = {
   product: Product;
   addToCart: (product: any) => void;
+  navigation?: NavigationProp<RootStackParamList>; // Optional navigation prop
 };
 
 const ProductCard = React.memo(
-  ({ product, addToCart }: ProductCardScreenProps) => {
+  ({ product, addToCart, navigation }: ProductCardProps) => {
     const insets = useSafeAreaInsets();
-    const navigation = useNavigation();
     const [isAdded, setIsAdded] = useState<boolean>(false);
     const dispatch = useDispatch<AppDispatch>();
     const cartItem = useSelector(selectCartItemById(product.id));
 
+    const handleProductPress = () => {
+      if (navigation) {
+        console.log("Product ID", product.slug);
+        navigation.navigate("ProductsDetails", {
+          productId: product.slug,
+        });
+      } else {
+        console.warn("Navigation not provided to ProductCard");
+      }
+    };
+
     return (
       <>
-        <Pressable
-          onPress={() => {
-            console.log("Product ID", product.slug);
-            navigation.navigate("ProductsDetails", {
-              productId: product.slug,
-            });
-          }}
-        >
+        <Pressable onPress={handleProductPress}>
           <Image
             source={require("../../assets/images/milmamilk.png")}
             style={{ height: 125, width: '100%' }}

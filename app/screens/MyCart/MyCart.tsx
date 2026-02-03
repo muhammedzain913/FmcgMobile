@@ -568,7 +568,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
               {displayedProducts?.map((data: any, index: any) => {
                 return (
                   <View>
-                    <ProductCard product={data} />
+                    <ProductCard product={data} addToCart={() => {}} navigation={navigation} />
                   </View>
                 );
               })}

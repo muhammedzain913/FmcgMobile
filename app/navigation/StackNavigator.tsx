@@ -64,7 +64,6 @@ import DeliveryLocation from "../screens/Location/DeliveryLocation";
 import { LogLevel, OneSignal } from "react-native-onesignal";
 import UserDeliveryAddress from "../screens/Location/UserDeliveryAddress";
 import Categories from "../screens/Category/Categories";
-import ProductCard from "../screens/Product/ProductCard";
 import AllCategories from "../screens/Category/AllCategories";
 import Brands from "../screens/Brand/Brands";
 import OrderSuccess from "../screens/Myorder/OrderSuccess";
@@ -163,7 +162,6 @@ const StackNavigator = () => {
         <StackComponent.Screen name="AllCategories" component={AllCategories} />
         <StackComponent.Screen name="Categories" component={Categories} />
 
-        <StackComponent.Screen name="Product" component={ProductCard} />
         <StackComponent.Screen
           name="OTPAuthentication"
           component={OTPAuthentication}

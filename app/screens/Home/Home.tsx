@@ -546,7 +546,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
             {displayedProducts?.map((data: any) => {
               return (
                 <View style={{width : '20%'}}>
-                  <ProductCard addToCart={addItemToCart} product={data} />
+                  <ProductCard addToCart={addItemToCart} product={data} navigation={navigation} />
                 </View>
               );
             })}

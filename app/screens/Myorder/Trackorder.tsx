@@ -641,7 +641,7 @@ const Trackorder = ({ route, navigation }: TrackorderScreenProps) => {
               {DUMMY_PRODUCTS?.map((data: any, index: any) => {
                 return (
                   <>
-                    <ProductCard product={data} />
+                    <ProductCard product={data} addToCart={() => {}} navigation={navigation} />
                   </>
                 );
               })}

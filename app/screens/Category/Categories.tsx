@@ -246,7 +246,7 @@ const Categories = ({ navigation }: CategoriesScreenProps) => {
                 data={displayedProducts}
                 showsVerticalScrollIndicator = {false}
                 numColumns={2}
-                renderItem={({ item }) => <ProductCard product={item} />}
+                renderItem={({ item }) => <ProductCard product={item} addToCart={() => {}} navigation={navigation} />}
               />
             </View>
             {/* </View> */}

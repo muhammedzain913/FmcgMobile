@@ -125,7 +125,7 @@ const ShopByBrand = ({ navigation }: ShopByBrandScreenProps) => {
             }}
             renderItem={({ item }) => (
               <View style={{width : '45%'}}>
-              <ProductCard product={item} addToCart={() => {}} />
+              <ProductCard product={item} addToCart={() => {}} navigation={navigation} />
                 </View>
             )}
           />
