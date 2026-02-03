@@ -40,6 +40,7 @@ import DropdownMenu from "../../components/DropDown/DropDownMenu";
 import MenuOption from "../../components/DropDown/MenuOption";
 import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 import Button from "../../components/Button/Button";
+import LocationDisplay from "../../components/Location/LocationDisplay";
 
 const apiPath = ApiClient();
 
@@ -231,41 +232,12 @@ const Home = ({ navigation }: HomeScreenProps) => {
               }}
               source={require("../../assets/images/maskgroup.png")}
             >
-              <View style={{ gap: 10 }}>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    gap: 10,
-                    alignItems: "center",
-                  }}
-                >
-                  <Image
-                    style={{ width: 15, height: 15 }}
-                    source={require("../../assets/images/icons/locationpin.png")}
-                  />
-                  <Text
-                    style={{
-                      fontFamily: "Lato-SemiBold",
-                      fontSize: 20,
-                      color: "#FFFFFF",
-                    }}
-                  >
-                    {governorate?.name}
-                  </Text>
-                </View>
-
-                <View>
-                  <Text
-                    style={{
-                      fontFamily: "Lato-Regular",
-                      fontSize: 15,
-                      color: "#FFFFFF",
-                    }}
-                  >
-                    {city?.name} , Block {block?.name}
-                  </Text>
-                </View>
-              </View>
+              <LocationDisplay
+                governorate={governorate}
+                city={city}
+                block={block}
+                textColor="#FFFFFF"
+              />
 
               <LinearGradient
                 // Button Linear Gradient
