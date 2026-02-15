@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   ImageBackground,
   StyleSheet,
-  TextInput,
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import { GlobalStyleSheet } from "../../constants/StyleSheet";
@@ -15,43 +14,41 @@ import { IMAGES } from "../../constants/Images";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
 import { StackScreenProps } from "@react-navigation/stack";
 import BottomSheet2 from "../Components/BottomSheet2";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { ApiClient } from "../../redux/api";
 import { Url } from "../../redux/userConstant";
 import { useLocationSelector } from "../../hooks/useLocationSelector";
 import { LinearGradient } from "expo-linear-gradient";
 import {
   SafeAreaView,
-  useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import ProductCard from "../Product/ProductCard";
-import { FONTS } from "../../constants/theme";
-import {
-  addToCart,
-  selectCartTotalQuantity,
-} from "../../redux/reducer/cartReducer";
-import { AppDispatch } from "../../redux/store";
+import { selectCartTotalQuantity } from "../../redux/reducer/cartReducer";
+import { useAddToCart } from "../../hooks/useAddToCart";
 import Animated, { useSharedValue } from "react-native-reanimated";
 import LocationBottomSheet from "../../components/BottomSheet/LocationBottomSheet";
-import UserDeliveryAddress from "../Location/UserDeliveryAddress";
 import UserDeliveryAddressDropDown from "../Location/UserDeliveryAddressDropDown";
-import DropdownMenu from "../../components/DropDown/DropDownMenu";
-import MenuOption from "../../components/DropDown/MenuOption";
-import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 import Button from "../../components/Button/Button";
-import LocationDisplay from "../../components/Location/LocationDisplay";
+import SectionHeader from "../../components/Home/SectionHeader";
+import SectionContainer from "../../components/Home/SectionContainer";
+import LocationDropdown from "../../components/Home/LocationDropdown";
+import CartNotification from "../../components/Cart/CartNotification";
+import BottomSheetHeader from "../../components/BottomSheet/BottomSheetHeader";
+import AddressCard from "../../components/BottomSheet/AddressCard";
+import LocationSelectionView from "../../components/BottomSheet/LocationSelectionView";
+import { widthPercentageToDP as wp } from "react-native-responsive-screen";
+import HomeHeader from "../../components/Home/HomeHeader";
+import CategoryCard from "../../components/Home/CategoryCard";
 
 const apiPath = ApiClient();
 
 type HomeScreenProps = StackScreenProps<RootStackParamList, "Home">;
 
 const Home = ({ navigation }: HomeScreenProps) => {
-  const insets = useSafeAreaInsets();
   const defaultAddress = useSelector((x: any) => x?.user?.defaultAddress);
   const isOpen = useSharedValue(false);
   const isOpenEdit = useSharedValue(false);
-  const dispatch = useDispatch<AppDispatch>();
   const [banner, setBanner] = useState<any>({});
   const address = useSelector((x: any) => x.user.defaultAddress);
   const [loading, setLoading] = useState(true);
@@ -187,23 +184,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
   //const navigation = useNavigation()
 
   const sheetRef = useRef<any>(null);
-
-  const addItemToCart = (product: any) => {
-    // const selectedImage = swiperimageData[currentSlide].image;
-    console.log("adding items..");
-    dispatch(
-      addToCart({
-        id: product?.id,
-        image: product?.imageUrl,
-        title: product?.title,
-        price: product?.salePrice,
-        slug: product?.slug,
-        color: false,
-        hascolor: false,
-        vendorId: product?.userId,
-      } as any),
-    );
-  };
+  const addItemToCart = useAddToCart();
 
   return (
     <SafeAreaView style={{ backgroundColor: colors.card, flex: 1 }} edges={[]}>
@@ -212,197 +193,48 @@ const Home = ({ navigation }: HomeScreenProps) => {
         contentContainerStyle={{ paddingBottom: totalQuantity > 0 ? 100 : 20 }}
         showsVerticalScrollIndicator={false}
       >
-        <View
-          style={{
-            borderBottomLeftRadius: 30,
-            borderBottomRightRadius: 30,
-            overflow: "hidden",
-          }}
-        >
+        <View style={styles.headerContainer}>
           <LinearGradient
-            // Button Linear Gradient
             colors={["rgba(30, 18, 61, 1)", "rgba(12, 0, 40, 1)"]}
           >
-            <ImageBackground
-              style={{
-                flex: 1,
-                padding: 20,
-                paddingTop: Math.max(insets.top + 20, 40),
-                gap : 20
+            <HomeHeader
+              governorate={governorate}
+              city={city}
+              block={block}
+              onLocationPress={toggleSheet}
+              searchQuery={searchQuery}
+              onSearchChange={(e: string) => {
+                console.log("term", e);
+                setSearchQuety(e);
               }}
-              source={require("../../assets/images/maskgroup.png")}
-            >
-              <LocationDisplay
-                governorate={governorate}
-                city={city}
-                block={block}
-                textColor="#FFFFFF"
-              />
-
-              <LinearGradient
-                // Button Linear Gradient
-                colors={["rgba(255, 255, 255, 1)", "rgba(184, 184, 184, 1)"]}
-              ></LinearGradient>
-
-              <LinearGradient
-                colors={["rgba(255,255,255,1)", "rgba(184,184,184,1)"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.gradientBorder}
-              >
-                <View style={styles.searchBoxCotainer}>
-                  {/* Search Icon */}
-                  <Image
-                    source={require("../../assets/images/icons/searchiconimg.png")}
-                    style={styles.icon}
-                  />
-
-                  {/* Divider */}
-                  <View style={styles.searchBoxDivider} />
-
-                  {/* Text */}
-
-                  <TextInput
-                    placeholder="Search Product"
-                    placeholderTextColor={"#666666"}
-                    style={[
-                      FONTS.fontRegular,
-                      {
-                        height: 50,
-                        width: "100%",
-                        borderWidth: 1,
-                        borderColor: colors.border,
-                        borderRadius: 8,
-                        color: colors.title,
-                        fontSize: 16,
-                      },
-                    ]}
-                    onChangeText={(e: string) => {
-                      (console.log("term", e), setSearchQuety(e));
-                    }}
-                  />
-                </View>
-              </LinearGradient>
-            </ImageBackground>
-
+            />
             <ImageBackground
               imageStyle={{ opacity: 0.2 }}
               style={{ padding: 20 }}
               source={require("../../assets/images/bg.png")}
             >
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
+              <View style={styles.bannerContainer}>
                 <View>
-                  <Text
-                    style={{
-                      fontFamily: "Lato-SemiBold", // or "Lato" with fontWeight if mapped
-                      fontSize: 13,
-                      // lineHeight: 12, // 100% of fontSize
-                      letterSpacing: -0.36, // -3% of 12px → 12 * -0.03
-                      color: "#FFFFFF",
-                    }}
-                  >
-                    Grocery Kit -
-                  </Text>
-
-                  <Text
-                    style={{
-                      color: "#FFFFFF",
-                      fontSize: 20,
-                      fontWeight: "700",
-                    }}
-                  >
-                    Flat 50% Off!
-                  </Text>
-
-                  <View
-                    style={{
-                      borderRadius: 20,
-                      overflow: "hidden",
-                      borderColor: "#FFFFFF",
-                      borderWidth: 1,
-                      width: 90,
-                      height: 26,
-                      justifyContent: "center",
-                      alignItems: "center",
-                      marginTop: 10,
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontFamily: "Lato-Bold", // preferred if font file exists
-                        fontSize: 10,
-                        // lineHeight: 10,
-                        // letterSpacing: 0,
-                        color: "#FFFFFF",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      KNOW MORE
-                    </Text>
+                  <Text style={styles.bannerTitle}>Grocery Kit -</Text>
+                  <Text style={styles.bannerSubtitle}>Flat 50% Off!</Text>
+                  <View style={styles.knowMoreButton}>
+                    <Text style={styles.knowMoreText}>KNOW MORE</Text>
                   </View>
                 </View>
+                <Image
+                  style={styles.bannerImage}
+                  source={require("../../assets/images/grocery.jpeg")}
+                />
               </View>
             </ImageBackground>
           </LinearGradient>
         </View>
 
-        <View
-          style={[
-            GlobalStyleSheet.container,
-            { paddingHorizontal: 20, paddingBottom: 10 },
-          ]}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              backgroundColor: "transparent",
-            }}
-          >
-            <Text
-              style={{
-                fontFamily: "Lato",
-                fontSize: 15,
-                fontWeight: "700", // Bold
-                lineHeight: 20,
-                letterSpacing: -0.39, // -3% of 13px ≈ -0.39
-                color: "rgba(31, 31, 31, 1)",
-                textTransform: "uppercase", // Cap height look
-              }}
-            >
-              Categories
-            </Text>
-
-            <TouchableOpacity
-              onPress={() => navigation.navigate("AllCategories")}
-            >
-              <View
-                style={{
-                  flexDirection: "row", // Flow: Horizontal
-                  alignItems: "center", // Inner alignment
-                  height: 30, // Fixed height
-                  paddingVertical: 7.78,
-                  paddingHorizontal: 10,
-                  borderRadius: 8,
-                  borderWidth: 1,
-                  borderColor: "rgba(240, 240, 240, 1)",
-                  backgroundColor: "rgba(255, 255, 255, 0.6)", // Required for blur effect
-                }}
-              >
-                <Image
-                  style={{ height: 10, width: 10, marginTop: 4 }}
-                  source={require("../../assets/images/icons/top-right.png")}
-                />
-              </View>
-            </TouchableOpacity>
-          </View>
+        <SectionContainer>
+          <SectionHeader
+            title="Categories"
+            onViewAllPress={() => navigation.navigate("Categories")}
+          />
 
           <ScrollView
             contentContainerStyle={{
@@ -413,168 +245,59 @@ const Home = ({ navigation }: HomeScreenProps) => {
             horizontal
             showsHorizontalScrollIndicator={false}
           >
-            {categories?.map((data: any, index: any) => {
-              return (
-                <View key={index} style={{ gap: 5, width: 95 }}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      navigation.navigate("Categories");
-                    }}
-                  >
-                    <View
-                      style={{
-                        backgroundColor: "rgba(245, 245, 245, 1)",
-                        borderRadius: 15,
-                        justifyContent: "center",
-                        alignItems: "center",
-                        paddingVertical: 5,
-                      }}
-                    >
-                      <Image
-                        style={{ width: 85, height: 85 }}
-                        source={require("../../assets/images/item/fruitcatimage.png")}
-                      />
-                    </View>
-                    <View>
-                      <Text
-                        style={{
-                          fontFamily: "Lato",
-                          fontSize: 15,
-                          fontWeight: "600", // SemiBold
-                          color: "rgba(0, 0, 0, 1)",
-                          textAlign: "center",
-                        }}
-                      >
-                        {data.title}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                </View>
-              );
-            })}
-          </ScrollView>
-        </View>
-
-        <View
-          style={[
-            GlobalStyleSheet.container,
-            { paddingHorizontal: 20, paddingBottom: 10 },
-          ]}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Text
-              style={{
-                fontFamily: "Lato",
-                fontSize: 15,
-                fontWeight: "700", // Bold
-                lineHeight: 20,
-                letterSpacing: -0.39, // -3% of 13px ≈ -0.39
-                color: "rgba(31, 31, 31, 1)",
-                textTransform: "uppercase", // Cap height look
-              }}
-            >
-              PRODUCTS
-            </Text>
-
-            <View
-              style={{
-                flexDirection: "row", // Flow: Horizontal
-                alignItems: "center", // Inner alignment
-                height: 30, // Fixed height
-                paddingVertical: 7.78,
-                paddingHorizontal: 10,
-                borderRadius: 8,
-                borderWidth: 1,
-
-                borderColor: "rgba(240, 240, 240, 1)",
-                backgroundColor: "rgba(255, 255, 255, 0.6)",
-              }}
-            >
-              <Image
-                style={{ height: 10, width: 10, marginTop: 4 }}
-                source={require("../../assets/images/icons/top-right.png")}
+            {categories?.map((data: any, index: any) => (
+              <CategoryCard
+                key={index}
+                title={data.title}
+                onPress={() => navigation.navigate("AllCategories")}
+                containerStyle={{ width: 95 }}
               />
-            </View>
-          </View>
+            ))}
+          </ScrollView>
+        </SectionContainer>
 
+        <SectionContainer>
+          <SectionHeader
+            title="PRODUCTS"
+            showViewAll={true}
+            onViewAllPress={() => {
+              navigation.navigate("ShopByBrand");
+            }}
+          />
           <ScrollView
-            contentContainerStyle={{ gap: 15 }}
+            contentContainerStyle={{
+              gap: 15,
+              flexDirection: "row",
+              marginTop: 20,
+              paddingRight: 20,
+            }}
             horizontal
             showsHorizontalScrollIndicator={false}
+            nestedScrollEnabled={true}
           >
             {displayedProducts?.map((data: any) => {
               return (
-                <View style={{ width: "20%" }}>
-                  <ProductCard
-                    addToCart={addItemToCart}
-                    product={data}
-                    navigation={navigation}
-                  />
-                </View>
+                <ProductCard
+                  key={data.id || data.slug}
+                  addToCart={addItemToCart}
+                  product={data}
+                  navigation={navigation}
+                  containerStyle={{
+                    width: wp("30%"),
+                    minWidth: 120,
+                    maxWidth: 160,
+                  }}
+                />
               );
             })}
           </ScrollView>
-        </View>
+        </SectionContainer>
 
-        <View
-          style={[
-            GlobalStyleSheet.container,
-            { paddingHorizontal: 20, paddingBottom: 10 },
-          ]}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Text
-              style={{
-                fontFamily: "Lato",
-                fontSize: 15,
-                fontWeight: "700", // Bold
-                lineHeight: 20,
-                letterSpacing: -0.39, // -3% of 13px ≈ -0.39
-                color: "rgba(31, 31, 31, 1)",
-                textTransform: "uppercase", // Cap height look
-              }}
-            >
-              SHOP BY BRANDS
-            </Text>
-
-            <TouchableOpacity
-              onPress={() => {
-                navigation.navigate("Brands");
-              }}
-            >
-              <View
-                style={{
-                  flexDirection: "row", // Flow: Horizontal
-                  alignItems: "center", // Inner alignment
-                  height: 30, // Fixed height
-                  paddingVertical: 7.78,
-                  paddingHorizontal: 10,
-                  borderRadius: 8,
-                  borderWidth: 1,
-
-                  borderColor: "rgba(240, 240, 240, 1)",
-                  backgroundColor: "rgba(255, 255, 255, 0.6)",
-                }}
-              >
-                <Image
-                  style={{ height: 10, width: 10, marginTop: 4 }}
-                  source={require("../../assets/images/icons/top-right.png")}
-                />
-              </View>
-            </TouchableOpacity>
-          </View>
+        <SectionContainer>
+          <SectionHeader
+            title="SHOP BY BRANDS"
+            onViewAllPress={() => navigation.navigate("Brands")}
+          />
 
           <ScrollView
             contentContainerStyle={{
@@ -585,342 +308,108 @@ const Home = ({ navigation }: HomeScreenProps) => {
             horizontal
             showsHorizontalScrollIndicator={false}
           >
-            {brandData?.map((data: any) => {
-              return (
-                <View
-                  style={{
-                    borderWidth: 1,
-                    borderRadius: 8,
-                    borderColor: "rgba(245, 245, 245, 1)",
-                    paddingHorizontal: 20,
-                    paddingVertical: 10,
-                  }}
+            {brandData?.map((data: any, index: number) => (
+              <View key={index} style={styles.brandCard}>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("ShopByBrand")}
                 >
-                  <TouchableOpacity
-                    onPress={() => {
-                      navigation.navigate("ShopByBrand");
-                    }}
-                  >
-                    <Image
-                      style={{ width: 100, height: 50 }}
-                      source={data.imagePath}
-                    />
-                  </TouchableOpacity>
-                </View>
-              );
-            })}
+                  <Image style={styles.brandImage} source={data.imagePath} />
+                </TouchableOpacity>
+              </View>
+            ))}
           </ScrollView>
-        </View>
+        </SectionContainer>
       </ScrollView>
       <BottomSheet2 ref={sheetRef} />
 
-      {totalQuantity > 0 && (
-        <View
-          style={{
-            position: "absolute",
-            left: 30,
-            right: 30,
-            bottom: 16,
-            borderRadius: 12,
-            backgroundColor: "#FFFFFF",
-            overflow: "hidden",
-            shadowColor: "rgb(115, 158, 123)",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.1,
-            shadowRadius: 20,
-            elevation: 8,
-          }}
-        >
-          <LinearGradient
-            style={{
-              paddingVertical: 20,
-              paddingHorizontal: 20,
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-            colors={["rgba(134, 235, 193, 0.25)", "rgba(255,255,255,0)"]}
-            start={{ x: 0.5, y: 0 }}
-            end={{ x: 0.5, y: 1 }}
-          >
-            <View
-              style={{ flexDirection: "row", gap: 10, alignItems: "center" }}
-            >
-              <Text
-                style={{
-                  color: "rgba(5, 155, 93, 1)",
-                  fontSize: 15,
-                  fontWeight: 600,
-                }}
-              >
-                {totalQuantity} Items Added
-              </Text>
-              <Image source={require("../../assets/images/smstar.png")} />
-            </View>
-            <View
-              style={{
-                backgroundColor: "rgba(5, 155, 93, 1)",
-                flexDirection: "row",
-                gap: 10,
-                paddingHorizontal: 10,
-                paddingVertical: 5,
-                borderRadius: 8,
-              }}
-            >
-              <TouchableOpacity
-                onPress={() => {
-                  navigation.navigate("MyCart");
-                }}
-              >
-                <Text style={{ color: "#fff" }}>View Cart</Text>
-              </TouchableOpacity>
-              <Image
-                source={require("../../assets/images/icons/ShoppingBag.png")}
-              />
-            </View>
-          </LinearGradient>
-        </View>
-      )}
+      <CartNotification totalQuantity={totalQuantity} navigation={navigation} />
 
       <LocationBottomSheet isOpen={isOpen} toggleSheet={toggleSheet}>
         {view === "LIST" && (
-          <Animated.View
-            style={{
-              flex: 1,
-              backgroundColor: "rgba(255, 255, 255, 1)",
-              gap: 10,
-              paddingHorizontal: 20,
-              paddingVertical: 50,
-            }}
-          >
-            <View style={{ position: "absolute", top: 20, right: 30 }}>
-              <TouchableOpacity onPress={toggleSheet}>
-                <Text>Close</Text>
-              </TouchableOpacity>
-            </View>
-            <Text>CHANGE ADDRESS</Text>
-
-            <View
-              style={{
-                backgroundColor: "#fff",
-                borderRadius: 12,
-                padding: 16,
-                marginBottom: 16,
-                shadowColor: "#705656",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.06,
-                shadowRadius: 6,
-                elevation: 6,
-              }}
-            >
-              <View
-                style={{
-                  backgroundColor: "#fff",
-                  paddingHorizontal: 10,
-                  paddingVertical: 10,
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    gap: 10,
-                    alignSelf: "flex-end",
-                  }}
-                >
-                  <TouchableOpacity
-                    onPress={() => {
-                      (toggleSheetEdit(), setView("EDIT"));
+          <Animated.View style={styles.bottomSheetContent}>
+            <View style={{ gap: 10 }}>
+              <BottomSheetHeader title="CHANGE ADDRESS" onClose={toggleSheet} />
+              <View>
+                {[1, 2].map((item, index) => (
+                  <AddressCard
+                    key={index}
+                    governorate={governorate}
+                    city={city}
+                    block={block}
+                    defaultAddress={defaultAddress}
+                    onEdit={() => {
+                      toggleSheetEdit();
+                      setView("EDIT");
                     }}
-                  >
-                    <Text>Edit</Text>
-                  </TouchableOpacity>
-                  <Text style={{ color: "red" }}>Remove</Text>
-                </View>
-                <View style={{ flexDirection: "row", gap: 10 }}>
-                  <View
-                    style={{
-                      width: 32,
-                      height: 32,
-                      borderWidth: 1,
-                      borderColor: "rgba(240, 240, 240, 1)",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      borderRadius: 100,
+                    onRemove={() => {
+                      // Handle remove action
                     }}
-                  >
-                    <Image
-                      source={require("../../assets/images/icons/House.png")}
-                    />
-                  </View>
-
-                  <View style={{ gap: 5 }}>
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        gap: 5,
-                      }}
-                    >
-                      <Image
-                        style={{ resizeMode: "contain" }}
-                        source={require("../../assets/images/icons/locationblackl.png")}
-                      />
-                      <Text>HOME</Text>
-                    </View>
-                    <View style={{ gap: 5 }}>
-                      <Text>
-                        {governorate?.name}, {city?.name}, {block?.name}
-                      </Text>
-                      <Text>
-                        {defaultAddress?.street}, {defaultAddress?.building},{" "}
-                        {defaultAddress?.phone}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
+                  />
+                ))}
               </View>
             </View>
           </Animated.View>
         )}
 
         {view === "EDIT" && (
-          <View style={{ paddingHorizontal: 20, paddingVertical: 20 }}>
+          <Animated.View style={{ ...styles.bottomSheetContent, gap: 40 }}>
+            <BottomSheetHeader title="CHANGE ADDRESS" onClose={toggleSheet} />
             <UserDeliveryAddressDropDown
               onChangeLocation={() => {
                 setView("LOCATION");
               }}
             />
-          </View>
+          </Animated.View>
         )}
 
         {view === "LOCATION" && (
           <Animated.View
-            style={{ flex: 1, paddingHorizontal: 20, paddingVertical: 20 }}
+            style={{
+              ...styles.bottomSheetContent,
+              justifyContent: "space-between",
+              gap: 15,
+            }}
           >
-            <Text>Choose governorate</Text>
-            <DropdownMenu
-              visible={govVisible}
-              handleOpen={() => setGovVisible(true)}
-              handleClose={() => setGovVisible(false)}
-              trigger={
-                <View style={styles.triggerStyle}>
-                  <Text style={styles.triggerText}>
-                    {governorate ? governorate?.name : "Select Governerate"}
-                  </Text>
-                  <Image
-                    source={require("../../assets/images/icons/dropicon.png")}
-                  />
-                </View>
-              }
-            >
-              {governorates.map((block: any, index) => {
-                return (
-                  <MenuOption
-                    key={index}
-                    onSelect={() => {
-                      setGovernorate(block);
-                      setCity(null);
-                      setBlock(null);
-                    }}
-                  >
-                    <Text>{block?.name}</Text>
-                  </MenuOption>
-                );
-              })}
-            </DropdownMenu>
-
-            <Text>Choose city</Text>
-
-            <DropdownMenu
-              visible={cityVisible}
-              handleOpen={() => setCityVisible(true)}
-              handleClose={() => setCityVisible(false)}
-              trigger={
-                <View style={styles.triggerStyle}>
-                  <Text style={styles.triggerText}>
-                    {city ? city?.name : "Select City"}
-                  </Text>
-                  <Image
-                    source={require("../../assets/images/icons/dropicon.png")}
-                  />
-                </View>
-              }
-            >
-              <ScrollView
-                style={{ maxHeight: hp("40%") }}
-                nestedScrollEnabled={true}
-              >
-                {cities.map((city, index) => {
-                  return (
-                    <MenuOption
-                      key={index}
-                      onSelect={() => {
-                        setCity(city);
-                        setCityVisible(false);
-                        setBlock(null);
-                      }}
-                    >
-                      <Text>{city?.name}</Text>
-                    </MenuOption>
-                  );
-                })}
-              </ScrollView>
-            </DropdownMenu>
-
-            <Text>Choose city</Text>
-
-            <DropdownMenu
-              visible={blockVisible}
-              handleOpen={() => setBlockVisible(true)}
-              handleClose={() => setBlockVisible(false)}
-              trigger={
-                <View style={styles.triggerStyle}>
-                  <Text style={styles.triggerText}>
-                    {block ? block.name : "Select Block"}
-                  </Text>
-                  <Image
-                    source={require("../../assets/images/icons/dropicon.png")}
-                  />
-                </View>
-              }
-            >
-              <ScrollView
-                style={{ maxHeight: hp("40%") }}
-                nestedScrollEnabled={true}
-              >
-                {blocks.map((block, index) => {
-                  return (
-                    <MenuOption
-                      key={index}
-                      onSelect={() => {
-                        setBlock(block);
-                        setBlockVisible(false);
-                      }}
-                    >
-                      <Text>{block?.name}</Text>
-                    </MenuOption>
-                  );
-                })}
-              </ScrollView>
-            </DropdownMenu>
-
-            <Button
-              variant="non"
-              color={"#1E123D"}
-              title="Continue"
-              onPress={() => {
-                isOpen.value = false;
-              }}
-            />
+            <BottomSheetHeader title="CHANGE ADDRESS" onClose={toggleSheet} />
+            <View style={{ flex: 1, justifyContent: "space-between" }}>
+              <LocationSelectionView
+                governorates={governorates}
+                cities={cities}
+                blocks={blocks}
+                governorate={governorate}
+                city={city}
+                block={block}
+                govVisible={govVisible}
+                cityVisible={cityVisible}
+                blockVisible={blockVisible}
+                onGovOpen={() => setGovVisible(true)}
+                onGovClose={() => setGovVisible(false)}
+                onCityOpen={() => setCityVisible(true)}
+                onCityClose={() => setCityVisible(false)}
+                onBlockOpen={() => setBlockVisible(true)}
+                onBlockClose={() => setBlockVisible(false)}
+                onGovernorateSelect={(item) => {
+                  setGovernorate(item);
+                  setCity(null);
+                  setBlock(null);
+                }}
+                onCitySelect={(item) => {
+                  setCity(item);
+                  setCityVisible(false);
+                  setBlock(null);
+                }}
+                onBlockSelect={(item) => {
+                  setBlock(item);
+                  setBlockVisible(false);
+                }}
+                onContinue={() => {
+                  isOpen.value = false;
+                }}
+              />
+            </View>
           </Animated.View>
         )}
       </LocationBottomSheet>
-
-      {/* <LocationBottomSheet isOpen={isOpenEdit} toggleSheet={toggleSheetEdit}> */}
-      {/* <View style={{alignSelf :'flex-end',bottom : 10}}>
-            <TouchableOpacity onPress={toggleSheetEdit}><Text>Close</Text></TouchableOpacity>
-          </View> */}
-      {/* </LocationBottomSheet> */}
     </SafeAreaView>
   );
 };
@@ -928,6 +417,117 @@ const Home = ({ navigation }: HomeScreenProps) => {
 export default Home;
 
 const styles = StyleSheet.create({
+  // Header styles
+  headerContainer: {
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    overflow: "hidden",
+  },
+  imageBackground: {
+    flex: 1,
+    padding: 20,
+    gap: 20,
+  },
+  bannerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  bannerTitle: {
+    fontFamily: "Lato-SemiBold",
+    fontSize: 13,
+    letterSpacing: -0.36,
+    color: "#FFFFFF",
+  },
+  bannerSubtitle: {
+    color: "#FFFFFF",
+    fontSize: 20,
+    fontWeight: "700",
+  },
+  knowMoreButton: {
+    borderRadius: 20,
+    overflow: "hidden",
+    borderColor: "#FFFFFF",
+    borderWidth: 1,
+    width: 90,
+    height: 26,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  knowMoreText: {
+    fontFamily: "Lato-Bold",
+    fontSize: 10,
+    color: "#FFFFFF",
+    textTransform: "uppercase",
+  },
+  bannerImage: {
+    height: 100,
+    width: 100,
+  } as const,
+  // Brand styles
+  brandCard: {
+    borderWidth: 1,
+    borderRadius: 8,
+    borderColor: "rgba(245, 245, 245, 1)",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  brandImage: {
+    width: 100,
+    height: 50,
+  } as const,
+  // Location bottom sheet styles
+  bottomSheetContent: {
+    flex: 1,
+    backgroundColor: "white",
+    // gap: 10,
+    paddingHorizontal: 20,
+    paddingTop: 50,
+  },
+  addressCard: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    elevation: 2,
+  },
+  addressCardContent: {
+    backgroundColor: "#fff",
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+  },
+  addressActions: {
+    flexDirection: "row",
+    gap: 10,
+    alignSelf: "flex-end",
+  },
+  addressRow: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  addressIconContainer: {
+    width: 32,
+    height: 32,
+    borderWidth: 1,
+    borderColor: "rgba(240, 240, 240, 1)",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 100,
+  },
+  addressInfo: {
+    gap: 5,
+  },
+  addressLocationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
+  // Unused styles (keeping for reference)
   container: {
     marginTop: 20,
     height: 500,
@@ -937,17 +537,14 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
   },
-
   backgroundImage: {
     ...StyleSheet.absoluteFillObject,
   },
-
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "#1E123D",
-    opacity: 0.85, // tweak: 0.8–0.9 for best match
+    opacity: 0.85,
   },
-
   content: {
     flex: 1,
     padding: 20,
@@ -959,84 +556,16 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.35)",
     marginHorizontal: 12,
   },
-  containerW: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "orange",
+  addressTItle: {
+    fontFamily: "Lato-SemiBold",
+    fontSize: 14,
   },
-  background: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    height: 300,
+  addressContent: {
+    fontFamily: "Lato-Regular",
+    fontSize: 13,
   },
-  button: {
-    padding: 15,
-    alignItems: "center",
-    borderRadius: 5,
-  },
-  text: {
-    backgroundColor: "transparent",
-    fontSize: 15,
-    color: "#fff",
-  },
-  gradientBorder: {
-    borderRadius: 8,
-    padding: 1, // border thickness = 1px
-    shadowColor: "#FFFFFF",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 25,
-    elevation: 6, // Android shadow
-  },
-
-  searchBoxCotainer: {
-    height: 48,
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    gap: 8,
-    borderRadius: 8,
-    backgroundColor: "rgba(44, 33, 71, 1)",
-  },
-
-  icon: {
-    width: 18,
-    height: 18,
-    tintColor: "#FFFFFF",
-  },
-
-  searchBoxDivider: {
-    width: 1,
-    height: 20,
-    backgroundColor: "rgba(255,255,255,0.35)",
-  },
-
-  placeholder: {
-    fontFamily: "Lato",
-    fontSize: 15,
-    color: "#FFFFFF",
-  },
-
-  highlight: {
-    color: "#FFC107", // yellow "Snacks"
-    fontWeight: "600",
-  },
-  triggerStyle: {
-    width: "100%",
-    height: 48,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#F0F0F0",
-    borderRadius: 8,
-  },
-  triggerText: {
-    fontSize: 16,
+  editText: {
+    fontFamily: "Lato-SemiBold",
+    fontSize: 13,
   },
 });
