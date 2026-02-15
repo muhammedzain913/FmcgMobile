@@ -6,10 +6,11 @@ export type RootStackParamList = {
   Demo: undefined;
   OnBoarding: undefined;
   AllCategories : undefined;
-  Categories : undefined;
+  Categories : { categoryTitle?: string; categoryId?: string } | undefined;
   Brands : undefined;
   ShopByBrand : undefined;
   OrderSuccess : undefined;
+  GiveRating : undefined;
   Product : undefined;
   Login: undefined;
   Register: undefined;
