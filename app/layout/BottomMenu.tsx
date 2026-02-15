@@ -8,6 +8,7 @@ import {
     Image,
     Dimensions
 } from 'react-native';
+
 import { useTheme } from '@react-navigation/native';
 import { GlobalStyleSheet } from '../constants/StyleSheet';
 import { SIZES, FONTS, COLORS } from '../constants/theme';
@@ -31,7 +32,7 @@ const BottomMenu = ({state, navigation, descriptors}: Props) => {
     const [tabWidth, setWidth] = useState(wp('100%'));
 
     const tabWD =
-        tabWidth < SIZES.container ? tabWidth / 5 : SIZES.container / 5;
+        tabWidth < SIZES.container ? tabWidth / 4 : SIZES.container / 4;
 
     const circlePosition = useRef(
         new Animated.Value(0),
@@ -51,7 +52,7 @@ const BottomMenu = ({state, navigation, descriptors}: Props) => {
 
     const onTabPress = (index:any) => {
         const tabW =
-            tabWidth < SIZES.container ? tabWidth / 5 : SIZES.container / 5; // Adjust this according to your tab width
+            tabWidth < SIZES.container ? tabWidth / 4 : SIZES.container / 4; // Adjust this according to your tab width
 
         Animated.spring(circlePosition, {
             toValue: index * tabW,
@@ -83,38 +84,7 @@ const BottomMenu = ({state, navigation, descriptors}: Props) => {
                         }]}
                     >
 
-                        <Animated.View style={{transform: [{translateX: circlePosition}]}}>
-                            <View
-                                style={{
-                                    width: tabWidth < SIZES.container ? tabWidth / 5 : SIZES.container / 5,
-                                    position: 'absolute',
-                                    //backgroundColor:'red',
-                                    zIndex: 1,
-                                    bottom:10,
-                                    left: 0,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                }}
-                            >
-                                {/* <View
-                                    style={{
-                                        height:65,
-                                        width:65,
-                                        borderRadius:0,
-                                        backgroundColor:'rgba(255,255,255,.1)',
-                                        position:'absolute',
-                                    }}
-                                /> */}
-                                <View
-                                    style={{
-                                        height:4,
-                                        width:24,
-                                        borderRadius:10,
-                                        backgroundColor:theme.dark ? COLORS.white :COLORS.primary,
-                                    }}
-                                />
-                            </View>
-                        </Animated.View>
+                     
 
                         {state.routes.map((route:any , index:string) => {
 
@@ -168,19 +138,20 @@ const BottomMenu = ({state, navigation, descriptors}: Props) => {
                                                     marginBottom:10,
                                                     resizeMode:'contain',
                                                     // tintColor: isFocused ? COLORS.title : theme.dark ? colors.title : colors.text,
-                                                    tintColor:colors.title
+                                                    // tintColor:colors.title
                                                 }}
                                                 source={
                                                     label === 'Home'    ?  IMAGES.Home:
-                                                    label === 'Wishlist' ?  IMAGES.heart:
-                                                    label === 'MyCart'     ?  IMAGES.mycart:
-                                                    label === 'Category'   ?  IMAGES.Category:
-                                                    label === 'Profile'  ?  IMAGES.user2 : IMAGES.Home
+                                                    label === 'My Cart'     ?  IMAGES.mycart:
+                                                    label === 'Categories'   ?  IMAGES.Category:
+                                                    label === 'My Orders'  ?  IMAGES.myorders : IMAGES.Home
                                                 }
                                             />
                                         {/* </Animated.View> */}
                                         {/* <Text style={[styles.navText,{color:isFocused ? colors.title : colors.text}]}>{label}</Text> */}
                                     </TouchableOpacity>
+                                    <Text style={{fontFamily : 'Lato-Medium' ,color : isFocused ? '#000' : '#8C8C8C',fontSize : 12}}>{label}</Text>
+                           
                                 </View>
                             )
                         })}
@@ -192,8 +163,10 @@ const BottomMenu = ({state, navigation, descriptors}: Props) => {
 
 const styles = StyleSheet.create({
     tabBar : {
-        height : 60,
+        height : 80,
         borderTopWidth:1,
+        justifyContent : 'center'
+        
     },
     tabItem : {
         flex: 1,
