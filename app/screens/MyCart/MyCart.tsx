@@ -26,6 +26,10 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import { Url } from "../../redux/userConstant";
 import { ApiClient } from "../../redux/api";
 import ProductCard from "../Product/ProductCard";
+import SectionContainer from "../../components/Home/SectionContainer";
+import SectionHeader from "../../components/Home/SectionHeader";
+import { useAddToCart } from "../../hooks/useAddToCart";
+import { widthPercentageToDP as wp } from "react-native-responsive-screen";
 
 type MyCartScreenProps = StackScreenProps<RootStackParamList, "MyCart">;
 
@@ -51,6 +55,8 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
   const addItemToWishList = (data: any) => {
     dispatch(addTowishList(data));
   };
+
+  const addItemToCart = useAddToCart();
 
   const totalQuantity = useSelector(selectCartTotalQuantity);
   const totalPrice = useSelector(selectCartTotalPrice);
@@ -148,7 +154,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
           style={{
             paddingHorizontal: 20,
             backgroundColor: "white",
-            paddingVertical: 30,
+            paddingVertical: 15,
           }}
         >
           <View
@@ -164,46 +170,46 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
               style={{
                 flexDirection: "row", // Flow: Horizontal
                 alignItems: "center", // Inner alignment
-                height: 40, // Fixed height // Padding
+                height: 36, // Fixed height // Padding
                 paddingVertical: 7.78,
                 borderRadius: 8,
                 borderWidth: 1,
-                borderColor: "grey",
+                borderColor: "#E5E5E5",
                 backgroundColor: "rgba(255, 255, 255, 0.6)", // Required for blur effect
-                width: 40,
+                width: 36,
                 justifyContent: "center",
               }}
             >
               <Image
                 style={{ height: 20, width: 15, marginTop: 4 }}
-                source={require("../../assets/images/icons/CaretLeft.png")}
+                source={require("../../assets/images/icons/left-chevron.png")}
               />
             </View>
             <View style={{ position: "absolute", left: 0, right: 0 }}>
               <Text
                 style={{
-                  fontFamily: "Lato", // preferred if font file exists
+                  fontFamily: "Lato-Bold", // preferred if font file exists
                   fontSize: 20,
                   lineHeight: 32,
                   letterSpacing: -0.48, // -3% of 16px = -0.48
                   color: "#000000",
                   textAlign: "center",
-                  fontWeight: "700",
                 }}
               >
                 My Cart
               </Text>
             </View>
-            <View></View>
+         
           </View>
         </View>
 
-        <View style={{ paddingHorizontal: 20, gap: 30 }}>
+        <View style={{ paddingHorizontal: 20,gap :20 }}>
           <View
             style={{
               paddingHorizontal: 10,
               paddingVertical: 10,
               gap: 20,
+              borderRadius : 8,
               backgroundColor: "#ffff",
             }}
           >
@@ -211,20 +217,26 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
               colors={["rgba(106, 61, 208, 1)", "rgba(54, 31, 106, 1)"]}
               style={{
                 alignSelf: "flex-start",
-                paddingHorizontal: 15,
-                paddingVertical: 4,
-                borderRadius: 6,
+                paddingHorizontal: 13,
+                paddingVertical: 8,
+                borderRadius: 8,
               }}
             >
-              <Text style={{ color: "white", fontSize: 17 }}>15 mins</Text>
+              <Text style={{ color: "white", fontSize: 14,fontFamily : 'Lato-Bold' }}>15 mins</Text>
             </LinearGradient>
             <View
               style={{ flexDirection: "row", gap: 10, alignItems: "center" }}
             >
-              <Text style={{ color: "rgba(5, 155, 93, 1)", fontSize: 15 }}>
+              <Text
+                style={{
+                  color: "rgba(5, 155, 93, 1)",
+                  fontSize: 12,
+                  fontFamily: "Lato-Bold",
+                }}
+              >
                 Delivering To
               </Text>
-              <Image source={require("../../assets/images/delivery.png")} />
+              <Image style={{width : 15,height :15}} source={require("../../assets/images/icons/delivery-man.png")} />
               <Image source={require("../../assets/images/line.png")} />
             </View>
 
@@ -244,14 +256,13 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                   }}
                 >
                   <Image
-                    style={{ height: 24, width: 24, resizeMode: "contain" }}
-                    source={require("../../assets/images/icons/locationblack.png")}
+                    style={{ height: 15, width: 15, resizeMode: "contain" }}
+                    source={require("../../assets/images/icons/locationpinblack.png")}
                   />
                   <Text
                     style={{
-                      fontFamily: "Lato",
-                      fontSize: 20,
-                      fontWeight: "700",
+                      fontFamily: "Lato-SemiBold",
+                      fontSize: 15,
                       lineHeight: 28,
                       color: "#141313",
                     }}
@@ -263,9 +274,8 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                 <View>
                   <Text
                     style={{
-                      fontFamily: "Lato",
+                      fontFamily: "Lato-Regular",
                       fontSize: 13,
-                      fontWeight: "400",
                       lineHeight: 28,
                       color: "rgb(17, 17, 17)",
                     }}
@@ -286,8 +296,6 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
               >
                 <Text>Change</Text>
               </View>
-
-              <View></View>
             </View>
           </View>
 
@@ -398,19 +406,23 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
 
             <ScrollView
               horizontal
+              nestedScrollEnabled={true}
+              showsHorizontalScrollIndicator={false}
               contentContainerStyle={{
                 gap: 30,
                 padding: 20,
+                paddingRight: 20,
               }}
             >
               {OFFERS.map((item: any, index: number) => {
                 return (
                   <View
+                    key={index}
                     style={{
                       gap: 10,
-
                       padding: 10,
                       borderRadius: 8,
+                      minWidth: 280,
                     }}
                   >
                     <View
@@ -507,73 +519,42 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
             </ScrollView>
           </View>
 
-          <View
-            style={{
-              backgroundColor: "#fff",
-              paddingHorizontal: 10,
-              paddingVertical: 10,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
+          <SectionContainer>
+            <SectionHeader
+              title="PRODUCTS"
+              showViewAll={true}
+              onViewAllPress={() => {
+                navigation.navigate("ShopByBrand");
               }}
-            >
-              <Text
-                style={{
-                  fontFamily: "Lato",
-                  fontSize: 15,
-                  lineHeight: 20,
-                  fontWeight: 600,
-                  letterSpacing: -0.39, // -3% of 13px ≈ -0.39
-                  color: "rgba(31, 31, 31, 1)",
-                  textTransform: "uppercase", // Cap height look
-                }}
-              >
-                TAKE A LOOK ATH THESE
-              </Text>
-
-              <TouchableOpacity onPress={() => navigation.navigate("MyCart")}>
-                <View
-                  style={{
-                    flexDirection: "row", // Flow: Horizontal
-                    alignItems: "center", // Inner alignment
-                    height: 30, // Fixed height
-                    paddingVertical: 7.78,
-                    paddingHorizontal: 10,
-                    borderRadius: 8,
-                    borderWidth: 1,
-                    borderColor: "rgba(240, 240, 240, 1)",
-                    backgroundColor: "rgba(255, 255, 255, 0.6)", // Required for blur effect
-                  }}
-                >
-                  <Image
-                    style={{ height: 10, width: 10, marginTop: 4 }}
-                    source={require("../../assets/images/icons/top-right.png")}
-                  />
-                </View>
-              </TouchableOpacity>
-            </View>
-
+            />
             <ScrollView
               contentContainerStyle={{
+                gap: 15,
                 flexDirection: "row",
-                justifyContent: "space-between",
+                marginTop: 20,
+                paddingRight: 20,
               }}
               horizontal
               showsHorizontalScrollIndicator={false}
+              nestedScrollEnabled={true}
             >
-              {displayedProducts?.map((data: any, index: any) => {
+              {displayedProducts?.map((data: any) => {
                 return (
-                  <View>
-                    <ProductCard product={data} addToCart={() => {}} navigation={navigation} />
-                  </View>
+                  <ProductCard
+                    key={data.id || data.slug}
+                    addToCart={addItemToCart}
+                    product={data}
+                    navigation={navigation}
+                    containerStyle={{
+                      width: wp("30%"),
+                      minWidth: 120,
+                      maxWidth: 160,
+                    }}
+                  />
                 );
               })}
             </ScrollView>
-          </View>
+          </SectionContainer>
 
           <View
             style={{
@@ -735,15 +716,16 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#000",
+    fontSize: 12,
+    color: "#00000",
+    fontFamily: "Lato-Medium",
   },
 
   subTitle: {
     fontSize: 12,
     color: "#666",
     marginTop: 2,
+    fontFamily: "Lato-SemiBold",
   },
 
   priceRow: {
@@ -753,9 +735,10 @@ const styles = StyleSheet.create({
   },
 
   price: {
-    fontSize: 14,
-    fontWeight: "700",
+    fontSize: 12,
     marginRight: 6,
+    fontFamily: "lato-Bold",
+    fontWeight: 700,
   },
 
   strike: {
@@ -782,8 +765,9 @@ const styles = StyleSheet.create({
   },
 
   qty: {
-    fontSize: 14,
+    fontSize: 11,
     fontWeight: "600",
+    fontFamily: "Lato-SemiBold",
   },
 
   billContainer: {
