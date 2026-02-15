@@ -8,7 +8,7 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
-import { useNavigation, useTheme } from "@react-navigation/native";
+import { useTheme } from "@react-navigation/native";
 import { IMAGES } from "../../constants/Images";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
 import { StackScreenProps } from "@react-navigation/stack";
@@ -20,6 +20,8 @@ import { useLocationSelector } from "../../hooks/useLocationSelector";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
+import HomeHeader from "../../components/Home/HomeHeader";
+import CategoryCard from "../../components/Home/CategoryCard";
 
 const apiPath = ApiClient();
 
@@ -28,7 +30,7 @@ type AllCategoriesScreenProps = StackScreenProps<
   "AllCategories"
 >;
 
-const AllCategories = () => {
+const AllCategories = ({ navigation }: AllCategoriesScreenProps) => {
   const [banner, setBanner] = useState<any>({});
   const address = useSelector((x: any) => x.user.defaultAddress);
   const [loading, setLoading] = useState(true);
@@ -65,8 +67,18 @@ const AllCategories = () => {
 
   const sheetRef = useRef<any>(null);
 
-  const { governorate, city, block } = useLocationSelector();
-  const navigation = useNavigation();
+  const {
+    governorate,
+    city,
+    block,
+    setGovVisible,
+  } = useLocationSelector();
+  
+  const toggleSheet = () => {
+    // Handle location sheet toggle if needed
+    // For now, just a placeholder
+    setGovVisible(true);
+  };
 
   return (
     <SafeAreaView style={{ backgroundColor: colors.card, flex: 1 }}>
@@ -80,120 +92,44 @@ const AllCategories = () => {
           }}
         >
           <LinearGradient
-            // Button Linear Gradient
             colors={["rgba(30, 18, 61, 1)", "rgba(12, 0, 40, 1)"]}
           >
-            <ImageBackground
-              style={{ flex: 1, padding: 20, paddingTop: 100 }}
-              source={require("../../assets/images/maskgroup.png")}
-            >
-              <View style={{ marginBottom: 20 }}>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    gap: 10,
-                    alignItems: "center",
-                  }}
-                >
-                  <Image
-                    style={{ height: 24, width: 24, resizeMode: "contain" }}
-                    source={require("../../assets/images/icons/locationaddress.png")}
-                  />
-                  <Text
-                    style={{
-                      fontFamily: "Lato",
-                      fontSize: 20,
-                      fontWeight: "700",
-                      lineHeight: 28,
-                      color: "#FFFFFF",
-                    }}
-                  >
-                    {governorate?.name}
-                  </Text>
-                </View>
-
-                <View>
-                  <Text
-                    style={{
-                      fontFamily: "Lato",
-                      fontSize: 13,
-                      fontWeight: "400",
-                      lineHeight: 28,
-                      color: "rgba(217, 217, 217, 1)",
-                    }}
-                  >
-                    {city?.name} , Block {block?.name}
-                  </Text>
-                </View>
-              </View>
-
-              <LinearGradient
-                // Button Linear Gradient
-                colors={["rgba(255, 255, 255, 1)", "rgba(184, 184, 184, 1)"]}
-              ></LinearGradient>
-
-              <LinearGradient
-                colors={["rgba(255,255,255,1)", "rgba(184,184,184,1)"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.gradientBorder}
-              >
-                <View style={styles.searchBoxCotainer}>
-                  {/* Search Icon */}
-                  <Image
-                    source={require("../../assets/images/icons/searchiconimg.png")}
-                    style={styles.icon}
-                  />
-
-                  {/* Divider */}
-                  <View style={styles.searchBoxDivider} />
-
-                  {/* Text */}
-                  <Text style={styles.placeholder}>
-                    Search <Text style={styles.highlight}>"Snacks"</Text>
-                  </Text>
-                </View>
-              </LinearGradient>
-            </ImageBackground>
+            <HomeHeader
+              governorate={governorate}
+              city={city}
+              block={block}
+              
+              onLocationPress={toggleSheet}
+              searchQuery={searchQuery}
+              onSearchChange={(e: string) => {
+                setSearchQuety(e);
+              }}
+            />
           </LinearGradient>
         </View>
 
-        <View style={{flexDirection : 'row',flexWrap : 'wrap',justifyContent : 'flex-start', gap : 10,paddingHorizontal : 15}}>
-          {categories?.map((data: any, index: any) => {
-            return (
-              <View key={index} style={{ gap: 5, width: '23%' }}>
-                <TouchableOpacity onPress={() => {navigation.navigate('Categories')}}>
                 <View
                   style={{
-                    backgroundColor: "rgba(245, 245, 245, 1)",
-                    borderRadius: 15,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    paddingVertical: 5,
+            flexDirection: "row",
+            flexWrap: "wrap",
+            justifyContent: "flex-start",
+            gap: 10,
+            paddingHorizontal: 15,
                   }}
                 >
-                  <Image
-                    style={{ width: 85, height: 85 }}
-                    source={require("../../assets/images/item/fruitcatimage.png")}
-                  />
-                </View>
-                <View>
-                  <Text
-                    style={{
-                      fontFamily: "Lato",
-                      fontSize: 15,
-                      fontWeight: "600", // SemiBold
-                      color: "rgba(0, 0, 0, 1)",
-                      textAlign: "center",
-                    }}
-                  >
-                    {data.title}
-                  </Text>
-                </View>
-                </TouchableOpacity>
-              </View>
-            );
-          })}
+          {categories?.map((data: any, index: any) => (
+            <CategoryCard
+              key={index}
+              title={data.title}
+              onPress={() => {
+                navigation.getParent()?.navigate("Categories", {
+                  categoryTitle: data.title,
+                  categoryId: data.id,
+                });
+              }}
+              containerStyle={{ width: "23%" }}
+            />
+          ))}
         </View>
       </ScrollView>
       <BottomSheet2 ref={sheetRef} />
@@ -257,47 +193,5 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     fontSize: 15,
     color: "#fff",
-  },
-  gradientBorder: {
-    borderRadius: 8,
-    padding: 1, // border thickness = 1px
-    shadowColor: "#FFFFFF",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 25,
-    elevation: 6, // Android shadow
-  },
-
-  searchBoxCotainer: {
-    height: 48,
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    gap: 8,
-    borderRadius: 8,
-    backgroundColor: "rgba(44, 33, 71, 1)",
-  },
-
-  icon: {
-    width: 18,
-    height: 18,
-    tintColor: "#FFFFFF",
-  },
-
-  searchBoxDivider: {
-    width: 1,
-    height: 20,
-    backgroundColor: "rgba(255,255,255,0.35)",
-  },
-
-  placeholder: {
-    fontFamily: "Lato",
-    fontSize: 15,
-    color: "#FFFFFF",
-  },
-
-  highlight: {
-    color: "#FFC107", // yellow "Snacks"
-    fontWeight: "600",
   },
 });
