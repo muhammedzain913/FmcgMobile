@@ -138,7 +138,7 @@ const UserDeliveryAddressDropDown = ({
   return (
     <>
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
+        style={{  }}
         keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
       >
         <ScrollView
@@ -146,6 +146,7 @@ const UserDeliveryAddressDropDown = ({
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
+          <View style={{justifyContent : 'space-between'}}>
           <View style={{ gap: 30 }}>
             <View style={{ gap: 50 }}>
               <View
@@ -167,13 +168,12 @@ const UserDeliveryAddressDropDown = ({
                     }}
                   >
                     <Image
-                      source={require("../../assets/images/icons/locationblack.png")}
+                      style={{width : 15,height :15}}
+                      source={require("../../assets/images/icons/locationpinblack.png")}
                     />
                     <Text
                       style={{
-                        fontFamily: "Lato",
-                        fontWeight: 600,
-                        fontStyle: "normal",
+                        fontFamily: "Lato-SemiBold",
                         fontSize: 20,
                         color: "#000",
                       }}
@@ -185,9 +185,7 @@ const UserDeliveryAddressDropDown = ({
                   <View>
                     <Text
                       style={{
-                        fontFamily: "Lato",
-                        fontWeight: 600,
-                        fontStyle: "normal",
+                        fontFamily: "Lato-Regular",
                         fontSize: 15,
                         color: "#000",
                       }}
@@ -211,10 +209,8 @@ const UserDeliveryAddressDropDown = ({
                   >
                     <Text
                       style={{
-                        fontFamily: "Lato",
-                        fontWeight: 600,
-                        fontStyle: "normal",
-                        fontSize: 12,
+                        fontFamily: "Lato-Medium",
+                        fontSize: 14,
                         color: "#000",
                       }}
                     >
@@ -285,6 +281,7 @@ const UserDeliveryAddressDropDown = ({
                 }}
               />
             )}
+          </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
