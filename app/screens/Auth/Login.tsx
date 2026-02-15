@@ -8,6 +8,9 @@ import {
   ImageBackground,
   StyleSheet,
   ActivityIndicator,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
@@ -149,111 +152,121 @@ const Login = ({ navigation }: LoginScreenProps) => {
           </Text>
         </View>
       </ImageBackground>
-
-      <View
+      
+      <KeyboardAvoidingView
         style={{
           borderTopRightRadius: 18,
           borderTopLeftRadius: 18,
           backgroundColor: "white",
-          paddingTop: 28,
-          paddingHorizontal: 16,
-          rowGap: 8,
           flexBasis: "60%",
         }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
       >
-        <Input
-          onChangeText={(value) => handleInputChange("email", value)}
-          placeholder="Email"
-        />
-        <Input
-          onChangeText={(value) => handleInputChange("password", value)}
-          placeholder="Password"
-        />
-
-        <View style={{ marginVertical: 10 }}>
-          {loading ? (
-            <ActivityIndicator size="large" color={COLORS.primary} />
-          ) : (
-            <Button
-              variant="decorate"
-              color={"#1E123D"}
-              title="Login"
-              onPress={handleLogin}
-            />
-          )}
-        </View>
-
-        <Text
-          style={{
-            fontFamily: "Lato-Medium",
-            fontSize: 13,
-            lineHeight: 13,
-            letterSpacing: -0.39,
-            color: "#545454",
-            textAlign: "center",
-            marginVertical: 10,
+        <ScrollView
+          contentContainerStyle={{
+            paddingTop: 28,
+            paddingHorizontal: 16,
+            paddingBottom: 20,
+            rowGap: 8,
           }}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
-          OR
-        </Text>
+          <Input
+            onChangeText={(value) => handleInputChange("email", value)}
+            placeholder="Email"
+          />
+          <Input
+            onChangeText={(value) => handleInputChange("password", value)}
+            placeholder="Password"
+          />
 
-        <View style={{gap : 30}}>
-          <View style={{ gap: 15 }}>
-            <View>
-              <SocialBtn
-                icon={
-                  <Image
-                    style={{ height: 20, width: 20, resizeMode: "contain" }}
-                    source={IMAGES.google2}
-                  />
-                }
-                color={colors.card}
-                rounded
-                text="Continue with Google"
-                //gap
+          <View style={{ marginVertical: 10 }}>
+            {loading ? (
+              <ActivityIndicator size="large" color={COLORS.primary} />
+            ) : (
+              <Button
+                variant="decorate"
+                color={"#1E123D"}
+                title="Login"
+                onPress={handleLogin}
               />
-            </View>
-            <View>
-              <SocialBtn
-                icon={
-                  <FontAwesome name="apple" size={20} color={colors.title} />
-                }
-                color={colors.card}
-                rounded
-                text="Continue with Apple"
-                //gap
-              />
-            </View>
+            )}
           </View>
 
-          <View>
-            <TouchableOpacity
-              style={{ justifyContent: "center" }}
-              onPress={() => navigation.navigate("Register")}
-            >
-              <Text
-                style={{
-                  ...FONTS.fontMedium,
-                  // borderBottomWidth: 1,
-                  // borderBottomColor: colors.title,
-                  color: colors.title,
-                  textDecorationLine: "underline",
-                  textAlign: "center",
-                }}
+          <Text
+            style={{
+              fontFamily: "Lato-Medium",
+              fontSize: 13,
+              lineHeight: 13,
+              letterSpacing: -0.39,
+              color: "#545454",
+              textAlign: "center",
+              marginVertical: 10,
+            }}
+          >
+            OR
+          </Text>
+
+          <View style={{gap : 30}}>
+            <View style={{ gap: 15 }}>
+              <View>
+                <SocialBtn
+                  icon={
+                    <Image
+                      style={{ height: 20, width: 20, resizeMode: "contain" }}
+                      source={IMAGES.google2}
+                    />
+                  }
+                  color={colors.card}
+                  rounded
+                  text="Continue with Google"
+                  //gap
+                />
+              </View>
+              <View>
+                <SocialBtn
+                  icon={
+                    <FontAwesome name="apple" size={20} color={colors.title} />
+                  }
+                  color={colors.card}
+                  rounded
+                  text="Continue with Apple"
+                  //gap
+                />
+              </View>
+            </View>
+
+            <View>
+              <TouchableOpacity
+                style={{ justifyContent: "center" }}
+                onPress={() => navigation.navigate("Register")}
               >
-                Create an account
-              </Text>
-            </TouchableOpacity>
+                <Text
+                  style={{
+                    ...FONTS.fontMedium,
+                    // borderBottomWidth: 1,
+                    // borderBottomColor: colors.title,
+                    color: colors.title,
+                    textDecorationLine: "underline",
+                    textAlign: "center",
+                  }}
+                >
+                  Create an account
+                </Text>
+              </TouchableOpacity>
 
-            <Text style={styles.termsText}>
-              By Continuing, you agree to our{" "}
-              <Text style={styles.termsLink}>
-                Terms of Use & Privacy Policy
+              <Text style={styles.termsText}>
+                By Continuing, you agree to our{" "}
+                <Text style={styles.termsLink}>
+                  Terms of Use & Privacy Policy
+                </Text>
               </Text>
-            </Text>
+            </View>
           </View>
-        </View>
-      </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
