@@ -7,6 +7,7 @@ import { StackScreenProps } from "@react-navigation/stack";
 import { ApiClient } from "../../redux/api";
 import { Url } from "../../redux/userConstant";
 import ProductCard from "../Product/ProductCard";
+import { useAddToCart } from "../../hooks/useAddToCart";
 
 type ShopByBrandScreenProps = StackScreenProps<
   RootStackParamList,
@@ -15,6 +16,7 @@ type ShopByBrandScreenProps = StackScreenProps<
 
 const ShopByBrand = ({ navigation }: ShopByBrandScreenProps) => {
   const apiPath = ApiClient();
+  const addItemToCart = useAddToCart();
   const [products, setProducts] = useState<[]>();
 
   useEffect(() => {
@@ -124,9 +126,12 @@ const ShopByBrand = ({ navigation }: ShopByBrandScreenProps) => {
               marginBottom: 20,
             }}
             renderItem={({ item }) => (
-              <View style={{width : '45%'}}>
-              <ProductCard product={item} addToCart={() => {}} navigation={navigation} />
-                </View>
+              <ProductCard 
+                product={item} 
+                addToCart={addItemToCart} 
+                navigation={navigation}
+                containerStyle={{ flex: 1, marginHorizontal: '2.5%' }}
+              />
             )}
           />
       </ScrollView>
