@@ -62,7 +62,7 @@ const Button = ({
               },
               color && { color: "white" },
               text && { color: text },
-              { fontFamily: "Lato-SemiBold" }, // Ensure fontFamily is applied last
+              { fontFamily: "Lato-Medium" }, // Ensure fontFamily is applied last
             ]}
           >
             {title}
