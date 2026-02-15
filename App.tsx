@@ -24,16 +24,21 @@ export default function App() {
     getCurrentLocation();
   }, []);
   const [location, setLocation] = useState<Location.LocationObject | null>(
-    null
+    null,
   );
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [loaded] = useFonts({
-    JostBold: require("./app/assets/fonts/Jost-Bold.ttf"),
-    JostSemiBold: require("./app/assets/fonts/Jost-SemiBold.ttf"),
-    JostLight: require("./app/assets/fonts/Jost-Light.ttf"),
-    JostMedium: require("./app/assets/fonts/Jost-Medium.ttf"),
-    JostRegular: require("./app/assets/fonts/Jost-Regular.ttf"),
-    JostExtraLight: require("./app/assets/fonts/Jost-ExtraLight.ttf"),
+    // Lato fonts - load with exact names used in code
+    Lato: require("./app/assets/fonts/Lato-Regular.ttf"),
+    "Lato-Regular": require("./app/assets/fonts/Lato-Regular.ttf"),
+    "Lato-Bold": require("./app/assets/fonts/Lato-Bold.ttf"),
+    "Lato-Light": require("./app/assets/fonts/Lato-Light.ttf"),
+    "Lato-Black": require("./app/assets/fonts/Lato-Black.ttf"),
+    "Lato-Thin": require("./app/assets/fonts/Lato-Thin.ttf"),
+    "Lato-Italic": require("./app/assets/fonts/Lato-Italic.ttf"),
+    // Map SemiBold and Medium to Bold (since those font files don't exist)
+    "Lato-SemiBold": require("./app/assets/fonts/Lato-Bold.ttf"),
+    "Lato-Medium": require("./app/assets/fonts/Lato-Regular.ttf"),
   });
 
   if (!loaded) {
