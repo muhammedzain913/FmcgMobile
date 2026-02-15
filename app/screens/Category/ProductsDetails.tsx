@@ -4,8 +4,13 @@ import { View, Text, Image, StyleSheet, LayoutAnimation } from "react-native";
 import { IMAGES } from "../../constants/Images";
 import { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
-import { useDispatch } from "react-redux";
-import { addToCart } from "../../redux/reducer/cartReducer";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  addToCart,
+  decrementQuantity,
+  incrementQuantity,
+  selectCartItemById,
+} from "../../redux/reducer/cartReducer";
 import { addTowishList } from "../../redux/reducer/wishListReducer";
 import { Url } from "../../redux/userConstant";
 import { ApiClient } from "../../redux/api";
@@ -17,6 +22,9 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import ProductCard from "../Product/ProductCard";
 import { GlobalStyleSheet } from "../../constants/StyleSheet";
+import SectionContainer from "../../components/Home/SectionContainer";
+import SectionHeader from "../../components/Home/SectionHeader";
+import { widthPercentageToDP as wp } from "react-native-responsive-screen";
 
 const apiPath = ApiClient();
 
@@ -74,7 +82,10 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
   const [activeTab, setActiveTab] = useState("Description");
   const [expanded, setExpanded] = useState(false);
 
+  const cartItem = useSelector(selectCartItemById(product?.id || ""));
+
   useEffect(() => {
+    console.log("is there in the cart", cartItem, productId);
     const fetchProduct = async () => {
       try {
         const response = await apiPath.get(
@@ -90,23 +101,6 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
     };
     fetchProduct();
   }, []);
-
-  const addItemToCart = () => {
-    // const selectedImage = swiperimageData[currentSlide].image;
-    console.log("adding items..");
-    dispatch(
-      addToCart({
-        id: product?.id,
-        image: product?.imageUrl,
-        title: product?.title,
-        price: product?.salePrice,
-        slug: product?.slug,
-        color: false,
-        hascolor: false,
-        vendorId: product?.userId,
-      } as any),
-    );
-  };
 
   const addItemToWishList = () => {
     const selectedImage = swiperimageData[currentSlide].image;
@@ -184,13 +178,16 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
               style={styles.icon}
             >
               <Image
-                style={{width : 20,height : 20}}
+                style={{ width: 20, height: 20 }}
                 source={require("../../assets/images/icons/left-chevron.png")}
               />
             </TouchableOpacity>
 
-            <View  style={styles.icon}>
-              <Image  style={{width : 20,height : 20}} source={require("../../assets/images/icons/share.png")} />
+            <View style={styles.icon}>
+              <Image
+                style={{ width: 20, height: 20 }}
+                source={require("../../assets/images/icons/share.png")}
+              />
             </View>
           </View>
 
@@ -202,7 +199,7 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
           />
         </View>
 
-        <View style={{ paddingHorizontal: 25, gap: 20 }}>
+        <View style={{ paddingHorizontal: 20, gap: 20 }}>
           <View
             style={{
               gap: 10,
@@ -226,30 +223,160 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
                   {product?.category.title}
                 </Text>
               </View>
-              <View style={{ flexDirection: "row" }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: 5,
+                }}
+              >
                 <Image
-                  source={require("../../assets/images/icons/star4.png")}
+                  style={{ width: 14, height: 14 }}
+                  source={require("../../assets/images/icons/ratingstar.png")}
                 />
-                <Text>4.0(11.5k)</Text>
+                <Text
+                  style={{
+                    fontFamily: "Lato-Regular",
+                    fontSize: 12,
+                    color: "orange",
+                  }}
+                >
+                  4.5
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 12,
+                    fontFamily: "Lato-Regular",
+                    color: "#8C8C8C",
+                  }}
+                >
+                  (11.5k)
+                </Text>
               </View>
             </View>
             <View>
               <Text style={styles.productTitleText}>{product?.title}</Text>
             </View>
-            <View>
-              <Text style={{ fontSize: 15, color: "rgba(89, 89, 89, 1)" }}>
-                Quantity {product?.unit}
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Text style={styles.categoryText}>Quantity : </Text>{" "}
+              <Text
+                style={{ ...styles.categoryText, fontFamily: "Lato-SemiBold" }}
+              >
+                {product?.unit}
               </Text>
             </View>
 
-            <View style={styles.offerContainer}>
-              <Text style={{ fontSize: 20, color: "rgba(89, 89, 89, 1)" }}>
-                {product?.unit} Kg
-              </Text>
-              <Text style={{ fontSize: 18 }}>KWD {product?.salePrice}</Text>
-              <Text style={{ color: "rgba(0, 138, 25, 1)", fontSize: 18 }}>
-                50% OFF
-              </Text>
+            <View style={{ gap: 20 }}>
+              <View style={{ flexDirection: "row", gap: 10 }}>
+                <View style={styles.offerContainer}>
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      color: "#000000",
+                      fontFamily: "Lato-Regular",
+                    }}
+                  >
+                    {product?.unit} Kg
+                  </Text>
+                  <View style={GlobalStyleSheet.priceContainer}>
+                    <Text style={GlobalStyleSheet.salePrice}>
+                      KD {product?.salePrice}
+                    </Text>
+                    <Text style={GlobalStyleSheet.originalPrice}>
+                      KD {product?.salePrice}
+                    </Text>
+                  </View>
+                  <Text style={GlobalStyleSheet.discountBadge}> 50% OFF</Text>
+                </View>
+
+                <View
+                  style={{
+                    ...styles.offerContainer,
+                    borderColor: "#F0F0F0",
+                    backgroundColor: "#fff",
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      color: "#000000",
+                      fontFamily: "Lato-Regular",
+                    }}
+                  >
+                    {product?.unit} Kg
+                  </Text>
+                  <View style={GlobalStyleSheet.priceContainer}>
+                    <Text style={GlobalStyleSheet.salePrice}>
+                      KD {product?.salePrice}
+                    </Text>
+                    <Text style={GlobalStyleSheet.originalPrice}>
+                      KD {product?.salePrice}
+                    </Text>
+                  </View>
+                  <Text style={GlobalStyleSheet.discountBadge}> 50% OFF</Text>
+                </View>
+
+                <View
+                  style={{
+                    ...styles.offerContainer,
+                    borderColor: "#F0F0F0",
+                    backgroundColor: "#fff",
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      color: "#000000",
+                      fontFamily: "Lato-Regular",
+                    }}
+                  >
+                    {product?.unit} Kg
+                  </Text>
+                  <View style={GlobalStyleSheet.priceContainer}>
+                    <Text style={GlobalStyleSheet.salePrice}>
+                      KD {product?.salePrice}
+                    </Text>
+                    <Text style={GlobalStyleSheet.originalPrice}>
+                      KD {product?.salePrice}
+                    </Text>
+                  </View>
+                  <Text style={GlobalStyleSheet.discountBadge}> 50% OFF</Text>
+                </View>
+              </View>
+
+              <View style={{ flexDirection: "row", gap: 10 }}>
+                <Text
+                  style={{
+                    ...styles.itemDescription,
+                    fontFamily: "Lato-Bold",
+                    fontSize: 15,
+                  }}
+                >
+                  KD {product?.salePrice}
+                </Text>
+                <Text
+                  style={{
+                    ...styles.itemDescription,
+                    fontFamily: "Lato-Medium",
+                    fontSize: 15,
+                    color: "#8C8C8C",
+                    textDecorationLine: "line-through",
+                  }}
+                >
+                  KD {product?.salePrice}
+                </Text>
+
+                <Text
+                  style={{
+                    ...styles.itemDescription,
+                    color: "#008A19",
+                    fontFamily: "Lato-SemiBold",
+                  }}
+                >
+                  50% OFF
+                </Text>
+              </View>
             </View>
           </View>
 
@@ -258,7 +385,7 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
               ...styles.descriptionContainer,
               flexDirection: "row",
               justifyContent: "space-between",
-              gap: 20,
+              // gap: 20,
             }}
           >
             <View style={styles.productQualityContainer}>
@@ -268,7 +395,7 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
               />
 
               <View style={{ justifyContent: "center", alignItems: "center" }}>
-                <Text style={styles.productQualityText}>10 Million + </Text>
+                <Text style={styles.productQualityText}>10 Thousand + </Text>
                 <Text style={styles.productQualityText}>Happy Customers</Text>
               </View>
             </View>
@@ -278,8 +405,8 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
                 source={require("../../assets/images/protect.png")}
               />
               <View style={{ justifyContent: "center", alignItems: "center" }}>
-                <Text style={styles.productQualityText}>10 Million + </Text>
-                <Text style={styles.productQualityText}>Happy Customers</Text>
+                <Text style={styles.productQualityText}>Fast </Text>
+                <Text style={styles.productQualityText}>Delivery</Text>
               </View>
             </View>
             <View style={styles.productQualityContainer}>
@@ -288,8 +415,8 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
                 source={require("../../assets/images/badge.png")}
               />
               <View style={{ justifyContent: "center", alignItems: "center" }}>
-                <Text style={styles.productQualityText}>10 Million + </Text>
-                <Text style={styles.productQualityText}>Happy Customers</Text>
+                <Text style={styles.productQualityText}>Quality </Text>
+                <Text style={styles.productQualityText}>Checked</Text>
               </View>
             </View>
           </View>
@@ -326,7 +453,8 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
                   <Text
                     style={{
                       fontSize: 14,
-                      fontWeight: activeTab === tab ? "600" : "400",
+                      fontFamily:
+                        activeTab === tab ? "Lato-Bold" : "Lato-SemiBold",
                       color: activeTab === tab ? "#0E8A4A" : "#9A9A9A",
                       borderBottomWidth: activeTab === tab ? 2 : 0,
                       borderBottomColor: "#0E8A4A",
@@ -381,68 +509,42 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
           </View>
         </View>
 
-        <View
-          style={[
-            GlobalStyleSheet.container,
-            { paddingHorizontal: 20, paddingBottom: 10 },
-          ]}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
+        <SectionContainer>
+          <SectionHeader
+            title="SIMILAR PRODUCTS"
+            showViewAll={true}
+            onViewAllPress={() => {
+              navigation.navigate("ShopByBrand");
             }}
-          >
-            <Text
-              style={{
-                fontFamily: "Lato",
-                fontSize: 15,
-                fontWeight: "700", // Bold
-                lineHeight: 20,
-                letterSpacing: -0.39, // -3% of 13px ≈ -0.39
-                color: "rgba(31, 31, 31, 1)",
-                textTransform: "uppercase", // Cap height look
-              }}
-            >
-              SIMILAR PRODUCTS
-            </Text>
-
-            <View
-              style={{
-                flexDirection: "row", // Flow: Horizontal
-                alignItems: "center", // Inner alignment
-                height: 30, // Fixed height
-                paddingVertical: 7.78,
-                paddingHorizontal: 10,
-                borderRadius: 8,
-                borderWidth: 1,
-
-                borderColor: "rgba(240, 240, 240, 1)",
-                backgroundColor: "rgba(255, 255, 255, 0.6)",
-              }}
-            >
-              <Image
-                style={{ height: 10, width: 10, marginTop: 4 }}
-                source={require("../../assets/images/icons/top-right.png")}
-              />
-            </View>
-          </View>
-
+          />
           <ScrollView
-            contentContainerStyle={{}}
+            contentContainerStyle={{
+              gap: 15,
+              flexDirection: "row",
+              marginTop: 20,
+              paddingRight: 20,
+            }}
             horizontal
             showsHorizontalScrollIndicator={false}
+            nestedScrollEnabled={true}
           >
-            {DUMMY_PRODUCTS?.map((data: any, index: any) => {
+            {DUMMY_PRODUCTS?.map((data: any) => {
               return (
-                <>
-                  <ProductCard product={data} addToCart={() => {}} navigation={navigation} />
-                </>
+                <ProductCard
+                  key={data.id || data.slug}
+                  addToCart={() => {}}
+                  product={data}
+                  navigation={navigation}
+                  containerStyle={{
+                    width: wp("38%"),
+                    minWidth: 140,
+                    maxWidth: 180,
+                  }}
+                />
               );
             })}
           </ScrollView>
-        </View>
+        </SectionContainer>
       </ScrollView>
 
       <View
@@ -468,7 +570,62 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
             start={{ x: 0, y: 0.5 }}
             end={{ x: 1, y: 0.5 }}
           >
-            <Text style={styles.addToCartText}>Add To Cart +</Text>
+            {cartItem ? (
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  width: "100%",
+                  paddingHorizontal: 20,
+                }}
+              >
+                <TouchableOpacity style={{marginTop : 10}} onPress={() => {incrementQuantity()}}>
+                  <Image
+                    style={{ width: 10, height: 10 }}
+                    source={require("../../assets/images/icons/subtract.png")}
+                  />
+                </TouchableOpacity>
+
+                <Text
+                  style={{
+                    color: "#fff",
+                    fontSize: 22,
+                    fontFamily: "Lato-Regular",
+                  }}
+                >
+                  {cartItem.quantity}
+                </Text>
+                <TouchableOpacity>
+                  <Image
+                    style={{ width: 10, height: 15 }}
+                    source={require("../../assets/images/icons/add.png")}
+                  />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableOpacity
+                onPress={() => {
+                  if (product) {
+                    dispatch(
+                      addToCart({
+                        id: product.id,
+                        image: product.imageUrl,
+                        title: product.title,
+                        price: product?.salePrice,
+                        slug: product.slug,
+                        color: false,
+                        hascolor: false,
+                        vendorId: product.userId,
+                      } as any),
+                    );
+                  }
+                }}
+                style={{ width: "100%", alignItems: "center" }}
+              >
+                <Text style={styles.addToCartText}>Add To Cart +</Text>
+              </TouchableOpacity>
+            )}
           </LinearGradient>
 
           <View
@@ -510,33 +667,33 @@ const styles = StyleSheet.create({
     borderColor: "grey",
   },
   categoryText: {
-    fontFamily: "Lato",
-    fontSize: 15,
+    fontFamily: "Lato-Regular",
+    fontSize: 13,
     lineHeight: 25,
     letterSpacing: -0.39, // -3% of 13px
-    color: "rgba(89, 89, 89, 1)",
+    color: "#595959",
   },
   productTitleText: {
-    fontFamily: "Lato",
-    fontSize: 22,
+    fontFamily: "Lato-Bold",
+    fontSize: 18,
     lineHeight: 24,
     letterSpacing: -0.54, // -3% of 18px
     color: "#000000",
-    fontWeight: 700,
   },
   offerContainer: {
     borderRadius: 8,
-    borderWidth: 2,
-    borderColor: "rgba(5, 155, 93, 1)",
+    borderWidth: 1,
+    borderColor: "#059B5D",
     gap: 10,
     padding: 10,
-    width: "50%",
+    width: "32%",
     backgroundColor: "rgba(5, 155, 93, 0.03)",
   },
 
   addToCartText: {
     color: "#ffff",
     fontSize: 17,
+    fontFamily: "Lato-SemiBold",
   },
   descriptionContainer: {
     gap: 10,
@@ -554,10 +711,12 @@ const styles = StyleSheet.create({
   productQualityContainer: {
     justifyContent: "center",
     alignItems: "center",
+    width: "33%",
     gap: 10,
   },
   productQualityText: {
     fontSize: 12,
+    fontFamily: "Lato-Regular",
   },
   imageSection: {
     height: 370, // 👈 controls how “big” the image area feels
@@ -588,5 +747,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: "rgba(217,217,217,1)",
     padding: 8,
+    justifyContent : 'center',
+    alignItems : 'center'
+  },
+  itemDescription: {
+    fontFamily: "Lato-Medium",
+    fontSize: 15,
+    lineHeight: 16,
+    letterSpacing: -0.36, // -3% of 12px
+    color: "rgba(0, 0, 0, 1)",
   },
 });
