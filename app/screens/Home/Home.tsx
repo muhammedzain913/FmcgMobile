@@ -41,6 +41,7 @@ import { widthPercentageToDP as wp } from "react-native-responsive-screen";
 import HomeHeader from "../../components/Home/HomeHeader";
 import CategoryCard from "../../components/Home/CategoryCard";
 import { useUserAddress } from "../../hooks/useSaveUserAddress";
+import { useSaveUserLocation } from "../../hooks/useSaveUserLocation";
 import { Alert } from "react-native";
 
 const apiPath = ApiClient();
@@ -49,7 +50,9 @@ type HomeScreenProps = StackScreenProps<RootStackParamList, "Home">;
 
 const Home = ({ navigation }: HomeScreenProps) => {
   const addresses = useSelector((x: any) => x?.user?.addresses || []);
+  const userId = useSelector((x: any) => x?.user?.userInfo.id);
   const { deleteAddress, loading: deleteLoading } = useUserAddress();
+  const { saveLocation, loading: locationLoading } = useSaveUserLocation();
   const isOpen = useSharedValue(false);
   const isOpenEdit = useSharedValue(false);
   const [banner, setBanner] = useState<any>({});
@@ -129,7 +132,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
       }
     };
     fetchProducts();
-  }, [searchQuery]);
+  }, [searchQuery,governorate, city, block]);
 
   useEffect(() => {
     const setDealProducts = async () => {
@@ -427,7 +430,27 @@ const Home = ({ navigation }: HomeScreenProps) => {
                   setBlockVisible(false);
                 }}
                 onContinue={() => {
-                  isOpen.value = false;
+                  if (!governorate || !city || !block) {
+                    Alert.alert("Error", "Please select governorate, city, and block");
+                    return;
+                  }
+
+                  saveLocation({
+                    payload: {
+                      userId,
+                      governorate: governorate.id,
+                      city: city.id,
+                      block: block.id,
+                      country : 'Kuwait'
+                    },
+                    onSuccess: () => {
+                      isOpen.value = false;
+                      setView("EDIT"); // Go back to EDIT view after saving location
+                    },
+                    onError: (error) => {
+                      Alert.alert("Error", error || "Failed to save location");
+                    },
+                  });
                 }}
               />
             </View>
