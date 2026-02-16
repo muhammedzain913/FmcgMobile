@@ -60,6 +60,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [products, setProducts] = useState<[]>();
+  const [brands, setBrands] = useState<[]>(); 
   const [categories, setCategories] = useState<[]>();
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [displayedProducts, setDisplayedProducts] = useState<any[]>();
@@ -167,23 +168,20 @@ const Home = ({ navigation }: HomeScreenProps) => {
     fetchCategory();
   }, []);
 
-  const brandData = [
-    {
-      imagePath: IMAGES.elite,
-    },
-    {
-      imagePath: IMAGES.muralya,
-    },
-    {
-      imagePath: IMAGES.milma,
-    },
-    {
-      imagePath: IMAGES.milma,
-    },
-    {
-      imagePath: IMAGES.milma,
-    },
-  ];
+  useEffect(() => {
+    const fetchBrands = async () => {
+      try {
+        const response = await apiPath.get(`${Url}/api/brands`);
+        console.log("brands api", response.data);
+        setBrands(response.data || []);
+      } catch (error: any) {
+        console.error("Error fetching brands:", error);
+        setError(error.message || "Failed to fetch brands");
+      }
+    };
+    fetchBrands();
+  }, []);
+
 
   const theme = useTheme();
   const { colors }: { colors: any } = theme;
@@ -315,12 +313,16 @@ const Home = ({ navigation }: HomeScreenProps) => {
             horizontal
             showsHorizontalScrollIndicator={false}
           >
-            {brandData?.map((data: any, index: number) => (
-              <View key={index} style={styles.brandCard}>
+            {brands?.map((brand: any) => (
+              <View key={brand.id} style={styles.brandCard}>
                 <TouchableOpacity
                   onPress={() => navigation.navigate("ShopByBrand")}
                 >
-                  <Image style={styles.brandImage} source={data.imagePath} />
+                  <Image 
+                    style={styles.brandImage} 
+                    source={{ uri: brand.image || brand.imageUrl || brand.logo }} 
+                    resizeMode="contain"
+                  />
                 </TouchableOpacity>
               </View>
             ))}
@@ -521,8 +523,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   brandImage: {
-    width: 100,
-    height: 50,
+    width: 150,
+    height: 80,
   } as const,
   // Location bottom sheet styles
   bottomSheetContent: {
