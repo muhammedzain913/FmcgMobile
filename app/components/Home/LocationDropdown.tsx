@@ -9,7 +9,7 @@ interface LocationDropdownProps {
   visible: boolean;
   onOpen: () => void;
   onClose: () => void;
-  selectedValue: string | null;
+  selectedValue: string | undefined;
   placeholder: string;
   options: any[];
   onSelect: (item: any) => void;
