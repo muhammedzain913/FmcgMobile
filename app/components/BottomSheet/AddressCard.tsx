@@ -1,27 +1,47 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { AddressResponse } from '../../types/response/addressResponse';
 
 interface AddressCardProps {
-  governorate?: { name: string } | null;
-  city?: { name: string } | null;
-  block?: { name: string } | null;
-  defaultAddress?: {
-    street?: string;
-    building?: string;
-    phone?: string;
-  } | null;
+  address: AddressResponse;
   onEdit: () => void;
   onRemove: () => void;
 }
 
 const AddressCard: React.FC<AddressCardProps> = ({
-  governorate,
-  city,
-  block,
-  defaultAddress,
+  address,
   onEdit,
   onRemove,
 }) => {
+  const location = address.user?.location;
+  const governorate = location?.governorate;
+  const city = location?.city;
+  const block = location?.block;
+
+  const getAddressTypeLabel = (type: string) => {
+    switch (type?.toUpperCase()) {
+      case 'HOME':
+        return 'HOME';
+      case 'WORK':
+        return 'WORK';
+      case 'OTHER':
+        return 'OTHER';
+      default:
+        return type?.toUpperCase() || 'ADDRESS';
+    }
+  };
+
+  const getAddressIcon = (type: string) => {
+    switch (type?.toUpperCase()) {
+      case 'HOME':
+        return require("../../assets/images/icons/House.png");
+      case 'WORK':
+        return require("../../assets/images/icons/briefcase.png");
+      default:
+        return require("../../assets/images/icons/House.png");
+    }
+  };
+
   return (
     <View style={styles.addressCard}>
       <View style={styles.addressCardContent}>
@@ -29,14 +49,16 @@ const AddressCard: React.FC<AddressCardProps> = ({
           <TouchableOpacity onPress={onEdit}>
             <Text style={styles.editText}>Edit</Text>
           </TouchableOpacity>
-          <Text style={{ ...styles.editText, color: "#EB0000" }}>
-            Remove
-          </Text>
+          <TouchableOpacity onPress={onRemove}>
+            <Text style={{ ...styles.editText, color: "#EB0000" }}>
+              Remove
+            </Text>
+          </TouchableOpacity>
         </View>
         <View style={styles.addressRow}>
           <View style={styles.addressIconContainer}>
             <Image
-              source={require("../../assets/images/icons/House.png")}
+              source={getAddressIcon(address.type)}
             />
           </View>
           <View style={styles.addressInfo}>
@@ -49,16 +71,27 @@ const AddressCard: React.FC<AddressCardProps> = ({
                 }}
                 source={require("../../assets/images/icons/locationpinblack.png")}
               />
-              <Text style={styles.addressTItle}>HOME</Text>
+              <Text style={styles.addressTItle}>
+                {getAddressTypeLabel(address.type)}
+              </Text>
             </View>
             <View style={{ gap: 5 }}>
+              {governorate && city && block && (
+                <Text style={styles.addressContent}>
+                  {governorate.name}, {city.name}, {block.name}
+                </Text>
+              )}
               <Text style={styles.addressContent}>
-                {governorate?.name}, {city?.name}, {block?.name}
+                {address.street && `${address.street}, `}
+                {address.building && `${address.building}`}
+                {address.contactPhone && `, ${address.contactPhone}`}
               </Text>
-              <Text style={styles.addressContent}>
-                {defaultAddress?.street}, {defaultAddress?.building},{" "}
-                {defaultAddress?.phone}
-              </Text>
+              {address.apartmentNumber && (
+                <Text style={styles.addressContent}>
+                  Apt {address.apartmentNumber}
+                  {address.floorNumber && `, Floor ${address.floorNumber}`}
+                </Text>
+              )}
             </View>
           </View>
         </View>

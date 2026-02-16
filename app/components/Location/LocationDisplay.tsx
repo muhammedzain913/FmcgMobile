@@ -47,7 +47,7 @@ const LocationDisplay: React.FC<LocationDisplayProps> = ({
         >
           <Image
             style={{ width: 15, height: 15 }}
-            source={require("../../assets/images/icons/locationpin.png")}
+            source={require("../../assets/images/icons/locationpinblack.png")}
           />
           <Text
             style={{

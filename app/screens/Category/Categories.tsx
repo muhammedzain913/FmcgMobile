@@ -183,7 +183,7 @@ const Categories = ({ navigation, route }: CategoriesScreenProps) => {
     const fetchProducts = async () => {
       try {
         const response = await apiPath.get(
-          `${Url}/api/products?gov=${address.governorate.name}&city=${address.city.name}&block=${address.block.name}&search =${searchQuery}`,
+          `${Url}/api/products?gov=${address.governorate.id}&city=${address.city.id}&block=${address.block.id}&search =${searchQuery}`,
         );
         console.log("product api", response.data.length);
         setProducts(response.data);

@@ -35,7 +35,7 @@ import SectionContainer from "../../components/Home/SectionContainer";
 import LocationDropdown from "../../components/Home/LocationDropdown";
 import CartNotification from "../../components/Cart/CartNotification";
 import BottomSheetHeader from "../../components/BottomSheet/BottomSheetHeader";
-import AddressCard from "../../components/BottomSheet/AddressCard";
+import AddressList from "../../components/BottomSheet/AddressList";
 import LocationSelectionView from "../../components/BottomSheet/LocationSelectionView";
 import { widthPercentageToDP as wp } from "react-native-responsive-screen";
 import HomeHeader from "../../components/Home/HomeHeader";
@@ -46,7 +46,7 @@ const apiPath = ApiClient();
 type HomeScreenProps = StackScreenProps<RootStackParamList, "Home">;
 
 const Home = ({ navigation }: HomeScreenProps) => {
-  const defaultAddress = useSelector((x: any) => x?.user?.defaultAddress);
+  const addresses = useSelector((x: any) => x?.user?.addresses || []);
   const isOpen = useSharedValue(false);
   const isOpenEdit = useSharedValue(false);
   const [banner, setBanner] = useState<any>({});
@@ -62,6 +62,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
   const [searchQuery, setSearchQuety] = useState<string>("");
   const totalQuantity = useSelector(selectCartTotalQuantity);
   const [view, setView] = useState<"LIST" | "EDIT" | "LOCATION">("LIST");
+  const [editingAddress, setEditingAddress] = useState<any>(null); // Store address being edited
   const toggleSheet = () => {
     isOpen.value = !isOpen.value;
   };
@@ -113,7 +114,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
     const fetchProducts = async () => {
       try {
         const response = await apiPath.get(
-          `${Url}/api/products?gov=${address.governorate.name}&city=${address.city.name}&block=${address.block.name}&search =${searchQuery}`,
+          `${Url}/api/products?gov=${address.governorate.id}&city=${address.city.id}&block=${address.block.id}&search =${searchQuery}`,
         );
         console.log("product api", response.data.length);
         setProducts(response.data);
@@ -327,27 +328,22 @@ const Home = ({ navigation }: HomeScreenProps) => {
       <LocationBottomSheet isOpen={isOpen} toggleSheet={toggleSheet}>
         {view === "LIST" && (
           <Animated.View style={styles.bottomSheetContent}>
-            <View style={{ gap: 10 }}>
-              <BottomSheetHeader title="CHANGE ADDRESS" onClose={toggleSheet} />
-              <View>
-                {[1, 2].map((item, index) => (
-                  <AddressCard
-                    key={index}
-                    governorate={governorate}
-                    city={city}
-                    block={block}
-                    defaultAddress={defaultAddress}
-                    onEdit={() => {
-                      toggleSheetEdit();
-                      setView("EDIT");
-                    }}
-                    onRemove={() => {
-                      // Handle remove action
-                    }}
-                  />
-                ))}
-              </View>
-            </View>
+            <BottomSheetHeader title="CHANGE ADDRESS" onClose={toggleSheet} />
+            <AddressList
+              addresses={addresses}
+              onEdit={(address) => {
+                setEditingAddress(address); // Set the address to be edited
+                toggleSheetEdit();
+                setView("EDIT");
+              }}
+              onRemove={(address) => {
+                // Handle remove action
+              }}
+              onAddNew={() => {
+                setEditingAddress(null); // Clear editing address (add new mode)
+                setView("EDIT");
+              }}
+            />
           </Animated.View>
         )}
 
@@ -355,6 +351,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
           <Animated.View style={{ ...styles.bottomSheetContent, gap: 40 }}>
             <BottomSheetHeader title="CHANGE ADDRESS" onClose={toggleSheet} />
             <UserDeliveryAddressDropDown
+              addressToEdit={editingAddress} // Pass address if editing, null if adding new
               onChangeLocation={() => {
                 setView("LOCATION");
               }}
@@ -482,6 +479,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "white",
     // gap: 10,
+    paddingBottom:5,
     paddingHorizontal: 20,
     paddingTop: 50,
   },

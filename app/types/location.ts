@@ -20,11 +20,8 @@ export interface Block {
 
 export interface BaseLocation {
   governorate: Governorate;
-  street?: string;
   block: Block;
   city: City;
-  phone? :string;
-  building? : string
   country: string;
 }
 

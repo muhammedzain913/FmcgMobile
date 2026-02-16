@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   Alert,
   Image,
-  ImageBackground,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -17,128 +16,123 @@ import Button from "../../components/Button/Button";
 import { COLORS } from "../../constants/theme";
 import { Typography } from "../../constants/typography";
 import { useSelector } from "react-redux";
-import Animated, { useSharedValue } from "react-native-reanimated";
-import LocationBottomSheet from "../../components/BottomSheet/LocationBottomSheet";
-import DropdownMenu from "../../components/DropDown/DropDownMenu";
-import MenuOption from "../../components/DropDown/MenuOption";
 import { useLocationSelector } from "../../hooks/useLocationSelector";
-import { heightPercentageToDP as hp } from "react-native-responsive-screen";
-import { useSaveUserLocation } from "../../hooks/useSaveUserLocation";
-import { RootStackParamList } from "../../navigation/RootStackParamList";
-import { StackScreenProps } from "@react-navigation/stack";
-import { LocationRequest } from "../../types/requests/locationRequest";
-import { StatusBar } from "expo-status-bar";
+import { useUserAddress } from "../../hooks/useSaveUserAddress";
+import { AddressRequest } from "../../types/requests/addressRequest";
+import { AddressResponse } from "../../types/response/addressResponse";
+import LocationDisplay from "../../components/Location/LocationDisplay";
 
 type Props = {
   onChangeLocation: () => void;
+  addressToEdit?: AddressResponse | null; // If provided, edit mode. If null/undefined, add new mode
 };
 
 const UserDeliveryAddressDropDown = ({
   onChangeLocation,
+  addressToEdit,
 }: Props) => {
-  const [loading, setLoading] = useState(false);
-  const defaultAddress = useSelector((x: any) => x.user.defaultAddress);
-  const { saveLocation } = useSaveUserLocation();
   const userId = useSelector((x: any) => x?.user?.userInfo.id);
-  const [addressType, setAddressType] = useState<string>("");
-  const isOpen = useSharedValue(false);
+  const { saveAddress, updateAddress, loading } = useUserAddress();
 
-  const [savedAddress, setSavedAddress] = useState<LocationRequest>({
-    userId: defaultAddress.userId,
-    governorate: defaultAddress.governorate,
-    street: "",
-    block: defaultAddress.block,
-    city: defaultAddress.city,
-    phone: "",
-    building: "",
-    country: defaultAddress.country,
+  const {
+    governorate,
+    city,
+    block,
+  } = useLocationSelector();
+
+  // Initialize state: if editing, use addressToEdit data; if adding new, use empty state
+  const [savedAddress, setSavedAddress] = useState<AddressRequest>(() => {
+    if (addressToEdit) {
+      // Edit mode: Pre-populate with existing address data
+      return {
+        type: addressToEdit.type || "HOME",
+        street: addressToEdit.street || "",
+        apartmentNumber: addressToEdit.apartmentNumber || "",
+        contactPhone: addressToEdit.contactPhone || "",
+      };
+    } else {
+      // Add new mode: Empty state
+      return {
+        type: "HOME",
+        street: "",
+        apartmentNumber: "",
+        contactPhone: "",
+      };
+    }
   });
 
-  const handleChange = (text: string, field: keyof LocationRequest) => {
-    setSavedAddress((prev) => ({
-      ...(prev as LocationRequest),
+  // Update state when addressToEdit changes (e.g., switching between edit/add)
+  useEffect(() => {
+    if (addressToEdit) {
+      setSavedAddress({
+        type: addressToEdit.type || "HOME",
+        street: addressToEdit.street || "",
+        apartmentNumber: addressToEdit.apartmentNumber || "",
+        contactPhone: addressToEdit.contactPhone || "",
+      });
+    } else {
+      setSavedAddress({
+        type: "HOME",
+        street: "",
+        apartmentNumber: "",
+        contactPhone: "",
+      });
+    }
+  }, [addressToEdit]);
+
+  const handleChange = (text: string, field: keyof AddressRequest) => {
+    setSavedAddress((prev: AddressRequest) => ({
+      ...prev,
       [field]: text,
     }));
   };
 
-  const toggleSheet = () => {
-    isOpen.value = !isOpen.value;
-  };
-
-  const {
-    governorates,
-    cities,
-    blocks,
-
-    governorate,
-    city,
-    block,
-
-    setGovernorate,
-    setCity,
-    setBlock,
-
-    govVisible,
-    cityVisible,
-    blockVisible,
-
-    setGovVisible,
-    setCityVisible,
-    setBlockVisible,
-  } = useLocationSelector();
-
-  useEffect(() => {
-    console.log(
-      "this is the governorate city or block",
-      governorate,
-      city,
-      block,
-    );
-  }, [governorate, city, block]);
-
-  useEffect(() => {
-    console.log("default", defaultAddress);
-  });
-
   const onSaveAddress = () => {
-    saveLocation({
-      payload: {
-        userId,
-        governorate: governorate?.id,
-        city: city?.id,
-        block: block?.id,
-        country: "Kuwait",
-        street: savedAddress.street,
-        building: savedAddress.building,
-      },
-      onSuccess: () => {
-        // navigation.reset({
-        //   index: 0,
-        //   routes: [{ name: "DrawerNavigation" }],
-        // });
-      },
-      onError: () => {
-        Alert.alert("Error", "Failed to save address");
-      },
-    });
+    if (!savedAddress.type) {
+      Alert.alert("Error", "Please select an address type");
+      return;
+    }
+
+    // Prepare payload with userId
+    const payload: AddressRequest = {
+      ...savedAddress,
+      userId,
+    };
+
+    // If editing (addressToEdit has id), call updateAddress
+    // If adding new (addressToEdit is null), call saveAddress
+    if (addressToEdit?.id) {
+      // Update existing address
+      updateAddress({
+        payload: {
+          ...payload,
+          id: addressToEdit.id,
+        },
+        onSuccess: () => {
+          // Handle success (could close bottom sheet, refresh list, etc.)
+        },
+        onError: (error: any) => {
+          Alert.alert("Error", error || "Failed to update address");
+        },
+      });
+    } else {
+      // Create new address
+      saveAddress({
+        payload,
+        onSuccess: () => {
+          // Handle success (could close bottom sheet, refresh list, etc.)
+        },
+        onError: (error: any) => {
+          Alert.alert("Error", error || "Failed to save address");
+        },
+      });
+    }
   };
 
-  useEffect(() => {
-    console.log("default address from here", defaultAddress);
-  }, [savedAddress]);
-
-  useEffect(() => {
-    console.log(
-      "city address and block",
-      city?.name,
-      block?.name,
-      governorate?.name,
-    );
-  }, []);
   return (
     <>
       <KeyboardAvoidingView
-        style={{  }}
+        style={{}}
         keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
       >
         <ScrollView
@@ -146,267 +140,128 @@ const UserDeliveryAddressDropDown = ({
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View style={{justifyContent : 'space-between'}}>
-          <View style={{ gap: 30 }}>
-            <View style={{ gap: 50 }}>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  borderBottomWidth: 1,
-                  borderBottomColor: "grey",
-                  paddingBottom: 20,
-                }}
-              >
-                <View style={{ gap: 10 }}>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      gap: 10,
-                      alignItems: "center",
-                    }}
-                  >
-                    <Image
-                      style={{width : 15,height :15}}
-                      source={require("../../assets/images/icons/locationpinblack.png")}
-                    />
-                    <Text
-                      style={{
-                        fontFamily: "Lato-SemiBold",
-                        fontSize: 20,
-                        color: "#000",
-                      }}
-                    >
-                      {governorate?.name}
-                    </Text>
-                  </View>
-
-                  <View>
-                    <Text
-                      style={{
-                        fontFamily: "Lato-Regular",
-                        fontSize: 15,
-                        color: "#000",
-                      }}
-                    >
-                      {city?.name} , Block {block?.name}
-                    </Text>
-                  </View>
+          <View style={{ justifyContent: "space-between" }}>
+            <View style={{ gap: 30 }}>
+              <View style={{ gap: 50 }}>
+                <View
+                  style={{
+                    borderBottomWidth: 1,
+                    borderBottomColor: "grey",
+                    paddingBottom: 20,
+                  }}
+                >
+                  <LocationDisplay
+                    governorate={governorate}
+                    city={city}
+                    block={block}
+                    showChangeButton={true}
+                    onChangePress={onChangeLocation}
+                    textColor="#000"
+                  />
                 </View>
-
-                <TouchableOpacity onPress={() => {toggleSheet(),onChangeLocation()}}>
-                  <View
-                    style={{
-                      width: 70,
-                      height: 30,
-                      borderColor: "#000",
-                      borderRadius: 8,
-                      borderWidth: 1,
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontFamily: "Lato-Medium",
-                        fontSize: 14,
-                        color: "#000",
-                      }}
-                    >
-                      Change
-                    </Text>
-                  </View>
-                </TouchableOpacity>
               </View>
-            </View>
 
-            <View style={{ gap: 15 }}>
-              <Input
-                value={defaultAddress?.street}
-                onChangeText={(value) => handleChange(value, "street")}
-                placeholder="Street"
-              />
-              <Input
-                value={defaultAddress?.phone}
-                onChangeText={(value) => handleChange(value, "phone")}
-                placeholder="Phone"
-              />
-              <Input
-                onChangeText={(value) => handleChange(value, "building")}
-                value={defaultAddress?.building}
-                multiline={true}
-                numberOfLines={5}
-                placeholder="Flat / House no / Building name *"
-              />
-            </View>
+              <View style={{ gap: 15 }}>
+                <Input
+                  value={savedAddress.street || ""}
+                  onChangeText={(value) => handleChange(value, "street")}
+                  placeholder="Street"
+                />
+                <Input
+                  value={savedAddress.apartmentNumber || ""}
+                  onChangeText={(value) =>
+                    handleChange(value, "apartmentNumber")
+                  }
+                  placeholder="Apartment / Flat number"
+                  keyboardType="numeric"
+                />
+                <Input
+                  value={savedAddress.contactPhone || ""}
+                  onChangeText={(value) =>
+                    handleChange(value, "contactPhone")
+                  }
+                  placeholder="Phone"
+                  keyboardType="phone-pad"
+                />
+              </View>
 
-            <View>
               <View>
-                <Text style={[Typography.titleMedium, { color: "#000" }]}>
-                  Save As
-                </Text>
-              </View>
-              <View style={{ flexDirection: "row", gap: 10 }}>
-                <View style={styles.buttonView}>
-                  <TouchableOpacity onPress={() => setAddressType("Home")}>
-                    <Text style={styles.buttonText}>Home</Text>
-                  </TouchableOpacity>
+                <View>
+                  <Text style={[Typography.titleMedium, { color: "#000" }]}>
+                    Save As
+                  </Text>
                 </View>
-                <View style={styles.buttonView}>
-                  <TouchableOpacity onPress={() => setAddressType("Work")}>
-                    <Text style={styles.buttonText}>Work</Text>
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.buttonView}>
-                  <TouchableOpacity onPress={() => setAddressType("Other")}>
-                    <Text style={styles.buttonText}>Other</Text>
-                  </TouchableOpacity>
+                <View style={{ flexDirection: "row", gap: 10 }}>
+                  <View
+                    style={[
+                      styles.buttonView,
+                      savedAddress.type === "HOME" && styles.buttonViewActive,
+                    ]}
+                  >
+                    <TouchableOpacity
+                      style={{
+                        flexDirection: "row",
+                        gap: 5,
+                        alignItems: "center",
+                      }}
+                      onPress={() => handleChange("HOME", "type")}
+                    >
+                      <Image
+                        style={{ width: 13, height: 13 }}
+                        source={require("../../assets/images/icons/homeltst.png")}
+                      />
+                      <Text style={styles.buttonText}>Home</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <View
+                    style={[
+                      styles.buttonView,
+                      savedAddress.type === "WORK" && styles.buttonViewActive,
+                    ]}
+                  >
+                    <TouchableOpacity
+                      style={{ flexDirection: "row", gap: 5 }}
+                      onPress={() => handleChange("WORK", "type")}
+                    >
+                      <Image
+                        style={{ width: 13, height: 13 }}
+                        source={require("../../assets/images/icons/briefcase.png")}
+                      />
+                      <Text style={styles.buttonText}>Work</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <View
+                    style={[
+                      styles.buttonView,
+                      savedAddress.type === "OTHER" && styles.buttonViewActive,
+                    ]}
+                  >
+                    <TouchableOpacity
+                      onPress={() => handleChange("OTHER", "type")}
+                    >
+                      <Text style={styles.buttonText}>Other</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
             </View>
-          </View>
 
-          <View style={{ marginVertical: 10 }}>
-            {loading ? (
-              <ActivityIndicator size="large" color={COLORS.primary} />
-            ) : (
-              <Button
-                variant=""
-                text={"#fff"}
-                color={"rgba(30, 18, 61, 1)"}
-                title="Save Address"
-                onPress={() => {
-                  onSaveAddress();
-                }}
-              />
-            )}
-          </View>
+            <View style={{ marginVertical: 10 }}>
+              {loading ? (
+                <ActivityIndicator size="large" color={COLORS.primary} />
+              ) : (
+                <Button
+                  variant=""
+                  text={"#fff"}
+                  color={"rgba(30, 18, 61, 1)"}
+                  title="Save Address"
+                  onPress={onSaveAddress}
+                />
+              )}
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-{/* 
-      <LocationBottomSheet isOpen={isOpen} toggleSheet={toggleSheet}>
-        <Animated.View
-          style={{ flex: 1, paddingHorizontal: 20, paddingVertical: 20 }}
-        >
-          <Text>Choose governorate</Text>
-          <DropdownMenu
-            visible={govVisible}
-            handleOpen={() => setGovVisible(true)}
-            handleClose={() => setGovVisible(false)}
-            trigger={
-              <View style={styles.triggerStyle}>
-                <Text style={styles.triggerText}>
-                  {governorate ? governorate?.name : "Select Governerate"}
-                </Text>
-                <Image
-                  source={require("../../assets/images/icons/dropicon.png")}
-                />
-              </View>
-            }
-          >
-            {governorates.map((block: any, index) => {
-              return (
-                <MenuOption
-                  key={index}
-                  onSelect={() => {
-                    setGovernorate(block);
-                    setCity(null);
-                    setBlock(null);
-                  }}
-                >
-                  <Text>{block?.name}</Text>
-                </MenuOption>
-              );
-            })}
-          </DropdownMenu>
-
-          <Text>Choose city</Text>
-
-          <DropdownMenu
-            visible={cityVisible}
-            handleOpen={() => setCityVisible(true)}
-            handleClose={() => setCityVisible(false)}
-            trigger={
-              <View style={styles.triggerStyle}>
-                <Text style={styles.triggerText}>
-                  {city ? city?.name : "Select City"}
-                </Text>
-                <Image
-                  source={require("../../assets/images/icons/dropicon.png")}
-                />
-              </View>
-            }
-          >
-            <ScrollView
-              style={{ maxHeight: hp("40%") }}
-              nestedScrollEnabled={true}
-            >
-              {cities.map((city, index) => {
-                return (
-                  <MenuOption
-                    key={index}
-                    onSelect={() => {
-                      setCity(city);
-                      setCityVisible(false);
-                      setBlock(null);
-                    }}
-                  >
-                    <Text>{city?.name}</Text>
-                  </MenuOption>
-                );
-              })}
-            </ScrollView>
-          </DropdownMenu>
-
-          <Text>Choose city</Text>
-
-          <DropdownMenu
-            visible={blockVisible}
-            handleOpen={() => setBlockVisible(true)}
-            handleClose={() => setBlockVisible(false)}
-            trigger={
-              <View style={styles.triggerStyle}>
-                <Text style={styles.triggerText}>
-                  {block ? block.name : "Select Block"}
-                </Text>
-                <Image
-                  source={require("../../assets/images/icons/dropicon.png")}
-                />
-              </View>
-            }
-          >
-            <ScrollView
-              style={{ maxHeight: hp("40%") }}
-              nestedScrollEnabled={true}
-            >
-              {blocks.map((block, index) => {
-                return (
-                  <MenuOption
-                    key={index}
-                    onSelect={() => {
-                      setBlock(block);
-                      setBlockVisible(false);
-                    }}
-                  >
-                    <Text>{block?.name}</Text>
-                  </MenuOption>
-                );
-              })}
-            </ScrollView>
-          </DropdownMenu>
-
-          <Button
-            variant="non"
-            color={"#1E123D"}
-            title="Continue"
-            onPress={() => {
-              isOpen.value = false;
-            }}
-          />
-        </Animated.View>
-      </LocationBottomSheet> */}
     </>
   );
 };
@@ -423,6 +278,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderColor: "#000",
     borderWidth: 1,
+  },
+  buttonViewActive: {
+    backgroundColor: "rgba(0, 0, 0, 0.1)",
+    borderWidth: 2,
   },
   triggerStyle: {
     width: "100%",

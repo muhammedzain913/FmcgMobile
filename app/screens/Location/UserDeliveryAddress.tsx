@@ -14,7 +14,6 @@ import {
 } from "react-native";
 import Input from "../../components/Input/Input";
 import Button from "../../components/Button/Button";
-import { COLORS } from "../../constants/theme";
 import { Typography } from "../../constants/typography";
 import { useSelector } from "react-redux";
 import Animated, { useSharedValue } from "react-native-reanimated";
@@ -23,10 +22,10 @@ import DropdownMenu from "../../components/DropDown/DropDownMenu";
 import MenuOption from "../../components/DropDown/MenuOption";
 import { useLocationSelector } from "../../hooks/useLocationSelector";
 import { heightPercentageToDP as hp } from "react-native-responsive-screen";
-import { useSaveUserLocation } from "../../hooks/useSaveUserLocation";
+import { useUserAddress } from "../../hooks/useSaveUserAddress";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
 import { StackScreenProps } from "@react-navigation/stack";
-import { LocationRequest } from "../../types/requests/locationRequest";
+import { AddressRequest } from "../../types/requests/addressRequest";
 import { StatusBar } from "expo-status-bar";
 import LocationDisplay from "../../components/Location/LocationDisplay";
 
@@ -38,27 +37,20 @@ type UserDeliveryAddressScreenProps = StackScreenProps<
 const UserDeliveryAddress = ({
   navigation,
 }: UserDeliveryAddressScreenProps) => {
-  const [loading, setLoading] = useState(false);
-  const defaultAddress = useSelector((x: any) => x.user.defaultAddress);
-  const { saveLocation } = useSaveUserLocation();
   const userId = useSelector((x: any) => x?.user?.userInfo.id);
-  const [addressType, setAddressType] = useState<string>("");
+  const { saveAddress, loading } = useUserAddress();
   const isOpen = useSharedValue(false);
 
-  const [savedAddress, setSavedAddress] = useState<LocationRequest>({
-    userId: defaultAddress.userId,
-    governorate: defaultAddress.governorate,
+  const [savedAddress, setSavedAddress] = useState<AddressRequest>({
+    type: "HOME",
     street: "",
-    block: defaultAddress.block,
-    city: defaultAddress.city,
-    phone: "",
-    building: "",
-    country: defaultAddress.country,
+    apartmentNumber: "",
+    contactPhone: "",
   });
 
-  const handleChange = (text: string, field: keyof LocationRequest) => {
+  const handleChange = (text: string, field: keyof AddressRequest) => {
     setSavedAddress((prev) => ({
-      ...(prev as LocationRequest),
+      ...prev,
       [field]: text,
     }));
   };
@@ -89,50 +81,28 @@ const UserDeliveryAddress = ({
     setBlockVisible,
   } = useLocationSelector();
 
-  useEffect(() => {
-    console.log(
-      "this is the governorate city or block",
-      governorate,
-      city,
-      block,
-    );
-  }, [governorate, city, block]);
-
   const onSaveAddress = () => {
-    saveLocation({
+    if (!savedAddress.type) {
+      Alert.alert("Error", "Please select an address type");
+      return;
+    }
+
+    saveAddress({
       payload: {
+        ...savedAddress,
         userId,
-        governorate: governorate?.id,
-        city: city?.id,
-        block: block?.id,
-        country: "Kuwait",
-        street: savedAddress.street,
-        building: savedAddress.building,
-      },
+      } as AddressRequest,
       onSuccess: () => {
         navigation.reset({
           index: 0,
           routes: [{ name: "DrawerNavigation" }],
         });
       },
-      onError: () => {
-        Alert.alert("Error", "Failed to save address");
+      onError: (error) => {
+        Alert.alert("Error", error || "Failed to save address");
       },
     });
   };
-
-  useEffect(() => {
-    console.log("default address from here", defaultAddress);
-  }, [savedAddress]);
-
-  useEffect(() => {
-    console.log(
-      "city address and block",
-      city?.name,
-      block?.name,
-      governorate?.name,
-    );
-  }, []);
 
   return (
     <>
@@ -199,25 +169,22 @@ const UserDeliveryAddress = ({
                   onChangeText={(value) => handleChange(value, "street")}
                   variant="dark"
                   placeholder="Street"
+                  value={savedAddress.street || ""}
                 />
                 <Input
-                  onChangeText={(value) => handleChange(value, "phone")}
+                  onChangeText={(value) => handleChange(value, "apartmentNumber")}
+                  variant="dark"
+                  placeholder="Apartment / Flat number"
+                  keyboardType="numeric"
+                  value={savedAddress.apartmentNumber || ""}
+                />
+                <Input
+                  onChangeText={(value) => handleChange(value, "contactPhone")}
                   variant="dark"
                   placeholder="Phone"
+                  keyboardType="phone-pad"
+                  value={savedAddress.contactPhone || ""}
                 />
-                <Input
-                  onChangeText={(value) => handleChange(value, "building")}
-                  multiline={true}
-                  numberOfLines={5}
-                  variant="dark"
-                  placeholder="Flat / House no / Building name *"
-                />
-                {/* <Input
-                multiline={true}
-                numberOfLines={5}
-                variant="dark"
-                placeholder="Directions to reach"
-              /> */}
               </View>
 
               <View>
@@ -227,20 +194,37 @@ const UserDeliveryAddress = ({
                   </Text>
                 </View>
                 <View style={{ flexDirection: "row", gap: 10 }}>
-                  <View style={styles.buttonView}>
-                    <TouchableOpacity style={{flexDirection : 'row',gap :5,alignItems : 'center'}} onPress={() => setAddressType("Home")}>
+                  <View style={[
+                    styles.buttonView,
+                    savedAddress.type === "HOME" && styles.buttonViewActive
+                  ]}>
+                    <TouchableOpacity 
+                      style={{flexDirection : 'row',gap :5,alignItems : 'center'}} 
+                      onPress={() => handleChange("HOME", "type")}
+                    >
                        <Image style={{width : 13,height : 13}} source={require('../../assets/images/icons/homeltst.png')}/>
                       <Text style={styles.buttonText}>Home</Text>
                     </TouchableOpacity>
                   </View>
-                  <View style={styles.buttonView}>
-                    <TouchableOpacity style={{flexDirection : 'row',gap :5}} onPress={() => setAddressType("Work")}>
+                  <View style={[
+                    styles.buttonView,
+                    savedAddress.type === "WORK" && styles.buttonViewActive
+                  ]}>
+                    <TouchableOpacity 
+                      style={{flexDirection : 'row',gap :5}} 
+                      onPress={() => handleChange("WORK", "type")}
+                    >
                       <Image style={{width : 13,height : 13}} source={require('../../assets/images/icons/briefcase.png')}/>
                       <Text style={styles.buttonText}>Work</Text>
                     </TouchableOpacity>
                   </View>
-                  <View style={styles.buttonView}>
-                    <TouchableOpacity onPress={() => setAddressType("Other")}>
+                  <View style={[
+                    styles.buttonView,
+                    savedAddress.type === "OTHER" && styles.buttonViewActive
+                  ]}>
+                    <TouchableOpacity 
+                      onPress={() => handleChange("OTHER", "type")}
+                    >
                       <Text style={styles.buttonText}>Other</Text>
                     </TouchableOpacity>
                   </View>
@@ -251,16 +235,14 @@ const UserDeliveryAddress = ({
 
           <View style={{ marginVertical: 10 }}>
             {loading ? (
-              <ActivityIndicator size="large" color={COLORS.primary} />
+              <ActivityIndicator size="large" color="#000" />
             ) : (
               <Button
                 variant="decorate"
                 text={"black"}
                 color={"white"}
                 title="Save Address"
-                onPress={() => {
-                  onSaveAddress();
-                }}
+                onPress={onSaveAddress}
               />
             )}
           </View>
@@ -408,6 +390,10 @@ const styles = StyleSheet.create({
     borderColor: "#FFFFFF",
     borderWidth: 1,
   },
+  buttonViewActive: {
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
+    borderWidth: 2,
+  },
   triggerStyle: {
     width: "100%",
     height: 48,
@@ -428,45 +414,5 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontFamily : 'Lato-Regular',
     fontSize : 13
-  },
-
-  flex: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-    height: 250,
-  },
-  buttonContainer: {
-    marginTop: 16,
-    display: "flex",
-    flexDirection: "row",
-    width: "100%",
-    justifyContent: "space-around",
-  },
-  toggleButton: {
-    backgroundColor: "#b58df1",
-    padding: 12,
-    borderRadius: 48,
-  },
-  toggleButtonText: {
-    color: "white",
-    padding: 1,
-  },
-  safeArea: {
-    alignItems: "center",
-    justifyContent: "center",
-    flex: 1,
-  },
-  bottomSheetButton: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingBottom: 2,
-  },
-  bottomSheetButtonText: {
-    fontWeight: 600,
-    textDecorationLine: "underline",
   },
 });
