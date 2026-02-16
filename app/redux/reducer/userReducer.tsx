@@ -169,6 +169,29 @@ export const updateUserAddress = createAsyncThunk<
   }
 );
 
+export const deleteUserAddress = createAsyncThunk<
+  any,
+  string,
+  { rejectValue: string }
+>(
+  "user/deleteUserAddress",
+  async (id: string, { getState, rejectWithValue }) => {
+    console.log("reached delete address thunk successfully", id);
+
+    try {
+      const response = await apiPath.del(`${Url}/api/addresses/${id}`);
+      console.log("deleted address from api", response.data);
+
+      return response.data; // Returns { id }
+    } catch (error: any) {
+      console.log(error.message);
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to delete address"
+      );
+    }
+  }
+);
+
 
 export const userSlice = createSlice({
   name: "user",
@@ -277,6 +300,24 @@ export const userSlice = createSlice({
       .addCase(updateUserAddress.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload || "Failed to update address";
+      })
+      .addCase(deleteUserAddress.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(deleteUserAddress.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        console.log("deleted address payload", action.payload);
+        // Filter out the deleted address by id
+        if (action.payload?.id) {
+          state.addresses = state.addresses.filter(
+            (addr) => addr.id !== action.payload.id
+          );
+        }
+      })
+      .addCase(deleteUserAddress.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload || "Failed to delete address";
       })
       .addCase(PURGE, (state, action) => {
         state.status = "failed";

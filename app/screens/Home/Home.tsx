@@ -40,6 +40,8 @@ import LocationSelectionView from "../../components/BottomSheet/LocationSelectio
 import { widthPercentageToDP as wp } from "react-native-responsive-screen";
 import HomeHeader from "../../components/Home/HomeHeader";
 import CategoryCard from "../../components/Home/CategoryCard";
+import { useUserAddress } from "../../hooks/useSaveUserAddress";
+import { Alert } from "react-native";
 
 const apiPath = ApiClient();
 
@@ -47,6 +49,7 @@ type HomeScreenProps = StackScreenProps<RootStackParamList, "Home">;
 
 const Home = ({ navigation }: HomeScreenProps) => {
   const addresses = useSelector((x: any) => x?.user?.addresses || []);
+  const { deleteAddress, loading: deleteLoading } = useUserAddress();
   const isOpen = useSharedValue(false);
   const isOpenEdit = useSharedValue(false);
   const [banner, setBanner] = useState<any>({});
@@ -337,7 +340,31 @@ const Home = ({ navigation }: HomeScreenProps) => {
                 setView("EDIT");
               }}
               onRemove={(address) => {
-                // Handle remove action
+                Alert.alert(
+                  "Delete Address",
+                  "Are you sure you want to delete this address?",
+                  [
+                    {
+                      text: "Cancel",
+                      style: "cancel",
+                    },
+                    {
+                      text: "Delete",
+                      style: "destructive",
+                      onPress: () => {
+                        deleteAddress({
+                          id: address.id,
+                          onSuccess: () => {
+                            // Address will be removed from Redux state automatically
+                          },
+                          onError: (error) => {
+                            Alert.alert("Error", error || "Failed to delete address");
+                          },
+                        });
+                      },
+                    },
+                  ]
+                );
               }}
               onAddNew={() => {
                 setEditingAddress(null); // Clear editing address (add new mode)
