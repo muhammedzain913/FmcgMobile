@@ -261,6 +261,9 @@ export const userSlice = createSlice({
         state.status = "succeeded";
         console.log("location payload", action.payload);
         state.defaultAddress = action.payload;
+        // Clear addresses when location changes (governorate/city/block changed)
+        // Old addresses are no longer valid for the new location
+        state.addresses = [];
       })
       .addCase(saveUserLocation.rejected, (state, action) => {
         state.status = "failed";
