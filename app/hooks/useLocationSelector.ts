@@ -63,9 +63,9 @@ export const useLocationSelector = () => {
   useEffect(() => {
   if (!defaultAddress) return;
 
-  setGovernorate(defaultAddress.governorate);
-  setCity(defaultAddress.city);
-  setBlock(defaultAddress.block);
+  setGovernorate(defaultAddress?.governorate);
+  setCity(defaultAddress?.city);
+  setBlock(defaultAddress?.block);
 }, [defaultAddress]);
 
 
