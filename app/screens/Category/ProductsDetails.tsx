@@ -6,7 +6,6 @@ import { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  addToCart,
   decrementQuantity,
   incrementQuantity,
   selectCartItemById,
@@ -14,7 +13,7 @@ import {
 import { addTowishList } from "../../redux/reducer/wishListReducer";
 import { Url } from "../../redux/userConstant";
 import { ApiClient } from "../../redux/api";
-import { Product } from "../../types/product";
+import { Product, Variant } from "../../types/product";
 import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -25,6 +24,8 @@ import { GlobalStyleSheet } from "../../constants/StyleSheet";
 import SectionContainer from "../../components/Home/SectionContainer";
 import SectionHeader from "../../components/Home/SectionHeader";
 import { widthPercentageToDP as wp } from "react-native-responsive-screen";
+import { calculateDiscountPercentage } from "../../utils/calculateDiscountPercentage";
+import { useAddToCart } from "../../hooks/useAddToCart";
 
 const apiPath = ApiClient();
 
@@ -65,12 +66,14 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
   const [activeSize, setActiveSize] = useState(productSizes[0]);
 
   const [product, setproduct] = useState<Product | null>(null);
+  const cartItem = useSelector(selectCartItemById(product?.id || ""));
+  const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
 
   const productColors = ["#BAA488", "#5F75C5", "#C58F5E", "#919191"];
 
   const [activeColor, setActiveColor] = useState(productColors[0]);
 
-  const isStockExist = product?.productStock ?? 0 > 0;
+  // const isStockExist = product?.productStock ?? 0 > 0;
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -82,7 +85,14 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
   const [activeTab, setActiveTab] = useState("Description");
   const [expanded, setExpanded] = useState(false);
 
-  const cartItem = useSelector(selectCartItemById(product?.id || ""));
+
+  useEffect(() =>{
+    console.log("cart item in details page rere", cartItem);
+  },[cartItem])
+
+  useEffect(() =>{
+      setSelectedVariant(product?.variants?.find((variant) => variant.id === cartItem?.variantId) || product?.variants?.[0] || null);
+  },[product,cartItem])
 
   useEffect(() => {
     console.log("is there in the cart", cartItem, productId);
@@ -91,8 +101,8 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
         const response = await apiPath.get(
           `${Url}/api/products/product/${productId}`,
         );
-        console.log("banner api", response.data);
-        setproduct(response.data);
+        const productData = response.data?.data || response.data;
+        setproduct(productData);
       } catch (error: any) {
         setError(error.message || "Something went wrong");
       } finally {
@@ -102,6 +112,15 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
     fetchProduct();
   }, []);
 
+  // Debug: Log product state whenever it changes
+  useEffect(() => {
+    if (product) {
+      console.log("Product state updated:", product);
+      console.log("Selected variant:", selectedVariant);
+      console.log("Product variants length:", product.variants?.length);
+    }
+  }, [product, selectedVariant]);
+
   const addItemToWishList = () => {
     const selectedImage = swiperimageData[currentSlide].image;
 
@@ -109,7 +128,7 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
       addTowishList({
         image: product?.imageUrl,
         title: product?.title,
-        price: product?.salePrice,
+        price: product?.variants?.[0]?.salePrice,
         color: false,
         hascolor: true,
       } as any),
@@ -160,6 +179,7 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
     "Lorem ipsum dolor sit amet consectetur. Quam diam elementum lacus vulputate tortor rhoncus at. Nulla sit a dictum tellus sit ac amet diam. Vestibulum fringilla arcu nullam at sagittis. At vitae dolor quisque vivamus et maecenas ut. Lectus vel fermentum tempor laoreet phasellus. Neque imperdiet pharetra vestibulum ut sit eu cras ultricies. In sit eget habitant pharetra sagittis sed senectus egestas. Quam vel ut eget ultricies non in phasellus mauris.Ut risus egestas enim cursus odio adipiscing. Nisl suscipit l Lorem ipsum dolor sit amet consectetur. Quam diam elementum lacus vulputate tortor rhoncus at. Nulla sit a dictum tellus sit ac amet diam. Vestibulum fringilla arcu nullam at sagittis. At vitae dolor quisque vivamus et maecenas ut. Lectus vel fermentum tempor laoreet phasellus. Neque imperdiet pharetra vestibulum ut sit eu cras ultricies. In sit eget habitant pharetra sagittis sed senectus egestas. Quam vel ut eget ultricies non in phasellus mauris.Ut risus egestas enim cursus odio adipiscing. Nisl suscipit l";
 
   const [textExceeds, setTextExceeds] = useState(false);
+  const addItemToCart = useAddToCart();
 
   return (
     <SafeAreaView
@@ -269,80 +289,57 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
 
             <View style={{ gap: 20 }}>
               <View style={{ flexDirection: "row", gap: 10 }}>
-                <View style={styles.offerContainer}>
-                  <Text
-                    style={{
-                      fontSize: 13,
-                      color: "#000000",
-                      fontFamily: "Lato-Regular",
-                    }}
-                  >
-                    {product?.unit} Kg
-                  </Text>
-                  <View style={GlobalStyleSheet.priceContainer}>
-                    <Text style={GlobalStyleSheet.salePrice}>
-                      KD {product?.salePrice}
-                    </Text>
-                    <Text style={GlobalStyleSheet.originalPrice}>
-                      KD {product?.salePrice}
-                    </Text>
-                  </View>
-                  <Text style={GlobalStyleSheet.discountBadge}> 50% OFF</Text>
-                </View>
-
-                <View
-                  style={{
-                    ...styles.offerContainer,
-                    borderColor: "#F0F0F0",
-                    backgroundColor: "#fff",
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontSize: 13,
-                      color: "#000000",
-                      fontFamily: "Lato-Regular",
-                    }}
-                  >
-                    {product?.unit} Kg
-                  </Text>
-                  <View style={GlobalStyleSheet.priceContainer}>
-                    <Text style={GlobalStyleSheet.salePrice}>
-                      KD {product?.salePrice}
-                    </Text>
-                    <Text style={GlobalStyleSheet.originalPrice}>
-                      KD {product?.salePrice}
-                    </Text>
-                  </View>
-                  <Text style={GlobalStyleSheet.discountBadge}> 50% OFF</Text>
-                </View>
-
-                <View
-                  style={{
-                    ...styles.offerContainer,
-                    borderColor: "#F0F0F0",
-                    backgroundColor: "#fff",
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontSize: 13,
-                      color: "#000000",
-                      fontFamily: "Lato-Regular",
-                    }}
-                  >
-                    {product?.unit} Kg
-                  </Text>
-                  <View style={GlobalStyleSheet.priceContainer}>
-                    <Text style={GlobalStyleSheet.salePrice}>
-                      KD {product?.salePrice}
-                    </Text>
-                    <Text style={GlobalStyleSheet.originalPrice}>
-                      KD {product?.salePrice}
-                    </Text>
-                  </View>
-                  <Text style={GlobalStyleSheet.discountBadge}> 50% OFF</Text>
-                </View>
+                {product?.variants?.map((variant: Variant, index: number) => {
+                  return (
+                    <View
+                      style={{
+                        ...styles.offerContainer,
+                        backgroundColor:
+                          selectedVariant?.id === variant.id
+                            ? "#059B5D08"
+                            : "#fff",
+                        borderColor:
+                          selectedVariant?.id === variant.id
+                            ? "#059B5D"
+                            : "#E0E0E0",
+                      }}
+                      key={index}
+                    >
+                      <TouchableOpacity
+                        onPress={() => setSelectedVariant(variant)}
+                      >
+                        <View style={{ gap: 10 }}>
+                          <Text
+                            style={{
+                              fontSize: 13,
+                              color: "#000000",
+                              fontFamily: "Lato-Regular",
+                            }}
+                          >
+                            {variant?.quantity} {product?.unit}
+                          </Text>
+                          <View style={GlobalStyleSheet.priceContainer}>
+                            <Text style={GlobalStyleSheet.salePrice}>
+                              KD {variant?.salePrice}
+                            </Text>
+                            <Text style={GlobalStyleSheet.originalPrice}>
+                              KD {variant?.price}
+                            </Text>
+                          </View>
+                          {variant?.price > variant?.salePrice && (
+                            <Text style={GlobalStyleSheet.discountBadge}>
+                              {calculateDiscountPercentage(
+                                variant?.price,
+                                variant?.salePrice,
+                              )}
+                              % OFF
+                            </Text>
+                          )}
+                        </View>
+                      </TouchableOpacity>
+                    </View>
+                  );
+                })}
               </View>
 
               <View style={{ flexDirection: "row", gap: 10 }}>
@@ -353,7 +350,7 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
                     fontSize: 15,
                   }}
                 >
-                  KD {product?.salePrice}
+                  KD {selectedVariant?.salePrice}
                 </Text>
                 <Text
                   style={{
@@ -364,18 +361,24 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
                     textDecorationLine: "line-through",
                   }}
                 >
-                  KD {product?.salePrice}
+                  KD {selectedVariant?.price}
                 </Text>
 
-                <Text
-                  style={{
-                    ...styles.itemDescription,
-                    color: "#008A19",
-                    fontFamily: "Lato-SemiBold",
-                  }}
-                >
-                  50% OFF
-                </Text>
+                {selectedVariant?.price > selectedVariant?.salePrice && (
+                  <Text
+                    style={{
+                      ...styles.itemDescription,
+                      color: "#008A19",
+                      fontFamily: "Lato-SemiBold",
+                    }}
+                  >
+                    {calculateDiscountPercentage(
+                      selectedVariant?.price,
+                      selectedVariant?.salePrice,
+                    )}
+                    % OFF
+                  </Text>
+                )}
               </View>
             </View>
           </View>
@@ -528,7 +531,7 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
             showsHorizontalScrollIndicator={false}
             nestedScrollEnabled={true}
           >
-            {DUMMY_PRODUCTS?.map((data: any) => {
+            {/* {DUMMY_PRODUCTS?.map((data: any) => {
               return (
                 <ProductCard
                   key={data.id || data.slug}
@@ -542,7 +545,7 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
                   }}
                 />
               );
-            })}
+            })} */}
           </ScrollView>
         </SectionContainer>
       </ScrollView>
@@ -580,7 +583,16 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
                   paddingHorizontal: 20,
                 }}
               >
-                <TouchableOpacity style={{marginTop : 10}} onPress={() => {incrementQuantity()}}>
+                <TouchableOpacity
+                  style={{ marginTop: 10 }}
+                  onPress={() => {
+                    console.log(
+                      "decrementing quantity for product ID:",
+                      product?.id,
+                    );
+                    dispatch(decrementQuantity({ id: product?.id }));
+                  }}
+                >
                   <Image
                     style={{ width: 10, height: 10 }}
                     source={require("../../assets/images/icons/subtract.png")}
@@ -596,7 +608,11 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
                 >
                   {cartItem.quantity}
                 </Text>
-                <TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    dispatch(incrementQuantity({ id: product?.id }));
+                  }}
+                >
                   <Image
                     style={{ width: 10, height: 15 }}
                     source={require("../../assets/images/icons/add.png")}
@@ -606,19 +622,8 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
             ) : (
               <TouchableOpacity
                 onPress={() => {
-                  if (product) {
-                    dispatch(
-                      addToCart({
-                        id: product.id,
-                        image: product.imageUrl,
-                        title: product.title,
-                        price: product?.salePrice,
-                        slug: product.slug,
-                        color: false,
-                        hascolor: false,
-                        vendorId: product.userId,
-                      } as any),
-                    );
+                  if (product && selectedVariant) {
+                    addItemToCart(product, selectedVariant);
                   }
                 }}
                 style={{ width: "100%", alignItems: "center" }}
@@ -747,8 +752,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: "rgba(217,217,217,1)",
     padding: 8,
-    justifyContent : 'center',
-    alignItems : 'center'
+    justifyContent: "center",
+    alignItems: "center",
   },
   itemDescription: {
     fontFamily: "Lato-Medium",
