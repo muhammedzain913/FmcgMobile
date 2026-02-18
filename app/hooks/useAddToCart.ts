@@ -1,6 +1,7 @@
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../redux/store";
 import { addToCart } from "../redux/reducer/cartReducer";
+import { Product, Variant } from "../types/product";
 
 /**
  * Custom hook for adding products to cart
@@ -20,15 +21,17 @@ import { addToCart } from "../redux/reducer/cartReducer";
 export const useAddToCart = () => {
   const dispatch = useDispatch<AppDispatch>();
 
-  const addItemToCart = (product: any) => {
+  const addItemToCart = (product: Product,selectedVariant: Variant) => {
     console.log("adding items..");
     dispatch(
       addToCart({
-        id: product?.id,
+        id: product?.id,  
         image: product?.imageUrl,
         title: product?.title,
-        price: product?.salePrice,
+        price: selectedVariant?.salePrice,
+        productPrice: selectedVariant?.price,
         slug: product?.slug,
+        variantId : selectedVariant.id,
         color: false,
         hascolor: false,
         vendorId: product?.userId,
