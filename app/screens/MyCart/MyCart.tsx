@@ -1,5 +1,5 @@
 import { useTheme } from "@react-navigation/native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   Image,
   StyleSheet,
   useWindowDimensions,
+  Alert,
 } from "react-native";
 import { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
@@ -30,23 +31,51 @@ import SectionContainer from "../../components/Home/SectionContainer";
 import SectionHeader from "../../components/Home/SectionHeader";
 import { useAddToCart } from "../../hooks/useAddToCart";
 import { widthPercentageToDP as wp } from "react-native-responsive-screen";
+import Animated, { useSharedValue } from "react-native-reanimated";
+import LocationBottomSheet from "../../components/BottomSheet/LocationBottomSheet";
+import BottomSheetHeader from "../../components/BottomSheet/BottomSheetHeader";
+import AddressList from "../../components/BottomSheet/AddressList";
+import { useUserAddress } from "../../hooks/useSaveUserAddress";
+import UserDeliveryAddressDropDown from "../Location/UserDeliveryAddressDropDown";
+import LocationSelectionView from "../../components/BottomSheet/LocationSelectionView";
+import { useSaveUserLocation } from "../../hooks/useSaveUserLocation";
 
 type MyCartScreenProps = StackScreenProps<RootStackParamList, "MyCart">;
 
 const MyCart = ({ navigation }: MyCartScreenProps) => {
   const apiPath = ApiClient();
+  const addresses = useSelector((x: any) => x?.user?.addresses || []);
+  const { saveLocation, loading: locationLoading } = useSaveUserLocation();
   const user = useSelector((x: any) => x.user.userInfo);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const theme = useTheme();
   const { colors }: { colors: any } = theme;
-  const address = useSelector((x: any) => x.user.defaultAddress);
+  const userLocation = useSelector((x: any) => x.user.defaultAddress);
+  const selectedAddress = useSelector((x: any) => x.user.selectedAddress);
   const [products, setProducts] = useState<[]>();
   const [displayedProducts, setDisplayedProducts] = useState<any[]>();
   const cart = useSelector((state: any) => state.cart.cart);
   const [searchQuery, setSearchQuety] = useState<string>("");
   const { width } = useWindowDimensions();
+
+  const { deleteAddress, loading: deleteLoading } = useUserAddress();
+
+  const isOpen = useSharedValue(false);
+  const isOpenEdit = useSharedValue(false);
+
+  const [view, setView] = useState<"LIST" | "EDIT" | "LOCATION">("LIST");
+  const [editingAddress, setEditingAddress] = useState<any>(null); // Store address being edited
+  const toggleSheet = () => {
+    isOpen.value = !isOpen.value;
+  };
+
+  const toggleSheetEdit = () => {
+    isOpenEdit.value = !isOpenEdit.value;
+  };
+
+  const sheetRef = useRef<any>(null);
 
   const removeItemFromCart = (data: any) => {
     dispatch(removeFromCart(data));
@@ -65,7 +94,27 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
     console.log("first item", cart[0]);
   });
 
-  const { governorate, city, block } = useLocationSelector();
+  const {
+    governorates,
+    cities,
+    blocks,
+
+    governorate,
+    city,
+    block,
+
+    setGovernorate,
+    setCity,
+    setBlock,
+
+    govVisible,
+    cityVisible,
+    blockVisible,
+
+    setGovVisible,
+    setCityVisible,
+    setBlockVisible,
+  } = useLocationSelector();
 
   const OFFERS = [
     {
@@ -87,6 +136,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
       id: x.id,
       vendorId: x.vendorId,
       qty: x.quantity,
+      variantId: x.variantId,
       salePrice: x.price,
       imageUrl: x.image,
       title: x.title,
@@ -98,14 +148,14 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
     console.log("cartItems", orderItems);
     try {
       const checkoutFormData = {
-        userId: address.userId,
+        userId: user.id,
         email: user.email,
-        country: address.country,
-        city: address.city.name,
-        state: address.governorate.name, // governorate → state
-        block: address.block.name, // block → district
-        streetAddress: address.street, // street → streetAddress
-        phone: "7902242788",
+        country: userLocation.country,
+        city: userLocation.city.name,
+        state: userLocation.governorate.name, // governorate → state
+        block: userLocation.block.name, // block → district
+        streetAddress: userLocation.street, // street → streetAddress
+        phone: selectedAddress?.phone || user.phone, // Fallback to user phone or dummy if selectedAddress is missing
         paymentMethod: "Cash On Delivery",
       };
 
@@ -123,12 +173,12 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
   };
 
   useEffect(() => {
-    if (!address) return;
-    if (!address.governorate) return;
+    if (!userLocation) return;
+    if (!userLocation.governorate) return;
     const fetchProducts = async () => {
       try {
         const response = await apiPath.get(
-          `${Url}/api/products?gov=${address.governorate.name}&city=${address.city.name}&block=${address.block.name}&search =${searchQuery}`,
+          `${Url}/api/products?gov=${userLocation.governorate.name}&city=${userLocation.city.name}&block=${userLocation.block.name}&search =${searchQuery}`,
         );
         console.log("product api", response.data.length);
         setProducts(response.data);
@@ -199,17 +249,16 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                 My Cart
               </Text>
             </View>
-         
           </View>
         </View>
 
-        <View style={{ paddingHorizontal: 20,gap :20 }}>
+        <View style={{ paddingHorizontal: 20, gap: 20 }}>
           <View
             style={{
               paddingHorizontal: 10,
               paddingVertical: 10,
               gap: 20,
-              borderRadius : 8,
+              borderRadius: 8,
               backgroundColor: "#ffff",
             }}
           >
@@ -222,7 +271,15 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                 borderRadius: 8,
               }}
             >
-              <Text style={{ color: "white", fontSize: 14,fontFamily : 'Lato-Bold' }}>15 mins</Text>
+              <Text
+                style={{
+                  color: "white",
+                  fontSize: 14,
+                  fontFamily: "Lato-Bold",
+                }}
+              >
+                15 mins
+              </Text>
             </LinearGradient>
             <View
               style={{ flexDirection: "row", gap: 10, alignItems: "center" }}
@@ -236,7 +293,10 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
               >
                 Delivering To
               </Text>
-              <Image style={{width : 15,height :15}} source={require("../../assets/images/icons/delivery-man.png")} />
+              <Image
+                style={{ width: 15, height: 15 }}
+                source={require("../../assets/images/icons/delivery-man.png")}
+              />
               <Image source={require("../../assets/images/line.png")} />
             </View>
 
@@ -267,7 +327,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                       color: "#141313",
                     }}
                   >
-                    {governorate?.name}
+                    {selectedAddress.type}
                   </Text>
                 </View>
 
@@ -280,22 +340,26 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                       color: "rgb(17, 17, 17)",
                     }}
                   >
-                    {city?.name} , Block {block?.name}
+                    Sreet {selectedAddress.street} , Apartment{" "}
+                    {selectedAddress.apartmentNumber} ,{" "}
+                    {selectedAddress.contactPhone}
                   </Text>
                 </View>
               </View>
 
-              <View
-                style={{
-                  borderWidth: 1,
-                  borderBlockColor: "black",
-                  paddingHorizontal: 15,
-                  paddingVertical: 5,
-                  borderRadius: 8,
-                }}
-              >
-                <Text>Change</Text>
-              </View>
+              <TouchableOpacity onPress={toggleSheet}>
+                <View
+                  style={{
+                    borderWidth: 1,
+                    borderBlockColor: "black",
+                    paddingHorizontal: 15,
+                    paddingVertical: 5,
+                    borderRadius: 8,
+                  }}
+                >
+                  <Text>Change</Text>
+                </View>
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -326,7 +390,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
 
                     <View style={styles.priceRow}>
                       <Text style={styles.price}>{item.price}</Text>
-                      <Text style={styles.strike}>₹789</Text>
+                      <Text style={styles.strike}>{item.productPrice}</Text>
                     </View>
                   </View>
 
@@ -598,6 +662,145 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
         </View>
       </ScrollView>
 
+
+      
+        <LocationBottomSheet isOpen={isOpen} toggleSheet={toggleSheet}>
+          {view === "LIST" && (
+            <Animated.View style={styles.bottomSheetContent}>
+              <BottomSheetHeader title="CHANGE ADDRESS" onClose={toggleSheet} />
+              <AddressList
+                addresses={addresses}
+                onEdit={(address) => {
+                  setEditingAddress(address); // Set the address to be edited
+                  toggleSheetEdit();
+                  setView("EDIT");
+                }}
+                onRemove={(address) => {
+                  Alert.alert(
+                    "Delete Address",
+                    "Are you sure you want to delete this address?",
+                    [
+                      {
+                        text: "Cancel",
+                        style: "cancel",
+                      },
+                      {
+                        text: "Delete",
+                        style: "destructive",
+                        onPress: () => {
+                          deleteAddress({
+                            id: address.id,
+                            onSuccess: () => {
+                              // Address will be removed from Redux state automatically
+                            },
+                            onError: (error) => {
+                              Alert.alert(
+                                "Error",
+                                error || "Failed to delete address",
+                              );
+                            },
+                          });
+                        },
+                      },
+                    ],
+                  );
+                }}
+                onAddNew={() => {
+                  setEditingAddress(null); // Clear editing address (add new mode)
+                  setView("EDIT");
+                }}
+              />
+            </Animated.View>
+          )}
+
+          {view === "EDIT" && (
+            <Animated.View style={{ ...styles.bottomSheetContent, gap: 40 }}>
+              <BottomSheetHeader title="CHANGE ADDRESS" onClose={toggleSheet} />
+              <UserDeliveryAddressDropDown
+                addressToEdit={editingAddress} // Pass address if editing, null if adding new
+                onChangeLocation={() => {
+                  setView("LOCATION");
+                }}
+              />
+            </Animated.View>
+          )}
+
+          {view === "LOCATION" && (
+            <Animated.View
+              style={{
+                ...styles.bottomSheetContent,
+                justifyContent: "space-between",
+                gap: 15,
+              }}
+            >
+              <BottomSheetHeader title="CHANGE ADDRESS" onClose={toggleSheet} />
+              <View style={{ flex: 1, justifyContent: "space-between" }}>
+                <LocationSelectionView
+                  governorates={governorates}
+                  cities={cities}
+                  blocks={blocks}
+                  governorate={governorate}
+                  city={city}
+                  block={block}
+                  govVisible={govVisible}
+                  cityVisible={cityVisible}
+                  blockVisible={blockVisible}
+                  onGovOpen={() => setGovVisible(true)}
+                  onGovClose={() => setGovVisible(false)}
+                  onCityOpen={() => setCityVisible(true)}
+                  onCityClose={() => setCityVisible(false)}
+                  onBlockOpen={() => setBlockVisible(true)}
+                  onBlockClose={() => setBlockVisible(false)}
+                  onGovernorateSelect={(item) => {
+                    setGovernorate(item);
+                    setCity(null);
+                    setBlock(null);
+                  }}
+                  onCitySelect={(item) => {
+                    setCity(item);
+                    setCityVisible(false);
+                    setBlock(null);
+                  }}
+                  onBlockSelect={(item) => {
+                    setBlock(item);
+                    setBlockVisible(false);
+                  }}
+                  onContinue={() => {
+                    if (!governorate || !city || !block) {
+                      Alert.alert(
+                        "Error",
+                        "Please select governorate, city, and block",
+                      );
+                      return;
+                    }
+
+                    saveLocation({
+                      payload: {
+                        userId : user.id,
+                        governorate: governorate.id,
+                        city: city.id,
+                        block: block.id,
+                        country: "Kuwait",
+                      },
+                      onSuccess: () => {
+                        isOpen.value = false;
+                        setView("EDIT"); // Go back to EDIT view after saving location
+                        navigation.navigate("Home"); // Refresh cart screen to reflect new location
+                      },
+                      onError: (error) => {
+                        Alert.alert(
+                          "Error",
+                          error || "Failed to save location",
+                        );
+                      },
+                    });
+                  }}
+                />
+              </View>
+            </Animated.View>
+          )}
+        </LocationBottomSheet>
+
       <View
         style={{
           backgroundColor: "rgba(255, 255, 255, 1)",
@@ -638,6 +841,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
             <Text>Change</Text>
           </View>
         </View>
+
 
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <View style={{ gap: 10 }}>
@@ -774,5 +978,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+  },
+  bottomSheetContent: {
+    flex: 1,
+    backgroundColor: "white",
+    // gap: 10,
+    paddingBottom: 5,
+    paddingHorizontal: 20,
+    paddingTop: 50,
   },
 });
