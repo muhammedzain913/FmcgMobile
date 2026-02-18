@@ -19,9 +19,7 @@ import { ApiClient } from "../../redux/api";
 import { Url } from "../../redux/userConstant";
 import { useLocationSelector } from "../../hooks/useLocationSelector";
 import { LinearGradient } from "expo-linear-gradient";
-import {
-  SafeAreaView,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import ProductCard from "../Product/ProductCard";
 import { selectCartTotalQuantity } from "../../redux/reducer/cartReducer";
@@ -55,12 +53,19 @@ const Home = ({ navigation }: HomeScreenProps) => {
   const { saveLocation, loading: locationLoading } = useSaveUserLocation();
   const isOpen = useSharedValue(false);
   const isOpenEdit = useSharedValue(false);
-  const [banner, setBanner] = useState<any>({});
+  const [banner, setBanner] = useState<{
+    title?: string;
+    subtitle?: string;
+    buttonText?: string;
+    link?: string;
+    imageUrl?: string;
+    isActive?: boolean;
+  } | null>(null);
   const address = useSelector((x: any) => x.user.defaultAddress);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [products, setProducts] = useState<[]>();
-  const [brands, setBrands] = useState<[]>(); 
+  const [brands, setBrands] = useState<[]>();
   const [categories, setCategories] = useState<[]>();
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [displayedProducts, setDisplayedProducts] = useState<any[]>();
@@ -101,20 +106,28 @@ const Home = ({ navigation }: HomeScreenProps) => {
   } = useLocationSelector();
 
   useEffect(() => {
-    const fetcchBanner = async () => {
+    const fetchBanner = async () => {
       try {
         const response = await apiPath.get(`${Url}/api/banners`);
         console.log("banner api", response.data);
-        setBanner(response.data[1]);
+        // Find the first active banner, or use the first one if no active banner
+        const activeBanner = Array.isArray(response.data)
+          ? response.data.find((b: any) => b.isActive) || response.data[0]
+          : response.data;
+        setBanner(activeBanner || null);
       } catch (error: any) {
+        console.error("Error fetching banner:", error);
         setError(error.message || "Something went wrong");
       } finally {
         setLoading(false);
       }
     };
-    fetcchBanner();
+    fetchBanner();
   }, []);
 
+  useEffect(() => {
+    console.log("addresses stored in redux", addresses);
+  });
   useEffect(() => {
     if (!address) return;
     if (!address.governorate) return;
@@ -133,7 +146,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
       }
     };
     fetchProducts();
-  }, [searchQuery,governorate, city, block]);
+  }, [searchQuery, governorate, city, block]);
 
   useEffect(() => {
     const setDealProducts = async () => {
@@ -182,7 +195,6 @@ const Home = ({ navigation }: HomeScreenProps) => {
     fetchBrands();
   }, []);
 
-
   const theme = useTheme();
   const { colors }: { colors: any } = theme;
 
@@ -218,19 +230,43 @@ const Home = ({ navigation }: HomeScreenProps) => {
               style={{ padding: 20 }}
               source={require("../../assets/images/bg.png")}
             >
-              <View style={styles.bannerContainer}>
-                <View>
-                  <Text style={styles.bannerTitle}>Grocery Kit -</Text>
-                  <Text style={styles.bannerSubtitle}>Flat 50% Off!</Text>
-                  <View style={styles.knowMoreButton}>
-                    <Text style={styles.knowMoreText}>KNOW MORE</Text>
+              {banner && (
+                <View style={styles.bannerContainer}>
+                  <View>
+                    {banner.title && (
+                      <Text style={styles.bannerTitle}>{banner.title}</Text>
+                    )}
+                    {banner.subtitle && (
+                      <Text style={styles.bannerSubtitle}>
+                        {banner.subtitle}
+                      </Text>
+                    )}
+                    {banner.buttonText && (
+                      <TouchableOpacity
+                        style={styles.knowMoreButton}
+                        onPress={() => {
+                          if (banner.link) {
+                            // Handle navigation based on link
+                            console.log("Banner link:", banner.link);
+                            // You can add navigation logic here if needed
+                          }
+                        }}
+                      >
+                        <Text style={styles.knowMoreText}>
+                          {banner.buttonText}
+                        </Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
+                  {banner.imageUrl && (
+                    <Image
+                      style={styles.bannerImage}
+                      source={{ uri: banner.imageUrl }}
+                      resizeMode="contain"
+                    />
+                  )}
                 </View>
-                <Image
-                  style={styles.bannerImage}
-                  source={require("../../assets/images/grocery.jpeg")}
-                />
-              </View>
+              )}
             </ImageBackground>
           </LinearGradient>
         </View>
@@ -318,9 +354,11 @@ const Home = ({ navigation }: HomeScreenProps) => {
                 <TouchableOpacity
                   onPress={() => navigation.navigate("ShopByBrand")}
                 >
-                  <Image 
-                    style={styles.brandImage} 
-                    source={{ uri: brand.image || brand.imageUrl || brand.logo }} 
+                  <Image
+                    style={styles.brandImage}
+                    source={{
+                      uri: brand.image || brand.imageUrl || brand.logo,
+                    }}
                     resizeMode="contain"
                   />
                 </TouchableOpacity>
@@ -363,12 +401,15 @@ const Home = ({ navigation }: HomeScreenProps) => {
                             // Address will be removed from Redux state automatically
                           },
                           onError: (error) => {
-                            Alert.alert("Error", error || "Failed to delete address");
+                            Alert.alert(
+                              "Error",
+                              error || "Failed to delete address",
+                            );
                           },
                         });
                       },
                     },
-                  ]
+                  ],
                 );
               }}
               onAddNew={() => {
@@ -433,7 +474,10 @@ const Home = ({ navigation }: HomeScreenProps) => {
                 }}
                 onContinue={() => {
                   if (!governorate || !city || !block) {
-                    Alert.alert("Error", "Please select governorate, city, and block");
+                    Alert.alert(
+                      "Error",
+                      "Please select governorate, city, and block",
+                    );
                     return;
                   }
 
@@ -443,7 +487,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
                       governorate: governorate.id,
                       city: city.id,
                       block: block.id,
-                      country : 'Kuwait'
+                      country: "Kuwait",
                     },
                     onSuccess: () => {
                       isOpen.value = false;
@@ -531,7 +575,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "white",
     // gap: 10,
-    paddingBottom:5,
+    paddingBottom: 5,
     paddingHorizontal: 20,
     paddingTop: 50,
   },
