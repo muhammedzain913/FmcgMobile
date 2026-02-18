@@ -8,7 +8,7 @@ import {
   View,
 } from "react-native";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
-import { Product } from "../../types/product";
+import { Product, Variant } from "../../types/product";
 import { NavigationProp } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -19,10 +19,11 @@ import {
   selectCartItemById,
 } from "../../redux/reducer/cartReducer";
 import { AppDispatch } from "../../redux/store";
+import { calculateDiscountPercentage } from "../../utils/calculateDiscountPercentage";
 
 type ProductCardProps = {
   product: Product;
-  addToCart: (product: any) => void;
+  addToCart: (product: any, selectedVariant: Variant) => void;
 
   navigation?: NavigationProp<RootStackParamList>; // Optional navigation prop
   containerStyle?: object; // Optional style for the outer container
@@ -32,6 +33,7 @@ const ProductCard = React.memo(
   ({ product, addToCart, navigation, containerStyle }: ProductCardProps) => {
     const insets = useSafeAreaInsets();
     const [isAdded, setIsAdded] = useState<boolean>(false);
+    const selectedVariant = product?.variants?.[0] || null; 
     const dispatch = useDispatch<AppDispatch>();
     const cartItem = useSelector(selectCartItemById(product.id));
 
@@ -130,7 +132,7 @@ const ProductCard = React.memo(
                   right: 0,
                 }}
                 onPress={(e) => {
-                  addToCart(product);
+                  addToCart(product,selectedVariant );
                   setIsAdded(true);
                   e.stopPropagation();
                 }}
@@ -168,8 +170,12 @@ const ProductCard = React.memo(
             >
               {product.title}
             </Text>
-            <Text style={styles.itemDescription}>{product.unit} KG</Text>
-            <Text style={{...styles.itemDescription,color : '#008A19',fontFamily : 'Lato-SemiBold'}}> 50% OFF</Text>
+            <Text style={styles.itemDescription}>{product.unit} {product.variants[0].quantity}</Text>
+            {product.variants[0].price > product.variants[0].salePrice && (
+              <Text style={{...styles.itemDescription,color : '#008A19',fontFamily : 'Lato-SemiBold'}}>
+                {calculateDiscountPercentage(product.variants[0].price, product.variants[0].salePrice)}% OFF
+              </Text>
+            )}
             <View style={{ flexDirection: "row",gap : 10 }}>
               <Text
                 style={{
@@ -178,7 +184,7 @@ const ProductCard = React.memo(
                   fontSize: 14,
                 }}
               >
-                KD {product.salePrice}
+                KD {product?.variants[0]?.salePrice}
               </Text>
               <Text
                 style={{
@@ -189,7 +195,7 @@ const ProductCard = React.memo(
                   textDecorationLine : 'line-through'
                 }}
               >
-                KD {product.salePrice}
+                KD {product.variants[0].price}
               </Text>
             </View>
           </View>
