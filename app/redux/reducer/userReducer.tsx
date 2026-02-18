@@ -32,8 +32,8 @@ type UserState = {
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
   defaultAddress: LocationResponse | null;
-  reuseDefaultAddress: boolean;
   addresses: AddressResponse[];
+  selectedAddress: AddressResponse | null;
 };
 
 const initialState: UserState = {
@@ -41,7 +41,7 @@ const initialState: UserState = {
   status: "idle",
   error: null,
   defaultAddress: null,
-  reuseDefaultAddress: false,
+  selectedAddress: null,
   addresses: [],
 };
 
@@ -201,24 +201,17 @@ export const userSlice = createSlice({
       state.userInfo.accessToken = action.payload.accessToken;
       state.userInfo.refreshToken = action.payload.refreshToken;
     },
-    saveDefaultAddress(state, action) {
-      state.defaultAddress = action.payload; // { fullName, phone, ... }
-      state.reuseDefaultAddress = false;
+    setSelectedAddress: (state, action) => {
+      state.selectedAddress = action.payload;
     },
-    setReuseDefaultAddress(state, action) {
-      state.reuseDefaultAddress = action.payload; // true when “Use the same location”
-    },
-    clearDefaultAddress(state) {
-      state.defaultAddress = null;
-      state.reuseDefaultAddress = false;
-    },
+ 
     logout(state) {
       // Reset to initial state
       state.userInfo = {};
       state.status = "idle";
       state.error = null;
       state.defaultAddress = null;
-      state.reuseDefaultAddress = false;
+      state.selectedAddress = null;
       state.addresses = [];
     },
   },
@@ -260,7 +253,8 @@ export const userSlice = createSlice({
         console.log("payload");
         state.status = "succeeded";
         console.log("location payload", action.payload);
-        state.defaultAddress = action.payload;
+        console.log("default address before api", action.payload.governorate, action.payload.city, action.payload.block);
+        state.defaultAddress = action.payload.data;
         // Clear addresses when location changes (governorate/city/block changed)
         // Old addresses are no longer valid for the new location
         state.addresses = [];
@@ -274,10 +268,11 @@ export const userSlice = createSlice({
       })
       .addCase(saveUserAddress.fulfilled, (state, action) => {
         state.status = "succeeded";
-        console.log("address payload", action.payload);
+        console.log("address payload", action.payload.data);
         // Add the new address to the addresses array
         if (action.payload?.data) {
           state.addresses.push(action.payload.data);
+          state.selectedAddress = action.payload.data; // Optionally set the newly added address as selected
         }
       })
       .addCase(saveUserAddress.rejected, (state, action) => {
@@ -328,7 +323,10 @@ export const userSlice = createSlice({
   },
 });
 
-export const { setToken, saveDefaultAddress, setReuseDefaultAddress, logout } =
+
+
+
+export const { setToken, logout } =
   userSlice.actions;
 
 export default userSlice.reducer;
