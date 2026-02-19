@@ -20,6 +20,7 @@ interface HomeHeaderProps {
   onLocationPress: () => void;
   searchQuery: string;
   onSearchChange: (text: string) => void;
+  searchPlaceholder?: string; // Optional dynamic placeholder (e.g., "Search 'Vegetables'")
 }
 
 const HomeHeader: React.FC<HomeHeaderProps> = ({
@@ -29,10 +30,45 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({
   onLocationPress,
   searchQuery,
   onSearchChange,
+  searchPlaceholder,
 }) => {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
   const { colors }: { colors: any } = theme;
+
+  // Function to get color for different categories
+  const getCategoryColor = (categoryName: string): string => {
+    const categoryColors: { [key: string]: string } = {
+      "Vegetables": "#FF6B35", // Orange/Red
+      "Fruits": "#4CAF50", // Green
+      "Vegetables & Fruits": "#FF6B35", // Orange/Red
+      "Electronics": "#2196F3", // Blue
+      "Dairy Products": "#FFC107", // Amber/Yellow
+      "Diary Products": "#FFC107", // Amber/Yellow
+      "Snacks": "#E91E63", // Pink
+      "Ice Cream": "#00BCD4", // Cyan
+      "Beverages": "#9C27B0", // Purple
+      "Meat": "#F44336", // Red
+      "Bakery": "#FF9800", // Deep Orange
+      "Frozen": "#00E5FF", // Light Cyan
+    };
+
+    // Check for exact match first
+    if (categoryColors[categoryName]) {
+      return categoryColors[categoryName];
+    }
+
+    // Check for partial match (case insensitive)
+    const lowerCategory = categoryName.toLowerCase();
+    for (const [key, color] of Object.entries(categoryColors)) {
+      if (lowerCategory.includes(key.toLowerCase()) || key.toLowerCase().includes(lowerCategory)) {
+        return color;
+      }
+    }
+
+    // Default color if no match found
+    return "#FF6B35"; // Default orange/red
+  };
 
   return (
     <View style={styles.headerContainer}>
@@ -87,25 +123,46 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({
               {/* Divider */}
               <View style={styles.searchBoxDivider} />
 
-              {/* Text Input */}
-              <TextInput
-                placeholder="Search Product"
-                placeholderTextColor={"#fff"}
-                value={searchQuery}
-                style={
-                  {
-                    height: 50,
-                    width: "100%",
-                    borderWidth: 1,
-                    borderColor: colors.border,
-                    borderRadius: 8,
-                    color: "white",
-                    fontSize: 16,
-                    fontFamily : 'Lato-Regular'
-                  }
-                }
-                onChangeText={onSearchChange}
-              />
+              {/* Text Input Container */}
+              <View style={styles.textInputContainer}>
+                {/* Text Input */}
+                <TextInput
+                  placeholder=""
+                  value={searchQuery}
+                  style={styles.textInput}
+                  onChangeText={onSearchChange}
+                />
+                
+                {/* Custom Placeholder with Colored Category */}
+                {!searchQuery && searchPlaceholder && (
+                  <View style={styles.placeholderContainer} pointerEvents="none">
+                    {(() => {
+                      // Parse placeholder: "Search 'CategoryName'" or "Search Product"
+                      const match = searchPlaceholder.match(/Search\s+'?([^']+)'?/);
+                      if (match && match[1]) {
+                        // Has category name - get color for this category
+                        const categoryName = match[1];
+                        const categoryColor = getCategoryColor(categoryName);
+                        return (
+                          <Text style={styles.placeholderText}>
+                            Search '
+                            <Text style={[styles.categoryText, { color: categoryColor }]}>
+                              {categoryName}
+                            </Text>'
+                          </Text>
+                        );
+                      } else {
+                        // No category, just show as is
+                        return (
+                          <Text style={styles.placeholderText}>
+                            {searchPlaceholder}
+                          </Text>
+                        );
+                      }
+                    })()}
+                  </View>
+                )}
+              </View>
             </View>
           </LinearGradient>
         </ImageBackground>
@@ -186,5 +243,39 @@ const styles = StyleSheet.create({
     width: 1,
     height: 20,
     backgroundColor: "#fff",
+  },
+  textInputContainer: {
+    flex: 1,
+    position: "relative",
+    height: 50,
+    justifyContent: "center",
+  },
+  textInput: {
+    height: 50,
+    width: "100%",
+    borderWidth: 1,
+    borderColor: "transparent",
+    borderRadius: 8,
+    color: "white",
+    fontSize: 16,
+    fontFamily: "Lato-Regular",
+    padding: 0,
+  },
+  placeholderContainer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    height: 50,
+    justifyContent: "center",
+  },
+  placeholderText: {
+    fontSize: 16,
+    fontFamily: "Lato-Regular",
+    color: "#FFFFFF",
+  },
+  categoryText: {
+    fontSize: 16,
+    fontFamily: "Lato-Regular",
+    // Color will be set dynamically based on category
   },
 });

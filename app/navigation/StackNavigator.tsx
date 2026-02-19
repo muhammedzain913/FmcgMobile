@@ -67,6 +67,7 @@ import Categories from "../screens/Category/Categories";
 import AllCategories from "../screens/Category/AllCategories";
 import Brands from "../screens/Brand/Brands";
 import OrderSuccess from "../screens/Myorder/OrderSuccess";
+import OrderPlacedSuccess from "../screens/Myorder/OrderPlacedSuccess";
 import GiveRating from "../screens/Myorder/GiveRating";
 import ShopByBrand from "../screens/Brand/ShopByBrand";
 //import BottomNavigation from './BottomNavigation';
@@ -179,6 +180,7 @@ const StackNavigator = () => {
         <StackComponent.Screen name="Brands" component={Brands} />
 
         <StackComponent.Screen name="OrderSuccess" component={OrderSuccess} />
+        <StackComponent.Screen name="OrderPlacedSuccess" component={OrderPlacedSuccess} />
         <StackComponent.Screen name="GiveRating" component={GiveRating} />
         <StackComponent.Screen name="AllCategories" component={AllCategories} />
         <StackComponent.Screen name="Categories" component={Categories} />

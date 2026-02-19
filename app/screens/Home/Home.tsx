@@ -66,7 +66,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
   const [error, setError] = useState(null);
   const [products, setProducts] = useState<[]>();
   const [brands, setBrands] = useState<[]>();
-  const [categories, setCategories] = useState<[]>();
+  const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [displayedProducts, setDisplayedProducts] = useState<any[]>();
   const [dealCategory, setDealCategory] = useState<any>();
@@ -224,6 +224,13 @@ const Home = ({ navigation }: HomeScreenProps) => {
                 console.log("term", e);
                 setSearchQuety(e);
               }}
+              searchPlaceholder={
+                selectedCategory && selectedCategory !== "All"
+                  ? `Search '${selectedCategory}'`
+                  : categories && categories.length > 0 && categories[0]?.title
+                  ? `Search '${categories[0].title}'`
+                  : "Search Product"
+              }
             />
             <ImageBackground
               imageStyle={{ opacity: 0.2 }}
@@ -303,7 +310,11 @@ const Home = ({ navigation }: HomeScreenProps) => {
               <CategoryCard
                 key={index}
                 title={data.title}
-                onPress={() => navigation.navigate("AllCategories")}
+                onPress={() => {
+                  setSelectedCategory(data.title);
+                  // Optionally navigate to AllCategories if needed
+                  // navigation.navigate("AllCategories");
+                }}
                 containerStyle={{ width: 95 }}
               />
             ))}

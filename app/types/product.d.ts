@@ -19,6 +19,8 @@ export interface Product {
   description?: string;
   userId : string;
   imageUrl?: string;
+  averageRating?: number;
+  ratingCount?: number;
   createdAt?: string;
   updatedAt?: string;
   productImages: string[];

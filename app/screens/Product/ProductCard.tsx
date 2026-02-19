@@ -161,7 +161,7 @@ const ProductCard = React.memo(
           <View style={{ marginTop: 8, gap: 4 , alignItems : 'flex-start'}}>
             <View style={{flexDirection : 'row', gap :5,alignItems : 'center'}}>
               <Image style={{width : 14,height : 14}} source={require('../../assets/images/icons/ratingstar.png')}/>
-              <Text style={{fontFamily :'Lato-Regular', fontSize : 12,color : 'orange'}}>4.5</Text>
+              <Text style={{fontFamily :'Lato-Regular', fontSize : 12,color : 'orange'}}>{product.averageRating}</Text>
             </View>
             <Text
               style={styles.itemDescription}

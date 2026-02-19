@@ -428,9 +428,6 @@ const Trackorder = ({ route, navigation }: TrackorderScreenProps) => {
                 >
                   Order Confirmed
                 </Text>
-                {/* <Text style={{ textAlign: "center", flexShrink: 1,color  : '#fff' , fontSize : 12 }}>
-              Finding A Delivery Partner
-            </Text> */}
                 <Text
                   style={{
                     textAlign: "center",
@@ -474,7 +471,7 @@ const Trackorder = ({ route, navigation }: TrackorderScreenProps) => {
                   style={{ width: 40, height: 40, borderRadius: 20 }}
                   source={require("../../assets/images/face.png")}
                 />
-                <Text style={{ color: "#fff" }}>John Mathew</Text>
+                <Text style={{ color: "#fff" }}>{order?.deliveryAgent?.name}</Text>
               </View>
               <Image
                 source={require("../../assets/images/icons/phonedelivery.png")}
@@ -532,7 +529,7 @@ const Trackorder = ({ route, navigation }: TrackorderScreenProps) => {
                       color: "#141313",
                     }}
                   >
-                    {governorate?.name}
+                    {order?.governorate} 
                   </Text>
                 </View>
 
@@ -545,8 +542,8 @@ const Trackorder = ({ route, navigation }: TrackorderScreenProps) => {
                       lineHeight: 28,
                       color: "rgb(17, 17, 17)",
                     }}
-                  >
-                    {city?.name} , Block {block?.name}
+                  > 
+                    {order?.city} , Block {order?.block} , {order?.streetAddress} , {order?.apartmentNumber}
                   </Text>
                 </View>
               </View>
@@ -580,7 +577,7 @@ const Trackorder = ({ route, navigation }: TrackorderScreenProps) => {
               );
             })}
           </View>
-
+{/* 
           <View
             style={[
               GlobalStyleSheet.container,
@@ -646,7 +643,7 @@ const Trackorder = ({ route, navigation }: TrackorderScreenProps) => {
                 );
               })}
             </ScrollView>
-          </View>
+          </View> */}
         </View>
       </ScrollView>
     </View>

@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { saveUserLocation } from "./userReducer";
 
 export const cartSlice = createSlice({
   name: "cart",
@@ -45,6 +46,15 @@ export const cartSlice = createSlice({
         itemInCart.quantity--;
       }
     },
+    clearCart: (state: any) => {
+      state.cart = [];
+    },
+  },
+  extraReducers: (builder) => {
+    // Whenever user location changes successfully, clear cart globally
+    builder.addCase(saveUserLocation.fulfilled, (state: any) => {
+      state.cart = [];
+    });
   },
 });
 
@@ -66,6 +76,7 @@ export const {
   removeFromCart,
   incrementQuantity,
   decrementQuantity,
+  clearCart,
 } = cartSlice.actions;
 
 export default cartSlice.reducer;

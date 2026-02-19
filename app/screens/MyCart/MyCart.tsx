@@ -13,6 +13,7 @@ import { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  clearCart,
   decrementQuantity,
   incrementQuantity,
   removeFromCart,
@@ -148,14 +149,15 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
     console.log("cartItems", orderItems);
     try {
       const checkoutFormData = {
+        name: user.name,
         userId: user.id,
         email: user.email,
         country: userLocation.country,
         city: userLocation.city.name,
-        state: userLocation.governorate.name, // governorate → state
+        governorate: userLocation.governorate.name, // governorate → state
         block: userLocation.block.name, // block → district
-        streetAddress: userLocation.street, // street → streetAddress
-        phone: selectedAddress?.phone || user.phone, // Fallback to user phone or dummy if selectedAddress is missing
+        streetAddress: selectedAddress?.street, // street → streetAddress
+        phone: selectedAddress?.contactPhone || user.phone, // Fallback to user phone or dummy if selectedAddress is missing
         paymentMethod: "Cash On Delivery",
       };
 
@@ -164,7 +166,9 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
         { checkoutFormData, orderItems },
         "",
       );
-      navigation.navigate("OrderSuccess");
+
+      dispatch(clearCart());
+      navigation.navigate("OrderPlacedSuccess");
     } catch (error: any) {
       console.log("Error submitting order:", error.message);
     } finally {
@@ -774,26 +778,55 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                       return;
                     }
 
-                    saveLocation({
-                      payload: {
-                        userId : user.id,
-                        governorate: governorate.id,
-                        city: city.id,
-                        block: block.id,
-                        country: "Kuwait",
-                      },
-                      onSuccess: () => {
-                        isOpen.value = false;
-                        setView("EDIT"); // Go back to EDIT view after saving location
-                        navigation.navigate("Home"); // Refresh cart screen to reflect new location
-                      },
-                      onError: (error) => {
-                        Alert.alert(
-                          "Error",
-                          error || "Failed to save location",
-                        );
-                      },
-                    });
+                    const currentGovId = userLocation?.governorate?.id;
+                    const currentCityId = userLocation?.city?.id;
+                    const currentBlockId = userLocation?.block?.id;
+
+                    const nextGovId = governorate?.id;
+                    const nextCityId = city?.id;
+                    const nextBlockId = block?.id;
+
+                    const locationChanged =
+                      (!!currentGovId && currentGovId !== nextGovId) ||
+                      (!!currentCityId && currentCityId !== nextCityId) ||
+                      (!!currentBlockId && currentBlockId !== nextBlockId);
+
+                    const doSaveLocation = () => {
+                      saveLocation({
+                        payload: {
+                          userId: user.id,
+                          governorate: governorate.id,
+                          city: city.id,
+                          block: block.id,
+                          country: "Kuwait",
+                        },
+                        onSuccess: () => {
+                          isOpen.value = false;
+                          setView("LIST");
+                          // Cart is cleared globally when saveUserLocation succeeds
+                          navigation.navigate("Home");
+                        },
+                        onError: (error) => {
+                          Alert.alert("Error", error || "Failed to save location");
+                        },
+                      });
+                    };
+
+                    if (locationChanged) {
+                      Alert.alert(
+                        "Change location?",
+                        "Changing governorate/city/block will clear your cart because products depend on your location. Do you want to continue?",
+                        [
+                          { text: "Cancel", style: "cancel" },
+                          { text: "Continue", style: "destructive", onPress: doSaveLocation },
+                        ],
+                      );
+                      return;
+                    }
+
+                    // No gov/city/block change: no warning and no location API call
+                    isOpen.value = false;
+                    setView("LIST");
                   }}
                 />
               </View>

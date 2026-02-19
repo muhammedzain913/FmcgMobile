@@ -237,10 +237,13 @@ export const userSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         console.log("payload");
         state.status = "succeeded";
-        const { location, ...userWithoutLocation } = action.payload;
+        const { location, addresses,...userWithoutLocation } = action.payload;
         console.log("user info reducer login", action.payload);
+        console.log("login info without location", userWithoutLocation);
         state.userInfo = userWithoutLocation;
         state.defaultAddress = location || null;
+        state.addresses = addresses || [];
+        state.selectedAddress = addresses && addresses.length > 0 ? addresses[0] : null;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.status = "failed";
@@ -255,9 +258,6 @@ export const userSlice = createSlice({
         console.log("location payload", action.payload);
         console.log("default address before api", action.payload.governorate, action.payload.city, action.payload.block);
         state.defaultAddress = action.payload.data;
-        // Clear addresses when location changes (governorate/city/block changed)
-        // Old addresses are no longer valid for the new location
-        state.addresses = [];
       })
       .addCase(saveUserLocation.rejected, (state, action) => {
         state.status = "failed";

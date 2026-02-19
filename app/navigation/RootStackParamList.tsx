@@ -10,7 +10,10 @@ export type RootStackParamList = {
   Brands : undefined;
   ShopByBrand : undefined;
   OrderSuccess : undefined;
-  GiveRating : undefined;
+  OrderPlacedSuccess : undefined;
+  GiveRating : {
+    order: any; // Order object with orderItems, orderStatus, etc.
+  };
   Product : undefined;
   Login: undefined;
   Register: undefined;

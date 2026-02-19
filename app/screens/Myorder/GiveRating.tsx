@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -14,6 +14,8 @@ import Header from "../../layout/Header";
 import StarRating from "../../components/Rating/StarRating";
 import Button from "../../components/Button/Button";
 import { GlobalStyleSheet } from "../../constants/StyleSheet";
+import { ApiClient } from "../../redux/api";
+import { Url } from "../../redux/userConstant";
 
 type GiveRatingScreenProps = StackScreenProps<RootStackParamList, "GiveRating">;
 
@@ -25,7 +27,45 @@ interface Product {
   rating: number;
 }
 
-const GiveRating = ({ navigation }: GiveRatingScreenProps) => {
+interface Rating {
+  productId : string,
+  rating : number
+}
+
+const apiPath = ApiClient();
+
+const GiveRating = ({ navigation, route }: GiveRatingScreenProps) => {
+  const apiPath = ApiClient();
+  const orderFromParams = route.params?.order;
+  const [order, setOrder] = useState<any>(orderFromParams);
+  const [loading, setLoading] = useState(false);
+
+  const [rating, setRating] = useState<Rating[]>([]);
+  
+  // Always fetch full order details to ensure we have deliveryAgent populated
+  useEffect(() => {
+    const fetchFullOrder = async () => {
+      if (orderFromParams?.id) {
+        setLoading(true);
+        try {
+          // Fetch full order from API (this endpoint includes deliveryAgent: true)
+          const response = await apiPath.get(`${Url}/api/orders/${orderFromParams.id}`);
+          setOrder(response.data);
+          console.log("Fetched full order:", response.data);
+          console.log("DeliveryAgent:", response.data?.deliveryAgent);
+          console.log("DeliveryAgent name:", response.data?.deliveryAgent?.name);
+        } catch (error: any) {
+          console.error("Error fetching order details:", error);
+          // Fallback to order from params if fetch fails
+          setOrder(orderFromParams);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    
+    fetchFullOrder();
+  }, [orderFromParams?.id]);
   const [deliveryRating, setDeliveryRating] = useState(0);
   const [products, setProducts] = useState<Product[]>([
     {
@@ -52,20 +92,36 @@ const GiveRating = ({ navigation }: GiveRatingScreenProps) => {
   ]);
 
   const handleProductRatingChange = (productId: string, rating: number) => {
-    setProducts((prevProducts) =>
-      prevProducts.map((product) =>
-        product.id === productId ? { ...product, rating } : product
-      )
-    );
+   setRating((prevRatings) => {
+      const existingRatingIndex = prevRatings.findIndex(r => r.productId === productId);
+      if (existingRatingIndex !== -1) {
+        const updatedRatings = [...prevRatings];
+        updatedRatings[existingRatingIndex] = { ...updatedRatings[existingRatingIndex], rating };
+        return updatedRatings;
+      } else {
+        return [...prevRatings, {  productId, rating }];
+      }
+    });
   };
 
-  const handleSubmitRating = () => {
-    // Handle submit rating logic here
-    console.log("Delivery Rating:", deliveryRating);
-    console.log("Product Ratings:", products);
-    // Navigate back or show success message
-    navigation.goBack();
+  const handleSubmitRating = async () => {
+    try {
+      const payload = {
+        productRatings: rating,
+      };
+      console.log("Payload to be sent:", payload);
+      const response = await apiPath.post(`${Url}/api/products/ratings`, payload,{});
+      console.log("Response from rating submission:", response.data);
+    } catch (error) {
+      console.error("Error submitting ratings:", error);
+    } finally {
+      navigation.goBack();
+    }
   };
+
+  useEffect(() => {
+    console.log("Current Ratings State:", rating);
+  }, [rating]);
 
   return (
     <SafeAreaView style={styles.container} edges={[]}>
@@ -88,7 +144,12 @@ const GiveRating = ({ navigation }: GiveRatingScreenProps) => {
                     resizeMode="cover"
                   />
                 </View>
-                <Text style={styles.deliveryPartnerName}>John Mathew</Text>
+                <Text style={styles.deliveryPartnerName}>
+                  {order?.deliveryAgent?.name || 
+                   order?.deliveryAgent?.fullName || 
+                   order?.deliveryAgent?.firstName || 
+                   (order?.deliveryAgent ? "Delivery Partner" : "No Agent Assigned")}
+                </Text>
               </View>
               
               {/* Second Row: Rate Delivery Partner with light orange background */}
@@ -106,18 +167,18 @@ const GiveRating = ({ navigation }: GiveRatingScreenProps) => {
           {/* RATE YOUR PRODUCTS Section */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>RATE YOUR PRODUCTS</Text>
-            {products.map((product) => (
-              <View key={product.id} style={styles.productCard}>
+            {order.orderItems.map((orderItem : any) => (
+              <View key={orderItem.id} style={styles.productCard}>
                 {/* First Row: Product Image, Name, and Quantity */}
                 <View style={styles.productInfoRow}>
                   <Image
-                    source={product.image}
+                    source={{ uri: orderItem.product?.imageUrl }}
                     style={styles.productImage}
                     resizeMode="cover"
                   />
                   <View style={styles.productDetails}>
-                    <Text style={styles.productName}>{product.name}</Text>
-                    <Text style={styles.productQuantity}>{product.quantity}</Text>
+                    <Text style={styles.productName}>{orderItem?.product?.title}</Text>
+                    {/* <Text style={styles.productQuantity}>{product.quantity}</Text> */}
                   </View>
                 </View>
                 
@@ -125,9 +186,9 @@ const GiveRating = ({ navigation }: GiveRatingScreenProps) => {
                 <View style={styles.productRatingRowContainer}>
                   <Text style={styles.rateProductText}>Rate This Product</Text>
                   <StarRating
-                    rating={product.rating}
+                    rating={rating.find(r => r.productId === orderItem.product.id)?.rating || 0}
                     onRatingChange={(rating) =>
-                      handleProductRatingChange(product.id, rating)
+                      handleProductRatingChange(orderItem.product.id, rating)
                     }
                     starSize={20}
                   />

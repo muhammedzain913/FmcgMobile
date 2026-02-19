@@ -262,7 +262,7 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
                     color: "orange",
                   }}
                 >
-                  4.5
+                  {product?.averageRating}
                 </Text>
                 <Text
                   style={{
@@ -271,7 +271,7 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
                     color: "#8C8C8C",
                   }}
                 >
-                  (11.5k)
+                  ({product?.ratingCount})
                 </Text>
               </View>
             </View>
