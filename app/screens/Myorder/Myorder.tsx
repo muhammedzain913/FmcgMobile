@@ -24,234 +24,13 @@ import { subTotal } from "../../utils/subTotal";
 import { generateSlug } from "../../utils/generateSlug";
 import { StatusBar } from "expo-status-bar";
 import Button from "../../components/Button/Button";
-const apiPath = ApiClient();
 
-const myOrders = [
-  {
-    id: "694e71b171b7e92cb6560fb3",
-    userId: "692ea5d5da21c31031bdaf58",
-    vendorId: "692ff1a6622aea5e762aa28e",
-    email: "manmadan@gmail.com",
-    phone: "9847235308",
 
-    streetAddress: "Katt",
-    city: "Andalus",
-    country: "Kuwait",
-
-    shippingCost: 0,
-    orderNumber: "I8AQ2VDV",
-    paymentMethod: "Cash On Delivery",
-
-    orderStatus: "PROCESSING", // PROCESSING | ON_THE_WAY | DELIVERED
-    deliveryAgentStatus: "ASSIGNED",
-
-    createdAt: "2025-12-26T11:29:53.591Z",
-    updatedAt: "2025-12-26T11:43:39.173Z",
-
-    deliveryAgentId: "693927f1ab03e3710719fc84",
-
-    orderItems: [
-      {
-        id: "69392c7a1f8d6c000d47e6a2",
-        orderId: "694e71b171b7e92cb6560fb3",
-        productId: "692ff417622aea5e762aa292",
-        vendorId: "692ff1a6622aea5e762aa28e",
-
-        title: "Wheat Flour",
-        quantity: 2,
-        price: 45,
-
-        createdAt: "2025-12-10T08:16:58.365Z",
-        updatedAt: "2025-12-10T08:16:58.365Z",
-      },
-
-      {
-        id: "69392c7a1f8d6c000d47e6a3",
-        orderId: "694e71b171b7e92cb6560fb3",
-        productId: "692ff417622aea5e762aa293",
-        vendorId: "692ff1a6622aea5e762aa28e",
-
-        title: "Amul Butter 2L",
-        imageUrl: "https://utfs.io/f/butter-image-example.jpeg",
-
-        quantity: 1,
-        price: 123,
-
-        createdAt: "2025-12-10T08:17:58.365Z",
-        updatedAt: "2025-12-10T08:17:58.365Z",
-      },
-    ],
-  },
-  {
-    id: "694e71b171b7e92cb6560fb3",
-    userId: "692ea5d5da21c31031bdaf58",
-    vendorId: "692ff1a6622aea5e762aa28e",
-    email: "manmadan@gmail.com",
-    phone: "9847235308",
-
-    streetAddress: "Katt",
-    city: "Andalus",
-    country: "Kuwait",
-
-    shippingCost: 0,
-    orderNumber: "I8AQ2VDV",
-    paymentMethod: "Cash On Delivery",
-
-    orderStatus: "PROCESSING", // PROCESSING | ON_THE_WAY | DELIVERED
-    deliveryAgentStatus: "ASSIGNED",
-
-    createdAt: "2025-12-26T11:29:53.591Z",
-    updatedAt: "2025-12-26T11:43:39.173Z",
-
-    deliveryAgentId: "693927f1ab03e3710719fc84",
-
-    orderItems: [
-      {
-        id: "69392c7a1f8d6c000d47e6a2",
-        orderId: "694e71b171b7e92cb6560fb3",
-        productId: "692ff417622aea5e762aa292",
-        vendorId: "692ff1a6622aea5e762aa28e",
-
-        title: "Wheat Flour",
-        quantity: 2,
-        price: 45,
-
-        createdAt: "2025-12-10T08:16:58.365Z",
-        updatedAt: "2025-12-10T08:16:58.365Z",
-      },
-
-      {
-        id: "69392c7a1f8d6c000d47e6a3",
-        orderId: "694e71b171b7e92cb6560fb3",
-        productId: "692ff417622aea5e762aa293",
-        vendorId: "692ff1a6622aea5e762aa28e",
-
-        title: "Amul Butter 2L",
-        imageUrl: "https://utfs.io/f/butter-image-example.jpeg",
-
-        quantity: 1,
-        price: 123,
-
-        createdAt: "2025-12-10T08:17:58.365Z",
-        updatedAt: "2025-12-10T08:17:58.365Z",
-      },
-    ],
-  },
-  {
-    id: "694e71b171b7e92cb6560fb3",
-    userId: "692ea5d5da21c31031bdaf58",
-    vendorId: "692ff1a6622aea5e762aa28e",
-    email: "manmadan@gmail.com",
-    phone: "9847235308",
-
-    streetAddress: "Katt",
-    city: "Andalus",
-    country: "Kuwait",
-
-    shippingCost: 0,
-    orderNumber: "I8AQ2VDV",
-    paymentMethod: "Cash On Delivery",
-
-    orderStatus: "PROCESSING", // PROCESSING | ON_THE_WAY | DELIVERED
-    deliveryAgentStatus: "ASSIGNED",
-
-    createdAt: "2025-12-26T11:29:53.591Z",
-    updatedAt: "2025-12-26T11:43:39.173Z",
-
-    deliveryAgentId: "693927f1ab03e3710719fc84",
-
-    orderItems: [
-      {
-        id: "69392c7a1f8d6c000d47e6a2",
-        orderId: "694e71b171b7e92cb6560fb3",
-        productId: "692ff417622aea5e762aa292",
-        vendorId: "692ff1a6622aea5e762aa28e",
-
-        title: "Wheat Flour",
-        quantity: 2,
-        price: 45,
-
-        createdAt: "2025-12-10T08:16:58.365Z",
-        updatedAt: "2025-12-10T08:16:58.365Z",
-      },
-
-      {
-        id: "69392c7a1f8d6c000d47e6a3",
-        orderId: "694e71b171b7e92cb6560fb3",
-        productId: "692ff417622aea5e762aa293",
-        vendorId: "692ff1a6622aea5e762aa28e",
-
-        title: "Amul Butter 2L",
-        imageUrl: "https://utfs.io/f/butter-image-example.jpeg",
-
-        quantity: 1,
-        price: 123,
-
-        createdAt: "2025-12-10T08:17:58.365Z",
-        updatedAt: "2025-12-10T08:17:58.365Z",
-      },
-    ],
-  },
-  {
-    id: "694e71b171b7e92cb6560fb3",
-    userId: "692ea5d5da21c31031bdaf58",
-    vendorId: "692ff1a6622aea5e762aa28e",
-    email: "manmadan@gmail.com",
-    phone: "9847235308",
-
-    streetAddress: "Katt",
-    city: "Andalus",
-    country: "Kuwait",
-
-    shippingCost: 0,
-    orderNumber: "I8AQ2VDV",
-    paymentMethod: "Cash On Delivery",
-
-    orderStatus: "PROCESSING", // PROCESSING | ON_THE_WAY | DELIVERED
-    deliveryAgentStatus: "ASSIGNED",
-
-    createdAt: "2025-12-26T11:29:53.591Z",
-    updatedAt: "2025-12-26T11:43:39.173Z",
-
-    deliveryAgentId: "693927f1ab03e3710719fc84",
-
-    orderItems: [
-      {
-        id: "69392c7a1f8d6c000d47e6a2",
-        orderId: "694e71b171b7e92cb6560fb3",
-        productId: "692ff417622aea5e762aa292",
-        vendorId: "692ff1a6622aea5e762aa28e",
-
-        title: "Wheat Flour",
-        quantity: 2,
-        price: 45,
-
-        createdAt: "2025-12-10T08:16:58.365Z",
-        updatedAt: "2025-12-10T08:16:58.365Z",
-      },
-
-      {
-        id: "69392c7a1f8d6c000d47e6a3",
-        orderId: "694e71b171b7e92cb6560fb3",
-        productId: "692ff417622aea5e762aa293",
-        vendorId: "692ff1a6622aea5e762aa28e",
-
-        title: "Amul Butter 2L",
-        imageUrl: "https://utfs.io/f/butter-image-example.jpeg",
-
-        quantity: 1,
-        price: 123,
-
-        createdAt: "2025-12-10T08:17:58.365Z",
-        updatedAt: "2025-12-10T08:17:58.365Z",
-      },
-    ],
-  },
-];
 
 type MyorderScreenProps = StackScreenProps<RootStackParamList, "Myorder">;
 
 const Myorder = ({ navigation }: MyorderScreenProps) => {
+  const apiPath = ApiClient();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const theme = useTheme();
@@ -281,7 +60,7 @@ const Myorder = ({ navigation }: MyorderScreenProps) => {
     const fetchOrders = async () => {
       try {
         const response = await apiPath.get(
-          `${Url}/api/orders/user/${userInfo.id}`,
+          `${Url}/api/orders`,
         );
         setOrders(response.data);
       } catch (error: any) {
@@ -297,6 +76,20 @@ const Myorder = ({ navigation }: MyorderScreenProps) => {
     return orderItems
       .reduce((total, item) => total + item.price * item.quantity, 0)
       .toFixed(2);
+  };
+
+
+  const getOrderStatusColor = (status: string) => {
+    switch (status) {
+      case "PROCESSING":
+        return "orange";
+      case "ON_THE_WAY":
+        return "blue";
+      case "DELIVERED":
+        return "green";
+      default:
+        return "black";
+    }
   };
 
   return (
@@ -372,7 +165,7 @@ const Myorder = ({ navigation }: MyorderScreenProps) => {
                 >
                   <View
                     style={{
-                      backgroundColor: "black",
+                      backgroundColor: getOrderStatusColor(item.orderStatus),
                       position: "absolute",
                       top: 0,
                       right: 0,
@@ -383,7 +176,7 @@ const Myorder = ({ navigation }: MyorderScreenProps) => {
                     }}
                   >
                     <Text style={{ color: "#fff", fontSize: 10 }}>
-                      On The Way
+                      {item.orderStatus}
                     </Text>
                   </View>
 
@@ -423,11 +216,17 @@ const Myorder = ({ navigation }: MyorderScreenProps) => {
 
                   <Button
                     onPress={() => {
-                      navigation.navigate("Trackorder", {
-                        orderId: item.id,
-                      });
+                      if (item.orderStatus === "DELIVERED") {
+                        navigation.navigate("GiveRating", {
+                          order: item,
+                        });
+                      } else {
+                        navigation.navigate("Trackorder", {
+                          orderId: item.id,
+                        });
+                      }
                     }}
-                    title="Track Order"
+                    title={item.orderStatus === "DELIVERED" ? "Give Rating" : "Track Order"}
                     color={"rgba(30, 18, 61, 1)"}
                   ></Button>
                 </View>
