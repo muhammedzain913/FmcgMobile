@@ -271,6 +271,19 @@ const Home = ({ navigation }: HomeScreenProps) => {
           </LinearGradient>
         </View>
 
+        {/* No Products Notification Banner */}
+        {displayedProducts && displayedProducts.length === 0 && address && address.governorate && (
+          <View style={styles.noProductsBanner}>
+            <Image
+              style={styles.noProductsIcon}
+              source={require("../../assets/images/icons/locationpinblack.png")}
+            />
+            <Text style={styles.noProductsText}>
+              No products available in your selected location. Please try a different address.
+            </Text>
+          </View>
+        )}
+
         <SectionContainer>
           <SectionHeader
             title="Categories"
@@ -661,5 +674,30 @@ const styles = StyleSheet.create({
   editText: {
     fontFamily: "Lato-SemiBold",
     fontSize: 13,
+  },
+  noProductsBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 193, 7, 0.15)", // Light yellow/orange background
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    marginHorizontal: 20,
+    marginTop: 10,
+    borderRadius: 8,
+    gap: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: "rgba(255, 152, 0, 1)", // Orange accent border
+  },
+  noProductsIcon: {
+    width: 20,
+    height: 20,
+    tintColor: "rgba(255, 152, 0, 1)", // Orange icon color
+  },
+  noProductsText: {
+    flex: 1,
+    fontFamily: "Lato-Medium",
+    fontSize: 13,
+    color: "rgba(102, 60, 0, 1)", // Dark orange/brown text
+    lineHeight: 18,
   },
 });
