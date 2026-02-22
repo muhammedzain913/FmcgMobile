@@ -71,7 +71,6 @@ import OrderSuccess from "../screens/Myorder/OrderSuccess";
 import OrderPlacedSuccess from "../screens/Myorder/OrderPlacedSuccess";
 import GiveRating from "../screens/Myorder/GiveRating";
 import ShopByBrand from "../screens/Brand/ShopByBrand";
-import GlobalCartNotification from "../components/Cart/GlobalCartNotification";
 //import BottomNavigation from './BottomNavigation';
 
 const StackComponent = createStackNavigator<RootStackParamList>();
@@ -257,8 +256,6 @@ const StackNavigator = () => {
         <StackComponent.Screen name="Tables" component={Tables} />
         <StackComponent.Screen name="Toggles" component={Toggles} />
       </StackComponent.Navigator>
-      {/* Global Cart Notification - visible on all screens when cart has items */}
-      <GlobalCartNotification />
     </SafeAreaView>
   );
 };

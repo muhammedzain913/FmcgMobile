@@ -6,8 +6,7 @@ import { useSelector } from "react-redux";
 import { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
 import { useAddToCart } from "../../hooks/useAddToCart";
-import { selectCartTotalQuantity } from "../../redux/reducer/cartReducer";
-import CartNotification from "../../components/Cart/CartNotification";
+import GlobalCartNotification from "../../components/Cart/GlobalCartNotification";
 import { useSharedValue } from "react-native-reanimated";
 import LocationBottomSheet from "../../components/BottomSheet/LocationBottomSheet";
 import CategoriesHeader from "../../components/Category/CategoriesHeader";
@@ -35,8 +34,6 @@ const Categories = ({ navigation, route }: CategoriesScreenProps) => {
   const [dealCategoryProducts, setDealCategoryProducts] = useState<any[]>();
   const [searchQuery, setSearchQuety] = useState<string>("");
   const categoryChangeAnim = useRef(new Animated.Value(0)).current;
-  const cartItemCount = useRef(new Animated.Value(100)).current; // Start off-screen
-  const totalQuantity = useSelector(selectCartTotalQuantity);
 
   // Category item dimensions (measured from actual layout)
   const CATEGORY_IMAGE_HEIGHT = 60; // Image height
@@ -107,24 +104,6 @@ const Categories = ({ navigation, route }: CategoriesScreenProps) => {
     }).start();
   }, [selectedCategory, categories]);
 
-  useEffect(() => {
-    if (totalQuantity > 0) {
-      // Slide up smoothly when cart has items
-      Animated.spring(cartItemCount, {
-        toValue: 0,
-        tension: 50,
-        friction: 7,
-        useNativeDriver: true,
-      }).start();
-    } else {
-      // Slide down when cart is empty
-      Animated.timing(cartItemCount, {
-        toValue: 100,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    }
-  }, [totalQuantity]);
 
   useEffect(() => {
     const fetchCategory = async () => {
@@ -248,12 +227,7 @@ const Categories = ({ navigation, route }: CategoriesScreenProps) => {
         />
       </LocationBottomSheet>
 
-      <Animated.View style={{ transform: [{ translateY: cartItemCount }] }}>
-        <CartNotification
-          totalQuantity={totalQuantity}
-          navigation={navigation}
-        />
-      </Animated.View>
+      <GlobalCartNotification />
     </View>
   );
 };

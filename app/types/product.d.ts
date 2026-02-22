@@ -6,6 +6,7 @@ export interface Variant {
   id?: string;
   salePrice: number;
   productId: string;
+  unit : string;  
   price: number;
   productStock: number;
   quantity: number;

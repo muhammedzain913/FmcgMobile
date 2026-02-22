@@ -31,7 +31,7 @@ import Button from "../../components/Button/Button";
 import SectionHeader from "../../components/Home/SectionHeader";
 import SectionContainer from "../../components/Home/SectionContainer";
 import LocationDropdown from "../../components/Home/LocationDropdown";
-import CartNotification from "../../components/Cart/CartNotification";
+import GlobalCartNotification from "../../components/Cart/GlobalCartNotification";
 import BottomSheetHeader from "../../components/BottomSheet/BottomSheetHeader";
 import AddressList from "../../components/BottomSheet/AddressList";
 import LocationSelectionView from "../../components/BottomSheet/LocationSelectionView";
@@ -543,6 +543,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
           </Animated.View>
         )}
       </LocationBottomSheet>
+      <GlobalCartNotification />
     </SafeAreaView>
   );
 };
