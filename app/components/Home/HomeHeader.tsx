@@ -11,6 +11,9 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../../navigation/RootStackParamList";
 import { FONTS } from "../../constants/theme";
 
 interface HomeHeaderProps {
@@ -30,27 +33,29 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({
   onLocationPress,
   searchQuery,
   onSearchChange,
+
   searchPlaceholder,
 }) => {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
   const { colors }: { colors: any } = theme;
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   // Function to get color for different categories
   const getCategoryColor = (categoryName: string): string => {
     const categoryColors: { [key: string]: string } = {
-      "Vegetables": "#FF6B35", // Orange/Red
-      "Fruits": "#4CAF50", // Green
+      Vegetables: "#FF6B35", // Orange/Red
+      Fruits: "#4CAF50", // Green
       "Vegetables & Fruits": "#FF6B35", // Orange/Red
-      "Electronics": "#2196F3", // Blue
+      Electronics: "#2196F3", // Blue
       "Dairy Products": "#FFC107", // Amber/Yellow
       "Diary Products": "#FFC107", // Amber/Yellow
-      "Snacks": "#E91E63", // Pink
+      Snacks: "#E91E63", // Pink
       "Ice Cream": "#00BCD4", // Cyan
-      "Beverages": "#9C27B0", // Purple
-      "Meat": "#F44336", // Red
-      "Bakery": "#FF9800", // Deep Orange
-      "Frozen": "#00E5FF", // Light Cyan
+      Beverages: "#9C27B0", // Purple
+      Meat: "#F44336", // Red
+      Bakery: "#FF9800", // Deep Orange
+      Frozen: "#00E5FF", // Light Cyan
     };
 
     // Check for exact match first
@@ -61,7 +66,10 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({
     // Check for partial match (case insensitive)
     const lowerCategory = categoryName.toLowerCase();
     for (const [key, color] of Object.entries(categoryColors)) {
-      if (lowerCategory.includes(key.toLowerCase()) || key.toLowerCase().includes(lowerCategory)) {
+      if (
+        lowerCategory.includes(key.toLowerCase()) ||
+        key.toLowerCase().includes(lowerCategory)
+      ) {
         return color;
       }
     }
@@ -72,9 +80,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({
 
   return (
     <View style={styles.headerContainer}>
-      <LinearGradient
-        colors={["rgba(30, 18, 61, 1)", "rgba(12, 0, 40, 1)"]}
-      >
+      <LinearGradient colors={["rgba(30, 18, 61, 1)", "rgba(12, 0, 40, 1)"]}>
         <ImageBackground
           style={[
             styles.imageBackground,
@@ -82,25 +88,45 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({
           ]}
           source={require("../../assets/images/maskgroup.png")}
         >
-          <View style={styles.locationContainer}>
-            <View style={styles.locationRow}>
-              <Image
-                style={styles.locationIcon}
-                source={require("../../assets/images/icons/locationpin.png")}
-              />
-              <Text style={styles.locationText}>{governorate?.name}</Text>
-              <TouchableOpacity onPress={onLocationPress}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <View style={styles.locationContainer}>
+              <View style={styles.locationRow}>
                 <Image
-                  style={styles.chevronIcon}
-                  source={require("../../assets/images/icons/down-chevron.png")}
+                  style={styles.locationIcon}
+                  source={require("../../assets/images/icons/locationpin.png")}
                 />
-              </TouchableOpacity>
+                <Text style={styles.locationText}>{governorate?.name}</Text>
+                <TouchableOpacity onPress={onLocationPress}>
+                  <Image
+                    style={styles.chevronIcon}
+                    source={require("../../assets/images/icons/down-chevron.png")}
+                  />
+                </TouchableOpacity>
+              </View>
+              <View>
+                <Text style={styles.locationSubText}>
+                  {city?.name} , Block {block?.name}
+                </Text>
+              </View>
             </View>
-            <View>
-              <Text style={styles.locationSubText}>
-                {city?.name} , Block {block?.name}
-              </Text>
-            </View>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Profile")}
+              activeOpacity={0.7}
+            >
+              <View style={{ borderRadius: 50, overflow: "hidden" }}>
+                <Image
+                  style={{ width: 50, height: 50 }}
+                  resizeMode="cover"
+                  source={require("../../assets/images/profilepic.jpg")}
+                />
+              </View>
+            </TouchableOpacity>
           </View>
 
           <LinearGradient
@@ -132,13 +158,17 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({
                   style={styles.textInput}
                   onChangeText={onSearchChange}
                 />
-                
+
                 {/* Custom Placeholder with Colored Category */}
                 {!searchQuery && searchPlaceholder && (
-                  <View style={styles.placeholderContainer} pointerEvents="none">
+                  <View
+                    style={styles.placeholderContainer}
+                    pointerEvents="none"
+                  >
                     {(() => {
                       // Parse placeholder: "Search 'CategoryName'" or "Search Product"
-                      const match = searchPlaceholder.match(/Search\s+'?([^']+)'?/);
+                      const match =
+                        searchPlaceholder.match(/Search\s+'?([^']+)'?/);
                       if (match && match[1]) {
                         // Has category name - get color for this category
                         const categoryName = match[1];
@@ -146,9 +176,15 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({
                         return (
                           <Text style={styles.placeholderText}>
                             Search '
-                            <Text style={[styles.categoryText, { color: categoryColor }]}>
+                            <Text
+                              style={[
+                                styles.categoryText,
+                                { color: categoryColor },
+                              ]}
+                            >
                               {categoryName}
-                            </Text>'
+                            </Text>
+                            '
                           </Text>
                         );
                       } else {

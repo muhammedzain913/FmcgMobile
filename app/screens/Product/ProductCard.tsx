@@ -64,7 +64,7 @@ const ProductCard = React.memo(
             }}
           >
             <Image
-              source={require("../../assets/images/milmamilk.png")}
+              source={{ uri: product.imageUrl }}
               style={{ height: "100%", width: "100%" }}
               resizeMode="cover"
             />
@@ -106,7 +106,7 @@ const ProductCard = React.memo(
                     fontFamily: "Lato-Regular",
                   }}
                 >
-                  {cartItem.quantity}
+                  {cartItem?.quantity}
                 </Text>
                 <View>
                   <TouchableOpacity
@@ -170,10 +170,10 @@ const ProductCard = React.memo(
             >
               {product.title}
             </Text>
-            <Text style={styles.itemDescription}>{product.unit} {product.variants[0].quantity}</Text>
-            {product.variants[0].price > product.variants[0].salePrice && (
+            <Text style={styles.itemDescription}> {product.variants[0]?.quantity} {product.unit === 'KILOGRAM' ? 'KG' : product.unit === 'LITER' ? 'L' : product.unit}</Text>
+            {product.variants[0]?.price > product.variants[0]?.salePrice && (
               <Text style={{...styles.itemDescription,color : '#008A19',fontFamily : 'Lato-SemiBold'}}>
-                {calculateDiscountPercentage(product.variants[0].price, product.variants[0].salePrice)}% OFF
+                {calculateDiscountPercentage(product.variants[0]?.price, product.variants[0]?.salePrice)}% OFF
               </Text>
             )}
             <View style={{ flexDirection: "row",gap : 10 }}>
@@ -195,7 +195,7 @@ const ProductCard = React.memo(
                   textDecorationLine : 'line-through'
                 }}
               >
-                KD {product.variants[0].price}
+                KD {product.variants[0]?.price}
               </Text>
             </View>
           </View>

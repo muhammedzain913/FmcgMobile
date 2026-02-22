@@ -47,6 +47,7 @@ import Myorder from "../screens/Myorder/Myorder";
 import Trackorder from "../screens/Myorder/Trackorder";
 import Writereview from "../screens/Myorder/Writereview";
 import EditProfile from "../screens/Profile/EditProfile";
+import Profile from "../screens/Profile/Profile";
 import Language from "../screens/Language/Language";
 import Questions from "../screens/Profile/Questions";
 import Coupons from "../screens/Profile/Coupons";
@@ -70,6 +71,7 @@ import OrderSuccess from "../screens/Myorder/OrderSuccess";
 import OrderPlacedSuccess from "../screens/Myorder/OrderPlacedSuccess";
 import GiveRating from "../screens/Myorder/GiveRating";
 import ShopByBrand from "../screens/Brand/ShopByBrand";
+import GlobalCartNotification from "../components/Cart/GlobalCartNotification";
 //import BottomNavigation from './BottomNavigation';
 
 const StackComponent = createStackNavigator<RootStackParamList>();
@@ -216,6 +218,7 @@ const StackNavigator = () => {
         <StackComponent.Screen name="Myorder" component={Myorder} />
         <StackComponent.Screen name="Trackorder" component={Trackorder} />
         <StackComponent.Screen name="Writereview" component={Writereview} />
+        <StackComponent.Screen name="Profile" component={Profile} />
         <StackComponent.Screen name="EditProfile" component={EditProfile} />
         <StackComponent.Screen name="Language" component={Language} />
         <StackComponent.Screen name="Questions" component={Questions} />
@@ -254,6 +257,8 @@ const StackNavigator = () => {
         <StackComponent.Screen name="Tables" component={Tables} />
         <StackComponent.Screen name="Toggles" component={Toggles} />
       </StackComponent.Navigator>
+      {/* Global Cart Notification - visible on all screens when cart has items */}
+      <GlobalCartNotification />
     </SafeAreaView>
   );
 };

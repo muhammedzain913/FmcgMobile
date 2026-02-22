@@ -68,6 +68,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
   const [brands, setBrands] = useState<[]>();
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [rotatingCategoryIndex, setRotatingCategoryIndex] = useState<number>(0);
   const [displayedProducts, setDisplayedProducts] = useState<any[]>();
   const [dealCategory, setDealCategory] = useState<any>();
   const [dealCategoryProducts, setDealCategoryProducts] = useState<any[]>();
@@ -136,7 +137,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
         const response = await apiPath.get(
           `${Url}/api/products?gov=${address.governorate.id}&city=${address.city.id}&block=${address.block.id}&search =${searchQuery}`,
         );
-        console.log("product api", response.data.length);
+        console.log("product api", response.data);
         setProducts(response.data);
         setDisplayedProducts(response.data);
       } catch (error: any) {
@@ -180,6 +181,20 @@ const Home = ({ navigation }: HomeScreenProps) => {
     };
     fetchCategory();
   }, []);
+
+  // Rotate category title in search box every 3 seconds
+  useEffect(() => {
+    if (!categories || categories.length === 0) return;
+
+    const interval = setInterval(() => {
+      setRotatingCategoryIndex((prevIndex) => {
+        // Rotate through all categories
+        return (prevIndex + 1) % categories.length;
+      });
+    }, 3000); // Change every 3 seconds
+
+    return () => clearInterval(interval);
+  }, [categories]);
 
   useEffect(() => {
     const fetchBrands = async () => {
@@ -225,10 +240,8 @@ const Home = ({ navigation }: HomeScreenProps) => {
                 setSearchQuety(e);
               }}
               searchPlaceholder={
-                selectedCategory && selectedCategory !== "All"
-                  ? `Search '${selectedCategory}'`
-                  : categories && categories.length > 0 && categories[0]?.title
-                  ? `Search '${categories[0].title}'`
+                categories && categories.length > 0 && categories[rotatingCategoryIndex]?.title
+                  ? `Search '${categories[rotatingCategoryIndex].title}'`
                   : "Search Product"
               }
             />
@@ -312,8 +325,11 @@ const Home = ({ navigation }: HomeScreenProps) => {
                 title={data.title}
                 onPress={() => {
                   setSelectedCategory(data.title);
-                  // Optionally navigate to AllCategories if needed
-                  // navigation.navigate("AllCategories");
+                  // Navigate to StackNavigator's Categories screen (not BottomNavigation's Categories tab)
+                  navigation.getParent()?.navigate('Categories', {
+                    categoryTitle: data.title,
+                    categoryId: data.id,
+                  });
                 }}
                 containerStyle={{ width: 95 }}
               />
@@ -326,7 +342,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
             title="PRODUCTS"
             showViewAll={true}
             onViewAllPress={() => {
-              navigation.navigate("ShopByBrand");
+              navigation.navigate("ShopByBrand", {});
             }}
           />
           <ScrollView
@@ -376,7 +392,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
             {brands?.map((brand: any) => (
               <View key={brand.id} style={styles.brandCard}>
                 <TouchableOpacity
-                  onPress={() => navigation.navigate("ShopByBrand")}
+                  onPress={() => navigation.navigate("ShopByBrand", { brandId: brand.id, brand: brand })}
                 >
                   <Image
                     style={styles.brandImage}
@@ -393,7 +409,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
       </ScrollView>
       <BottomSheet2 ref={sheetRef} />
 
-      <CartNotification totalQuantity={totalQuantity} navigation={navigation} />
+
 
       <LocationBottomSheet isOpen={isOpen} toggleSheet={toggleSheet}>
         {view === "LIST" && (

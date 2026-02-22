@@ -4,10 +4,11 @@ import { FlashList } from "@shopify/flash-list";
 import ProductCard from "../../screens/Product/ProductCard";
 import { NavigationProp } from "@react-navigation/native";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
+import { Variant } from "../../types/product";
 
 interface ProductGridProps {
   products: any[];
-  addToCart: (product: any) => void;
+  addToCart: (product: any, selectedVariant: Variant) => void;
   navigation: NavigationProp<RootStackParamList>;
 }
 

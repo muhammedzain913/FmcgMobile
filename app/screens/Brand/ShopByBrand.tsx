@@ -1,6 +1,13 @@
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import {
+  Image,
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { FlatList, ScrollView } from "react-native-gesture-handler";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
 import { StackScreenProps } from "@react-navigation/stack";
@@ -8,31 +15,79 @@ import { ApiClient } from "../../redux/api";
 import { Url } from "../../redux/userConstant";
 import ProductCard from "../Product/ProductCard";
 import { useAddToCart } from "../../hooks/useAddToCart";
+import { useSelector } from "react-redux";
+import ProductGrid from "../../components/Category/ProductGrid";
 
 type ShopByBrandScreenProps = StackScreenProps<
   RootStackParamList,
   "ShopByBrand"
 >;
 
-const ShopByBrand = ({ navigation }: ShopByBrandScreenProps) => {
+const ShopByBrand = ({ navigation, route }: ShopByBrandScreenProps) => {
   const apiPath = ApiClient();
   const addItemToCart = useAddToCart();
-  const [products, setProducts] = useState<[]>();
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const brandId = route.params?.brandId;
+  const brandFromParams = route.params?.brand;
+  const [brandName, setBrandName] = useState<string>(
+    brandFromParams?.name || "Brand",
+  );
+
+  // Get location from Redux
+  const address = useSelector((x: any) => x.user.defaultAddress);
+
+  useEffect(() => {
+    console.log("Products for brand", products);
+  }, [products]);
+
+  useEffect(() => {
+    // Set brand name from params if available
+    if (brandFromParams?.name) {
+      setBrandName(brandFromParams.name);
+    }
+  }, [brandFromParams]);
 
   useEffect(() => {
     const fetchProducts = async () => {
+      if (
+        !brandId ||
+        !address?.governorate?.id ||
+        !address?.city?.id ||
+        !address?.block?.id
+      ) {
+        setLoading(false);
+        return;
+      }
+
       try {
-        const response = await apiPath.get(`${Url}/api/products`);
-        console.log("product api", response.data.length);
-        setProducts(response.data);
+        setLoading(true);
+
+        // Fetch products using brands API endpoint
+        const response = await apiPath.get(
+          `${Url}/api/brands/${brandId}/products?gov=${address.governorate.id}&city=${address.city.id}&block=${address.block.id}`,
+        );
+        console.log("brand products api", response.data);
+
+        // Handle response structure
+        if (response.data?.products) {
+          setProducts(response.data.products);
+          // Update brand name from API response if available
+          if (response.data?.brand?.name) {
+            setBrandName(response.data.brand.name);
+          }
+        } else {
+          setProducts(response.data || []);
+        }
       } catch (error: any) {
-        // setError(error.message || "Something went wrong");
+        console.error("Error fetching brand products:", error);
+        setProducts([]);
       } finally {
-        // setLoading(false);
+        setLoading(false);
       }
     };
     fetchProducts();
-  }, []);
+  }, [brandId, address]);
   return (
     <View style={{ flex: 1, backgroundColor: "rgba(250, 250, 250, 1)" }}>
       <StatusBar translucent backgroundColor="transparent" />
@@ -54,7 +109,8 @@ const ShopByBrand = ({ navigation }: ShopByBrandScreenProps) => {
               backgroundColor: "#ffff",
             }}
           >
-            <View
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
               style={{
                 flexDirection: "row", // Flow: Horizontal
                 alignItems: "center", // Inner alignment
@@ -72,7 +128,7 @@ const ShopByBrand = ({ navigation }: ShopByBrandScreenProps) => {
                 style={{ height: 20, width: 15, marginTop: 4 }}
                 source={require("../../assets/images/icons/CaretLeft.png")}
               />
-            </View>
+            </TouchableOpacity>
             <View style={{ position: "absolute", left: 0, right: 0 }}>
               <Text
                 style={{
@@ -85,7 +141,7 @@ const ShopByBrand = ({ navigation }: ShopByBrandScreenProps) => {
                   fontWeight: "700",
                 }}
               >
-                Milmna
+                {brandName}
               </Text>
             </View>
             <View></View>
@@ -108,32 +164,46 @@ const ShopByBrand = ({ navigation }: ShopByBrandScreenProps) => {
               </Text>
             </View>
           </View>
-
-  
         </View>
-                <FlatList
-            data={products}
-            keyExtractor={(item: any) => item.id.toString()}
-            numColumns={2}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{
-              paddingHorizontal: 16,
-              paddingBottom: 20,
+        {loading ? (
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              paddingVertical: 50,
             }}
-            columnWrapperStyle={{
-              // justifyContent: "space-between",
-              gap: 20,
-              marginBottom: 20,
+          >
+            <ActivityIndicator size="large" color="#1E123D" />
+          </View>
+        ) : products.length === 0 ? (
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              paddingVertical: 50,
             }}
-            renderItem={({ item }) => (
-              <ProductCard 
-                product={item} 
-                addToCart={addItemToCart} 
-                navigation={navigation}
-                containerStyle={{ flex: 1, marginHorizontal: '2.5%' }}
-              />
-            )}
-          />
+          >
+            <Text
+              style={{
+                fontFamily: "Lato-Regular",
+                fontSize: 16,
+                color: "rgba(140, 140, 140, 1)",
+              }}
+            >
+              No products found for this brand
+            </Text>
+          </View>
+        ) : (
+          <View style={{ paddingHorizontal: 20, paddingBottom: 20 }}>
+            <ProductGrid
+              products={products}
+              addToCart={addItemToCart}
+              navigation={navigation}
+            />
+          </View>
+        )}
       </ScrollView>
     </View>
   );

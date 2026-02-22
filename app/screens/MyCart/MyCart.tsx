@@ -40,6 +40,7 @@ import { useUserAddress } from "../../hooks/useSaveUserAddress";
 import UserDeliveryAddressDropDown from "../Location/UserDeliveryAddressDropDown";
 import LocationSelectionView from "../../components/BottomSheet/LocationSelectionView";
 import { useSaveUserLocation } from "../../hooks/useSaveUserLocation";
+import Input from "../../components/Input/Input";
 
 type MyCartScreenProps = StackScreenProps<RootStackParamList, "MyCart">;
 
@@ -62,6 +63,10 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
   const { width } = useWindowDimensions();
 
   const { deleteAddress, loading: deleteLoading } = useUserAddress();
+
+  const subTotal = cart.reduce((acc: number, item: any) => {
+    return acc + item.productPrice * item.quantity;
+  }, 0);
 
   const isOpen = useSharedValue(false);
   const isOpenEdit = useSharedValue(false);
@@ -90,6 +95,10 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
 
   const totalQuantity = useSelector(selectCartTotalQuantity);
   const totalPrice = useSelector(selectCartTotalPrice);
+
+  const savedAmount = cart.reduce((acc: number, item: any) => {     
+    return acc + (item.productPrice - item.price) * item.quantity;
+  }, 0);
 
   useEffect(() => {
     console.log("first item", cart[0]);
@@ -200,6 +209,10 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
     console.log("screen width", width);
   });
 
+  useEffect(() => {
+    console.log(' this is the cart',cart);
+  })
+
   return (
     <View style={{ flex: 1, backgroundColor: "rgba(250, 250, 250, 1)" }}>
       <StatusBar translucent backgroundColor="transparent" />
@@ -278,7 +291,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
               <Text
                 style={{
                   color: "white",
-                  fontSize: 14,
+                  fontSize: 20,
                   fontFamily: "Lato-Bold",
                 }}
               >
@@ -291,7 +304,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
               <Text
                 style={{
                   color: "rgba(5, 155, 93, 1)",
-                  fontSize: 12,
+                  fontSize: 16,
                   fontFamily: "Lato-Bold",
                 }}
               >
@@ -325,7 +338,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                   />
                   <Text
                     style={{
-                      fontFamily: "Lato-SemiBold",
+                      fontFamily: "Lato-Bold",
                       fontSize: 15,
                       lineHeight: 28,
                       color: "#141313",
@@ -356,7 +369,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                   style={{
                     borderWidth: 1,
                     borderBlockColor: "black",
-                    paddingHorizontal: 15,
+                    paddingHorizontal: 10,
                     paddingVertical: 5,
                     borderRadius: 8,
                   }}
@@ -376,6 +389,8 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                     alignItems: "center",
                     borderRadius: 12,
                     padding: 10,
+                    borderBottomWidth: 1,
+                    borderBottomColor: "#E0E0E0",
                   }}
                 >
                   <View style={styles.imageBox}>
@@ -390,11 +405,29 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                       {item.title}
                     </Text>
 
-                    <Text style={styles.subTitle}>{item.quantity}</Text>
+                    <Text style={styles.subTitle}>{item.quantity} {item.unit === 'LITRE' ? 'L' : item.unit === 'KILOGRAM' ? 'KG' : item.unit}</Text>
 
                     <View style={styles.priceRow}>
-                      <Text style={styles.price}>{item.price}</Text>
-                      <Text style={styles.strike}>{item.productPrice}</Text>
+                      <Text
+                        style={{
+                          ...styles.itemDescription,
+                          fontFamily: "Lato-Bold",
+                          fontSize: 14,
+                        }}
+                      >
+                        {item.price}
+                      </Text>
+                      <Text
+                        style={{
+                          ...styles.itemDescription,
+                          fontFamily: "Lato-Medium",
+                          fontSize: 14,
+                          color: "#8C8C8C",
+                          textDecorationLine: "line-through",
+                        }}
+                      >
+                        {item.productPrice}
+                      </Text>
                     </View>
                   </View>
 
@@ -421,7 +454,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
               );
             })}
           </View>
-
+          {/* 
           <View
             style={{
               backgroundColor: "#fff",
@@ -585,44 +618,13 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                 );
               })}
             </ScrollView>
-          </View>
+          </View> */}
 
-          <SectionContainer>
-            <SectionHeader
-              title="PRODUCTS"
-              showViewAll={true}
-              onViewAllPress={() => {
-                navigation.navigate("ShopByBrand");
-              }}
-            />
-            <ScrollView
-              contentContainerStyle={{
-                gap: 15,
-                flexDirection: "row",
-                marginTop: 20,
-                paddingRight: 20,
-              }}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              nestedScrollEnabled={true}
-            >
-              {displayedProducts?.map((data: any) => {
-                return (
-                  <ProductCard
-                    key={data.id || data.slug}
-                    addToCart={addItemToCart}
-                    product={data}
-                    navigation={navigation}
-                    containerStyle={{
-                      width: wp("30%"),
-                      minWidth: 120,
-                      maxWidth: 160,
-                    }}
-                  />
-                );
-              })}
-            </ScrollView>
-          </SectionContainer>
+          <Input
+            multiline={true}
+            numberOfLines={10}
+            placeholder="ADDITIONAL NOTES"
+          />
 
           <View
             style={{
@@ -632,20 +634,28 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
               gap: 20,
             }}
           >
-            <Text>Bill Details</Text>
+            <Text
+              style={{
+                color: "#000",
+                fontSize: 15,
+                fontFamily: "Lato-SemiBold",
+              }}
+            >
+              Bill Details
+            </Text>
 
             <View style={{ gap: 10 }}>
               <View style={styles.billContainer}>
-                <Text>Sub Total</Text>
-                <Text>{totalPrice}</Text>
+                <Text style={styles.billDetailsText}>Sub Total</Text>
+                <Text> {subTotal}</Text>
               </View>
               <View style={styles.billContainer}>
-                <Text>Discout</Text>
-                <Text style={{ color: "rgba(5, 155, 93, 1)" }}>-₹ 30</Text>
+                <Text style={styles.billDetailsText}>Discount</Text>
+                <Text style={{ color: "rgba(5, 155, 93, 1)" }}>{savedAmount}</Text>
               </View>
               <View style={styles.billContainer}>
-                <Text>Delivery Charge </Text>
-                <Text>₹ 15</Text>
+                <Text style={styles.billDetailsText}>Delivery Charge</Text>
+                <Text>15</Text>
               </View>
             </View>
 
@@ -659,180 +669,185 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
             <View>
               <View style={styles.billContainer}>
                 <Text>To Pay </Text>
-                <Text>₹ {totalPrice}</Text>
+                <Text> د.ك {totalPrice}</Text>
               </View>
             </View>
           </View>
         </View>
       </ScrollView>
 
-
-      
-        <LocationBottomSheet isOpen={isOpen} toggleSheet={toggleSheet}>
-          {view === "LIST" && (
-            <Animated.View style={styles.bottomSheetContent}>
-              <BottomSheetHeader title="CHANGE ADDRESS" onClose={toggleSheet} />
-              <AddressList
-                addresses={addresses}
-                onEdit={(address) => {
-                  setEditingAddress(address); // Set the address to be edited
-                  toggleSheetEdit();
-                  setView("EDIT");
-                }}
-                onRemove={(address) => {
-                  Alert.alert(
-                    "Delete Address",
-                    "Are you sure you want to delete this address?",
-                    [
-                      {
-                        text: "Cancel",
-                        style: "cancel",
-                      },
-                      {
-                        text: "Delete",
-                        style: "destructive",
-                        onPress: () => {
-                          deleteAddress({
-                            id: address.id,
-                            onSuccess: () => {
-                              // Address will be removed from Redux state automatically
-                            },
-                            onError: (error) => {
-                              Alert.alert(
-                                "Error",
-                                error || "Failed to delete address",
-                              );
-                            },
-                          });
-                        },
-                      },
-                    ],
-                  );
-                }}
-                onAddNew={() => {
-                  setEditingAddress(null); // Clear editing address (add new mode)
-                  setView("EDIT");
-                }}
-              />
-            </Animated.View>
-          )}
-
-          {view === "EDIT" && (
-            <Animated.View style={{ ...styles.bottomSheetContent, gap: 40 }}>
-              <BottomSheetHeader title="CHANGE ADDRESS" onClose={toggleSheet} />
-              <UserDeliveryAddressDropDown
-                addressToEdit={editingAddress} // Pass address if editing, null if adding new
-                onChangeLocation={() => {
-                  setView("LOCATION");
-                }}
-              />
-            </Animated.View>
-          )}
-
-          {view === "LOCATION" && (
-            <Animated.View
-              style={{
-                ...styles.bottomSheetContent,
-                justifyContent: "space-between",
-                gap: 15,
+      <LocationBottomSheet isOpen={isOpen} toggleSheet={toggleSheet}>
+        {view === "LIST" && (
+          <Animated.View style={styles.bottomSheetContent}>
+            <BottomSheetHeader title="CHANGE ADDRESS" onClose={toggleSheet} />
+            <AddressList
+              addresses={addresses}
+              onEdit={(address) => {
+                setEditingAddress(address); // Set the address to be edited
+                toggleSheetEdit();
+                setView("EDIT");
               }}
-            >
-              <BottomSheetHeader title="CHANGE ADDRESS" onClose={toggleSheet} />
-              <View style={{ flex: 1, justifyContent: "space-between" }}>
-                <LocationSelectionView
-                  governorates={governorates}
-                  cities={cities}
-                  blocks={blocks}
-                  governorate={governorate}
-                  city={city}
-                  block={block}
-                  govVisible={govVisible}
-                  cityVisible={cityVisible}
-                  blockVisible={blockVisible}
-                  onGovOpen={() => setGovVisible(true)}
-                  onGovClose={() => setGovVisible(false)}
-                  onCityOpen={() => setCityVisible(true)}
-                  onCityClose={() => setCityVisible(false)}
-                  onBlockOpen={() => setBlockVisible(true)}
-                  onBlockClose={() => setBlockVisible(false)}
-                  onGovernorateSelect={(item) => {
-                    setGovernorate(item);
-                    setCity(null);
-                    setBlock(null);
-                  }}
-                  onCitySelect={(item) => {
-                    setCity(item);
-                    setCityVisible(false);
-                    setBlock(null);
-                  }}
-                  onBlockSelect={(item) => {
-                    setBlock(item);
-                    setBlockVisible(false);
-                  }}
-                  onContinue={() => {
-                    if (!governorate || !city || !block) {
-                      Alert.alert(
-                        "Error",
-                        "Please select governorate, city, and block",
-                      );
-                      return;
-                    }
+              onRemove={(address) => {
+                Alert.alert(
+                  "Delete Address",
+                  "Are you sure you want to delete this address?",
+                  [
+                    {
+                      text: "Cancel",
+                      style: "cancel",
+                    },
+                    {
+                      text: "Delete",
+                      style: "destructive",
+                      onPress: () => {
+                        deleteAddress({
+                          id: address.id,
+                          onSuccess: () => {
+                            // Address will be removed from Redux state automatically
+                          },
+                          onError: (error) => {
+                            Alert.alert(
+                              "Error",
+                              error || "Failed to delete address",
+                            );
+                          },
+                        });
+                      },
+                    },
+                  ],
+                );
+              }}
+              onAddNew={() => {
+                setEditingAddress(null); // Clear editing address (add new mode)
+                setView("EDIT");
+              }}
+            />
+          </Animated.View>
+        )}
 
-                    const currentGovId = userLocation?.governorate?.id;
-                    const currentCityId = userLocation?.city?.id;
-                    const currentBlockId = userLocation?.block?.id;
+        {view === "EDIT" && (
+          <Animated.View style={{ ...styles.bottomSheetContent, gap: 40 }}>
+            <BottomSheetHeader title="CHANGE ADDRESS" onClose={toggleSheet} />
+            <UserDeliveryAddressDropDown
+              addressToEdit={editingAddress} // Pass address if editing, null if adding new
+              onChangeLocation={() => {
+                setView("LOCATION");
+              }}
+            />
+          </Animated.View>
+        )}
 
-                    const nextGovId = governorate?.id;
-                    const nextCityId = city?.id;
-                    const nextBlockId = block?.id;
+        {view === "LOCATION" && (
+          <Animated.View
+            style={{
+              ...styles.bottomSheetContent,
+              justifyContent: "space-between",
+              gap: 15,
+            }}
+          >
+            <BottomSheetHeader title="CHANGE ADDRESS" onClose={toggleSheet} />
+            <View style={{ flex: 1, justifyContent: "space-between" }}>
+              <LocationSelectionView
+                governorates={governorates}
+                cities={cities}
+                blocks={blocks}
+                governorate={governorate}
+                city={city}
+                block={block}
+                govVisible={govVisible}
+                cityVisible={cityVisible}
+                blockVisible={blockVisible}
+                onGovOpen={() => setGovVisible(true)}
+                onGovClose={() => setGovVisible(false)}
+                onCityOpen={() => setCityVisible(true)}
+                onCityClose={() => setCityVisible(false)}
+                onBlockOpen={() => setBlockVisible(true)}
+                onBlockClose={() => setBlockVisible(false)}
+                onGovernorateSelect={(item) => {
+                  setGovernorate(item);
+                  setCity(null);
+                  setBlock(null);
+                }}
+                onCitySelect={(item) => {
+                  setCity(item);
+                  setCityVisible(false);
+                  setBlock(null);
+                }}
+                onBlockSelect={(item) => {
+                  setBlock(item);
+                  setBlockVisible(false);
+                }}
+                onContinue={() => {
+                  if (!governorate || !city || !block) {
+                    Alert.alert(
+                      "Error",
+                      "Please select governorate, city, and block",
+                    );
+                    return;
+                  }
 
-                    const locationChanged =
-                      (!!currentGovId && currentGovId !== nextGovId) ||
-                      (!!currentCityId && currentCityId !== nextCityId) ||
-                      (!!currentBlockId && currentBlockId !== nextBlockId);
+                  const currentGovId = userLocation?.governorate?.id;
+                  const currentCityId = userLocation?.city?.id;
+                  const currentBlockId = userLocation?.block?.id;
 
-                    const doSaveLocation = () => {
-                      saveLocation({
-                        payload: {
-                          userId: user.id,
-                          governorate: governorate.id,
-                          city: city.id,
-                          block: block.id,
-                          country: "Kuwait",
+                  const nextGovId = governorate?.id;
+                  const nextCityId = city?.id;
+                  const nextBlockId = block?.id;
+
+                  const locationChanged =
+                    (!!currentGovId && currentGovId !== nextGovId) ||
+                    (!!currentCityId && currentCityId !== nextCityId) ||
+                    (!!currentBlockId && currentBlockId !== nextBlockId);
+
+                  const doSaveLocation = () => {
+                    saveLocation({
+                      payload: {
+                        userId: user.id,
+                        governorate: governorate.id,
+                        city: city.id,
+                        block: block.id,
+                        country: "Kuwait",
+                      },
+                      onSuccess: () => {
+                        isOpen.value = false;
+                        setView("LIST");
+                        // Cart is cleared globally when saveUserLocation succeeds
+                        navigation.navigate("Home");
+                      },
+                      onError: (error) => {
+                        Alert.alert(
+                          "Error",
+                          error || "Failed to save location",
+                        );
+                      },
+                    });
+                  };
+
+                  if (locationChanged) {
+                    Alert.alert(
+                      "Change location?",
+                      "Changing governorate/city/block will clear your cart because products depend on your location. Do you want to continue?",
+                      [
+                        { text: "Cancel", style: "cancel" },
+                        {
+                          text: "Continue",
+                          style: "destructive",
+                          onPress: doSaveLocation,
                         },
-                        onSuccess: () => {
-                          isOpen.value = false;
-                          setView("LIST");
-                          // Cart is cleared globally when saveUserLocation succeeds
-                          navigation.navigate("Home");
-                        },
-                        onError: (error) => {
-                          Alert.alert("Error", error || "Failed to save location");
-                        },
-                      });
-                    };
+                      ],
+                    );
+                    return;
+                  }
 
-                    if (locationChanged) {
-                      Alert.alert(
-                        "Change location?",
-                        "Changing governorate/city/block will clear your cart because products depend on your location. Do you want to continue?",
-                        [
-                          { text: "Cancel", style: "cancel" },
-                          { text: "Continue", style: "destructive", onPress: doSaveLocation },
-                        ],
-                      );
-                      return;
-                    }
-
-                    // No gov/city/block change: no warning and no location API call
-                    isOpen.value = false;
-                    setView("LIST");
-                  }}
-                />
-              </View>
-            </Animated.View>
-          )}
-        </LocationBottomSheet>
+                  // No gov/city/block change: no warning and no location API call
+                  isOpen.value = false;
+                  setView("LIST");
+                }}
+              />
+            </View>
+          </Animated.View>
+        )}
+      </LocationBottomSheet>
 
       <View
         style={{
@@ -855,33 +870,17 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
       >
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <View style={{ gap: 10 }}>
-            <Text style={{ color: "rgba(89, 89, 89, 1)" }}>Payment Method</Text>
-            <Text style={{ fontWeight: "bold" }}>Online Payment</Text>
-          </View>
-          <View
-            style={{
-              borderWidth: 1,
-              borderBlockColor: "black",
-              paddingHorizontal: 15,
-              paddingVertical: 5,
-              borderRadius: 8,
-              width: 90,
-              height: 30,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Text>Change</Text>
+            <Text style={{ color: "rgba(89, 89, 89, 1)" ,fontFamily :'Lato-Regular'}}>Payment Method</Text>
+            <Text style={{ fontFamily : 'Lato-SemiBold' }}>Cash On Delivery</Text>
           </View>
         </View>
 
-
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <View style={{ gap: 10 }}>
-            <Text style={{ fontWeight: "bold", fontSize: 20 }}>
-              ₹ {totalPrice}
+            <Text style={{ fontFamily: "Lato-Bold", fontSize: 35 }}>
+             د.ك  {totalPrice}
             </Text>
-            <Text style={{ color: "rgba(0, 138, 25, 1)" }}>Saved ₹ 750</Text>
+            <Text style={{ color: "rgba(0, 138, 25, 1)" }}>Saved د.ك {savedAmount}</Text>
           </View>
           <View
             style={{
@@ -908,7 +907,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
               }}
             >
               <Text style={{ color: "#fff", fontSize: 18 }}>
-                Proceed To Pay
+                Order Now
               </Text>
               <Image source={require("../../assets/images/icons/arrow.png")} />
             </TouchableOpacity>
@@ -953,7 +952,7 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 12,
+    fontSize: 14,
     color: "#00000",
     fontFamily: "Lato-Medium",
   },
@@ -969,12 +968,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginTop: 6,
+    gap : 5
   },
 
   price: {
     fontSize: 12,
     marginRight: 6,
-    fontFamily: "lato-Bold",
+    fontFamily: "Lato-SemiBold",
     fontWeight: 700,
   },
 
@@ -1002,9 +1002,9 @@ const styles = StyleSheet.create({
   },
 
   qty: {
-    fontSize: 11,
+    fontSize: 15,
     fontWeight: "600",
-    fontFamily: "Lato-SemiBold",
+    fontFamily: "Lato-Medium",
   },
 
   billContainer: {
@@ -1019,5 +1019,17 @@ const styles = StyleSheet.create({
     paddingBottom: 5,
     paddingHorizontal: 20,
     paddingTop: 50,
+  },
+  billDetailsText: {
+    color: "#5D5D5D",
+    fontSize: 13,
+    fontFamily: "Lato-Regular",
+  },
+  itemDescription: {
+    fontFamily: "Lato-Medium",
+    fontSize: 13,
+    lineHeight: 16,
+    letterSpacing: -0.36, // -3% of 12px
+    color: "rgba(0, 0, 0, 1)",
   },
 });

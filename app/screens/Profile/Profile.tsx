@@ -131,9 +131,7 @@ const Profile = ({ navigation }: ProfileScreenProps) => {
                 <View style={styles.profileRow}>
                   {/* Profile Image */}
                   <Image
-                    source={{
-                      uri: user?.avatar || "https://i.pravatar.cc/150",
-                    }}
+                    source={require('../../assets/images/profilepic.jpg')}
                     style={styles.profileImage}
                   />
 

@@ -8,7 +8,10 @@ export type RootStackParamList = {
   AllCategories : undefined;
   Categories : { categoryTitle?: string; categoryId?: string } | undefined;
   Brands : undefined;
-  ShopByBrand : undefined;
+  ShopByBrand : {
+    brandId?: string;
+    brand?: any; // Brand object with details
+  };
   OrderSuccess : undefined;
   OrderPlacedSuccess : undefined;
   GiveRating : {

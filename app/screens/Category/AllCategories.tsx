@@ -36,8 +36,9 @@ const AllCategories = ({ navigation }: AllCategoriesScreenProps) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [products, setProducts] = useState<[]>();
-  const [categories, setCategories] = useState<[]>();
+  const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [rotatingCategoryIndex, setRotatingCategoryIndex] = useState<number>(0);
   const [displayedProducts, setDisplayedProducts] = useState<any[]>();
   const [dealCategory, setDealCategory] = useState<any>();
   const [dealCategoryProducts, setDealCategoryProducts] = useState<any[]>();
@@ -59,6 +60,20 @@ const AllCategories = ({ navigation }: AllCategoriesScreenProps) => {
     };
     fetchCategory();
   }, []);
+
+  // Rotate category title in search box every 3 seconds
+  useEffect(() => {
+    if (!categories || categories.length === 0) return;
+
+    const interval = setInterval(() => {
+      setRotatingCategoryIndex((prevIndex) => {
+        // Rotate through all categories
+        return (prevIndex + 1) % categories.length;
+      });
+    }, 3000); // Change every 3 seconds
+
+    return () => clearInterval(interval);
+  }, [categories]);
 
   const theme = useTheme();
   const { colors }: { colors: any } = theme;
@@ -98,12 +113,16 @@ const AllCategories = ({ navigation }: AllCategoriesScreenProps) => {
               governorate={governorate}
               city={city}
               block={block}
-              
               onLocationPress={toggleSheet}
               searchQuery={searchQuery}
               onSearchChange={(e: string) => {
                 setSearchQuety(e);
               }}
+              searchPlaceholder={
+                categories && categories.length > 0 && categories[rotatingCategoryIndex]?.title
+                  ? `Search '${categories[rotatingCategoryIndex].title}'`
+                  : "Search Product"
+              }
             />
           </LinearGradient>
         </View>

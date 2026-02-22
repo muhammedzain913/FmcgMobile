@@ -110,8 +110,8 @@ const Brands = ({ navigation }: BrandsScreenProps) => {
                   key={brand.id || index}
                   style={styles.brandCard}
                   onPress={() => {
-                    // Navigate to brand products if needed
-                    navigation.navigate("ShopByBrand");
+                    // Navigate to brand products with brandId and brand details
+                    navigation.navigate("ShopByBrand", { brandId: brand.id, brand: brand });
                   }}
                 >
                   <View style={styles.brandImageContainer}>
