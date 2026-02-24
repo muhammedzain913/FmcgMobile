@@ -20,14 +20,18 @@ import { addTowishList } from "../../redux/reducer/wishListReducer";
 import { ApiClient } from "../../redux/api";
 import { Url } from "../../redux/userConstant";
 import { convertIsoDateToNormal } from "../../utils/convertIsoDateToNormal";
+import { formatDateTime } from "../../utils/formatDateTime";
 import { subTotal } from "../../utils/subTotal";
 import { generateSlug } from "../../utils/generateSlug";
 import { StatusBar } from "expo-status-bar";
 import Button from "../../components/Button/Button";
+import DashedLine from "../../components/Common/DashedLine";
 
 
 
 type MyorderScreenProps = StackScreenProps<RootStackParamList, "Myorder">;
+
+
 
 const Myorder = ({ navigation }: MyorderScreenProps) => {
   const apiPath = ApiClient();
@@ -83,8 +87,8 @@ const Myorder = ({ navigation }: MyorderScreenProps) => {
     switch (status) {
       case "PROCESSING":
         return "orange";
-      case "ON_THE_WAY":
-        return "blue";
+      case "SHIPPED":
+        return "#1E123D";
       case "DELIVERED":
         return "green";
       default:
@@ -112,45 +116,26 @@ const Myorder = ({ navigation }: MyorderScreenProps) => {
               backgroundColor: "#ffff",
             }}
           >
-            <View
-              style={{
-                flexDirection: "row", // Flow: Horizontal
-                alignItems: "center", // Inner alignment
-                height: 40, // Fixed height // Padding
-                paddingVertical: 7.78,
-                borderRadius: 8,
-                borderWidth: 1,
-                borderColor: "grey",
-                backgroundColor: "rgba(255, 255, 255, 0.6)", // Required for blur effect
-                width: 40,
-                justifyContent: "center",
-              }}
-            >
-              <Image
-                style={{ height: 20, width: 15, marginTop: 4 }}
-                source={require("../../assets/images/icons/CaretLeft.png")}
-              />
-            </View>
-            <View style={{ position: "absolute", left: 0, right: 0 }}>
+
+            <View style={{ }}>
               <Text
                 style={{
-                  fontFamily: "Lato", // preferred if font file exists
+                  fontFamily: "Lato-SemiBold", // preferred if font file exists
                   fontSize: 20,
                   lineHeight: 32,
                   letterSpacing: -0.48, // -3% of 16px = -0.48
                   color: "#000000",
                   textAlign: "center",
-                  fontWeight: "700",
                 }}
               >
-                My Cart
+                My Orders
               </Text>
             </View>
-            <View></View>
+  
           </View>
         </View>
         <View style={{ paddingHorizontal: 20, gap: 30 }}>
-          <Text style={{ fontSize: 15, fontWeight: 600 }}>Active Orders</Text>
+          <Text style={{ fontSize: 15, fontFamily: "Lato-SemiBold"}}>ACTIVE ORDERS</Text>
           {orders?.map((item: any, index: number) => {
             return (
               <>
@@ -158,8 +143,9 @@ const Myorder = ({ navigation }: MyorderScreenProps) => {
                   style={{
                     backgroundColor: "#fff",
                     paddingHorizontal: 10,
-                    paddingVertical: 20,
-                    gap: 10,
+                    paddingTop: 35,
+                    paddingBottom: 20,
+                    gap: 15,
                     position: "relative",
                   }}
                 >
@@ -170,13 +156,14 @@ const Myorder = ({ navigation }: MyorderScreenProps) => {
                       top: 0,
                       right: 0,
                       paddingHorizontal: 10,
-                      paddingVertical: 2,
+                      paddingVertical: 5,
                       borderTopRightRadius: 8,
                       borderBottomLeftRadius: 8,
+                      
                     }}
                   >
-                    <Text style={{ color: "#fff", fontSize: 10 }}>
-                      {item.orderStatus}
+                    <Text style={{ color: "#fff", fontSize: 12,fontFamily : 'Lato-SemiBold' }}>
+                      {item.orderStatus === "SHIPPED" ? "ON THE WAY" : item.orderStatus}
                     </Text>
                   </View>
 
@@ -187,34 +174,36 @@ const Myorder = ({ navigation }: MyorderScreenProps) => {
                     }}
                   >
                     <View style={{ gap: 10 }}>
-                      <Text style={{}}>ORDER DETAILS</Text>
+                      <Text style={{fontSize : 15,fontFamily : 'Lato-Bold'}}>ORDER DETAILS</Text>
                     </View>
                     <View style={{}}>
-                      <Text>{item.createdAt}</Text>
+                      <Text style={{ fontSize: 12, fontFamily: "Lato-Regular", color: "#454545" }}>
+                        {formatDateTime(item.createdAt)}
+                      </Text>
                     </View>
                   </View>
-                  <Image
-                    style={{ width: 350 }}
-                    source={require("../../assets/images/line.png")}
-                  />
+                  <DashedLine />
 
-                  <View style={{ gap: 10 }}>
+                  <View style={{ gap: 20 }}>
                     {item.orderItems.map((item: any, index: number) => {
                       return (
+                        <View key={index}>
                         <View
                           style={{
                             flexDirection: "row",
                             justifyContent: "space-between",
                           }}
                         >
-                          <Text>{item.title}</Text>
-                          <Text>{item.price}</Text>
+                          <Text style={{ fontFamily: "Lato-Regular", fontSize: 16 }}>{item.title}</Text>
+                          <Text style={{ fontFamily: "Lato-Regular", fontSize: 16 }}>{item.price}</Text>
+                        </View>
                         </View>
                       );
                     })}
                   </View>
 
                   <Button
+                    variant=""
                     onPress={() => {
                       if (item.orderStatus === "DELIVERED") {
                         navigation.navigate("GiveRating", {
@@ -227,7 +216,7 @@ const Myorder = ({ navigation }: MyorderScreenProps) => {
                       }
                     }}
                     title={item.orderStatus === "DELIVERED" ? "Give Rating" : "Track Order"}
-                    color={"rgba(30, 18, 61, 1)"}
+                    color={item.orderStatus === "DELIVERED" ? "#059B5D" : "#1E123D"}
                   ></Button>
                 </View>
               </>

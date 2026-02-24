@@ -162,26 +162,20 @@
 // });
 
 import React, { useEffect, useRef } from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, Text, StyleSheet, Image, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import Svg, { Defs, RadialGradient, Stop, Rect } from "react-native-svg";
-import { useNavigation } from "@react-navigation/native";
+import { SvgUri } from "react-native-svg";
+import { StackScreenProps } from "@react-navigation/stack";
+import { RootStackParamList } from "../../navigation/RootStackParamList";
+
+type OrderPlacedSuccessScreenProps = StackScreenProps<
+  RootStackParamList,
+  "OrderPlacedSuccess"
+>;
 
 const SoftBlob = ({ color, style }: { color: string; style: any }) => {
-  const navigation = useNavigation();
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      navigation.navigate("DrawerNavigation", {
-        screen: "BottomNavigation",
-        params: {
-          screen: "Home",
-        },
-      });
-    }, 4000); // 4 seconds
-
-    return () => clearTimeout(timer);
-  }, [navigation]);
   return (
     <View style={style}>
       <Svg height="100%" width="100%">
@@ -207,7 +201,16 @@ const SoftBlob = ({ color, style }: { color: string; style: any }) => {
   );
 };
 
-const OrderPlacedSuccess = () => {
+const OrderPlacedSuccess = ({ navigation }: OrderPlacedSuccessScreenProps) => {
+  const handlePress = () => {
+    (navigation as any).navigate("DrawerNavigation", {
+      screen: "BottomNavigation",
+      params: {
+        screen: "Home",
+      },
+    });
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
@@ -225,15 +228,20 @@ const OrderPlacedSuccess = () => {
       {/* Optional subtle noise overlay to remove banding completely */}
       <View style={styles.noiseOverlay} />
 
-      {/* Content Example */}
-      <View style={styles.content}>
-        <Image
-          style={{ width: 120, height: 120 }}
-          source={require("../../assets/images/icons/ordersuccess.png")}
-        />
-        <Text style={styles.title}>Order Successfully Placed!</Text>
-        <Text style={styles.subtitle}>Thank you for shopping from us.</Text>
-      </View>
+      {/* Pressable wrapper to handle touch anywhere on screen */}
+      <Pressable style={styles.pressableArea} onPress={handlePress}>
+        {/* Content Example */}
+        <View style={styles.content}>
+          <Image
+            style={{ width: 175, height: 175 }}
+            source={require("../../assets/images/icons/tick.png")}
+          />
+          <Text style={styles.title}>Order Successfully Placed!</Text>
+          <View style={styles.subtitleContainer}>
+            <Text style={styles.subtitle}>Thank you for shopping from us.</Text>
+          </View>
+        </View>
+      </Pressable>
     </SafeAreaView>
   );
 };
@@ -280,28 +288,50 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.02)",
   },
 
+  pressableArea: {
+    flex: 1,
+    width: "100%",
+  },
   content: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 20,
-    gap: 10,
+    paddingHorizontal: 32,
+    width: "100%",  
+  },
+
+  iconContainer: {
+    width: 120,
+    height: 120,
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   title: {
     fontSize: 24,
-    fontFamily: "Lato-Bold",
+    fontFamily: "Lato-Medium",
+    fontStyle : 'italic',
     fontWeight: "800",
     color: "#000",
     textAlign: "center",
     marginBottom: 10,
+    width: "100%",
+    paddingHorizontal: 8,
+  },
+
+  subtitleContainer: {
+    width: "100%",
+    paddingHorizontal: 16,
+    alignItems: "center",
   },
 
   subtitle: {
     fontSize: 16,
     fontFamily: "Lato-Regular",
-    color: "#666",
+    color: "#000",
     textAlign: "center",
+    width: "100%",
+    height: 50,
   },
   animation: {
     width: 200,
