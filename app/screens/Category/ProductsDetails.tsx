@@ -1,7 +1,6 @@
 import { useTheme } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
 import { View, Text, Image, StyleSheet, LayoutAnimation } from "react-native";
-import { IMAGES } from "../../constants/Images";
 import { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
 import { useDispatch, useSelector } from "react-redux";
@@ -10,43 +9,20 @@ import {
   incrementQuantity,
   selectCartItemById,
 } from "../../redux/reducer/cartReducer";
-import { addTowishList } from "../../redux/reducer/wishListReducer";
 import { Url } from "../../redux/userConstant";
 import { ApiClient } from "../../redux/api";
 import { Product, Variant } from "../../types/product";
 import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-import ProductCard from "../Product/ProductCard";
 import { GlobalStyleSheet } from "../../constants/StyleSheet";
 import SectionContainer from "../../components/Home/SectionContainer";
 import SectionHeader from "../../components/Home/SectionHeader";
-import { widthPercentageToDP as wp } from "react-native-responsive-screen";
 import { calculateDiscountPercentage } from "../../utils/calculateDiscountPercentage";
 import { useAddToCart } from "../../hooks/useAddToCart";
 
 const apiPath = ApiClient();
-
-const swiperimageData = [
-  {
-    image: IMAGES.product1,
-    smallImage: IMAGES.product1,
-  },
-  {
-    image: IMAGES.product2,
-    smallImage: IMAGES.product2,
-  },
-  {
-    image: IMAGES.product3,
-    smallImage: IMAGES.product3,
-  },
-  {
-    image: IMAGES.product4,
-    smallImage: IMAGES.product4,
-  },
-];
 
 type ProductsDetailsScreenProps = StackScreenProps<
   RootStackParamList,
@@ -85,14 +61,19 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
   const [activeTab, setActiveTab] = useState("Description");
   const [expanded, setExpanded] = useState(false);
 
-
-  useEffect(() =>{
+  useEffect(() => {
     console.log("cart item in details page rere", cartItem);
-  },[cartItem])
+  }, [cartItem]);
 
-  useEffect(() =>{
-      setSelectedVariant(product?.variants?.find((variant) => variant.id === cartItem?.variantId) || product?.variants?.[0] || null);
-  },[product,cartItem])
+  useEffect(() => {
+    setSelectedVariant(
+      product?.variants?.find(
+        (variant) => variant.id === cartItem?.variantId,
+      ) ||
+        product?.variants?.[0] ||
+        null,
+    );
+  }, [product, cartItem]);
 
   useEffect(() => {
     console.log("is there in the cart", cartItem, productId);
@@ -121,60 +102,9 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
     }
   }, [product, selectedVariant]);
 
-  const addItemToWishList = () => {
-    const selectedImage = swiperimageData[currentSlide].image;
+ 
 
-    dispatch(
-      addTowishList({
-        image: product?.imageUrl,
-        title: product?.title,
-        price: product?.variants?.[0]?.salePrice,
-        color: false,
-        hascolor: true,
-      } as any),
-    );
-  };
-
-  const DUMMY_PRODUCTS = [
-    {
-      id: "1",
-      title: "Cheese",
-      unit: "1 KG",
-      price: 40,
-    },
-    {
-      id: "2",
-      title: "Butter",
-      unit: "1 KG",
-      price: 20,
-    },
-    {
-      id: "3",
-      title: "Milk",
-      unit: "1 KG",
-      price: 40,
-    },
-    {
-      id: "4",
-      title: "Cheese",
-      unit: "1 KG",
-      price: 40,
-    },
-    {
-      id: "5",
-      title: "Butter",
-      unit: "1 KG",
-      price: 20,
-    },
-  ];
-
-  const productDetails = {
-    Description:
-      "Lorem ipsum dolor sit amet consectetur. Quam diam elementum lacus vulputate tortor rhoncus at. Nulla sit a dictum tellus sit ac amet diam. Vestibulum fringilla arcu nullam at sagittis. At vitae dolor quisque vivamus et maecenas ut. Lectus vel fermentum tempor laoreet phasellus. Neque imperdiet pharetra vestibulum ut sit eu cras ultricies. In sit eget habitant pharetra sagittis sed senectus egestas. Quam vel ut eget ultricies non in phasellus mauris.Ut risus egestas enim cursus odio adipiscing. Nisl suscipit l",
-    Ingredients: "Milk solids, sugar, stabilizers, natural flavors...",
-    "How To Consume": "Consume directly or refrigerate before use...",
-  };
-
+  
   const descriptionText =
     "Lorem ipsum dolor sit amet consectetur. Quam diam elementum lacus vulputate tortor rhoncus at. Nulla sit a dictum tellus sit ac amet diam. Vestibulum fringilla arcu nullam at sagittis. At vitae dolor quisque vivamus et maecenas ut. Lectus vel fermentum tempor laoreet phasellus. Neque imperdiet pharetra vestibulum ut sit eu cras ultricies. In sit eget habitant pharetra sagittis sed senectus egestas. Quam vel ut eget ultricies non in phasellus mauris.Ut risus egestas enim cursus odio adipiscing. Nisl suscipit l Lorem ipsum dolor sit amet consectetur. Quam diam elementum lacus vulputate tortor rhoncus at. Nulla sit a dictum tellus sit ac amet diam. Vestibulum fringilla arcu nullam at sagittis. At vitae dolor quisque vivamus et maecenas ut. Lectus vel fermentum tempor laoreet phasellus. Neque imperdiet pharetra vestibulum ut sit eu cras ultricies. In sit eget habitant pharetra sagittis sed senectus egestas. Quam vel ut eget ultricies non in phasellus mauris.Ut risus egestas enim cursus odio adipiscing. Nisl suscipit l";
 
