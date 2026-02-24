@@ -126,9 +126,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
     fetchBanner();
   }, []);
 
-  useEffect(() => {
-    console.log("addresses stored in redux", addresses);
-  });
+
   useEffect(() => {
     if (!address) return;
     if (!address.governorate) return;
