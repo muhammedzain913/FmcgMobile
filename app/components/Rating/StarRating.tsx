@@ -36,7 +36,7 @@ const StarRating: React.FC<StarRatingProps> = ({
               {
                 width: starSize,
                 height: starSize,
-                tintColor: index < rating ? "#F7700B" : "#E0E0E0", // Orange for filled, gray for empty
+                tintColor: index < rating ? "#F7700B" : "#fff", // Orange for filled, gray for empty
               },
             ]}
             resizeMode="contain"
