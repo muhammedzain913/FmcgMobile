@@ -41,6 +41,7 @@ import UserDeliveryAddressDropDown from "../Location/UserDeliveryAddressDropDown
 import LocationSelectionView from "../../components/BottomSheet/LocationSelectionView";
 import { useSaveUserLocation } from "../../hooks/useSaveUserLocation";
 import Input from "../../components/Input/Input";
+import DashedLine from "../../components/Common/DashedLine";
 
 type MyCartScreenProps = StackScreenProps<RootStackParamList, "MyCart">;
 
@@ -96,7 +97,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
   const totalQuantity = useSelector(selectCartTotalQuantity);
   const totalPrice = useSelector(selectCartTotalPrice);
 
-  const savedAmount = cart.reduce((acc: number, item: any) => {     
+  const savedAmount = cart.reduce((acc: number, item: any) => {
     return acc + (item.productPrice - item.price) * item.quantity;
   }, 0);
 
@@ -210,8 +211,8 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
   });
 
   useEffect(() => {
-    console.log(' this is the cart',cart);
-  })
+    console.log(" this is the cart", cart);
+  });
 
   return (
     <View style={{ flex: 1, backgroundColor: "rgba(250, 250, 250, 1)" }}>
@@ -299,7 +300,12 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
               </Text>
             </LinearGradient>
             <View
-              style={{ flexDirection: "row", gap: 10, alignItems: "center" }}
+              style={{
+                flexDirection: "row",
+                gap: 10,
+                alignItems: "center",
+                overflow: "hidden",
+              }}
             >
               <Text
                 style={{
@@ -312,9 +318,9 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
               </Text>
               <Image
                 style={{ width: 15, height: 15 }}
-                source={require("../../assets/images/icons/delivery-man.png")}
+                source={require("../../assets/images/icons/delivery-bike.png")}
               />
-              <Image source={require("../../assets/images/line.png")} />
+              <DashedLine />
             </View>
 
             <View
@@ -369,12 +375,12 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                   style={{
                     borderWidth: 1,
                     borderBlockColor: "black",
-                    paddingHorizontal: 10,
-                    paddingVertical: 5,
+                    paddingHorizontal: 12,
+                    paddingVertical: 7,
                     borderRadius: 8,
                   }}
                 >
-                  <Text>Change</Text>
+                  <Text style={{ fontFamily: "Lato-Regular" }}>Change</Text>
                 </View>
               </TouchableOpacity>
             </View>
@@ -389,7 +395,8 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                     alignItems: "center",
                     borderRadius: 12,
                     padding: 10,
-                    borderBottomWidth: 1,
+                    borderBottomWidth: cart.at(-1) === item ? 0 : 1,
+                    paddingBottom : 15,
                     borderBottomColor: "#E0E0E0",
                   }}
                 >
@@ -405,7 +412,14 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                       {item.title}
                     </Text>
 
-                    <Text style={styles.subTitle}>{item.quantity} {item.unit === 'LITRE' ? 'L' : item.unit === 'KILOGRAM' ? 'KG' : item.unit}</Text>
+                    <Text style={styles.subTitle}>
+                      {item.variantQuantity}
+                      {item.unit === "LITRE"
+                        ? "L"
+                        : item.unit === "KILOGRAM"
+                          ? "KG"
+                          : item.unit}
+                    </Text>
 
                     <View style={styles.priceRow}>
                       <Text
@@ -437,7 +451,10 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                         dispatch(decrementQuantity({ id: item.id }));
                       }}
                     >
-                      <Text style={styles.stepperBtn}>−</Text>
+                      <Image
+                        source={require("../../assets/images/icons/minusblack.png")}
+                        style={{ width: 15, height: 15 }}
+                      />
                     </TouchableOpacity>
 
                     <Text style={styles.qty}>{item.quantity}</Text>
@@ -447,7 +464,10 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                         dispatch(incrementQuantity({ id: item.id }));
                       }}
                     >
-                      <Text style={styles.stepperBtn}>+</Text>
+                      <Image
+                        source={require("../../assets/images/icons/plusblack.png")}
+                        style={{ width: 15, height: 15 }}
+                      />
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -651,7 +671,9 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
               </View>
               <View style={styles.billContainer}>
                 <Text style={styles.billDetailsText}>Discount</Text>
-                <Text style={{ color: "rgba(5, 155, 93, 1)" }}>{savedAmount}</Text>
+                <Text style={{ color: "rgba(5, 155, 93, 1)" }}>
+                  {savedAmount}
+                </Text>
               </View>
               <View style={styles.billContainer}>
                 <Text style={styles.billDetailsText}>Delivery Charge</Text>
@@ -660,10 +682,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
             </View>
 
             <View style={{ justifyContent: "center", alignItems: "center" }}>
-              <Image
-                style={{ width: width - 100 }}
-                source={require("../../assets/images/icons/linebill.png")}
-              />
+              <DashedLine />
             </View>
 
             <View>
@@ -870,17 +889,28 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
       >
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <View style={{ gap: 10 }}>
-            <Text style={{ color: "rgba(89, 89, 89, 1)" ,fontFamily :'Lato-Regular'}}>Payment Method</Text>
-            <Text style={{ fontFamily : 'Lato-SemiBold' }}>Cash On Delivery</Text>
+            <Text
+              style={{
+                color: "rgba(89, 89, 89, 1)",
+                fontFamily: "Lato-Regular",
+              }}
+            >
+              Payment Method
+            </Text>
+            <Text style={{ fontFamily: "Lato-SemiBold" }}>
+              Cash On Delivery
+            </Text>
           </View>
         </View>
 
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <View style={{ gap: 10 }}>
             <Text style={{ fontFamily: "Lato-Bold", fontSize: 35 }}>
-             د.ك  {totalPrice}
+              د.ك {totalPrice}
             </Text>
-            <Text style={{ color: "rgba(0, 138, 25, 1)" }}>Saved د.ك {savedAmount}</Text>
+            <Text style={{ color: "rgba(0, 138, 25, 1)" }}>
+              Saved د.ك {savedAmount}
+            </Text>
           </View>
           <View
             style={{
@@ -906,10 +936,11 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                 handleSubmitOrder();
               }}
             >
-              <Text style={{ color: "#fff", fontSize: 18 }}>
-                Order Now
-              </Text>
-              <Image source={require("../../assets/images/icons/arrow.png")} />
+              <Text style={{ color: "#fff", fontSize: 18,fontFamily : 'Lato-Medium' }}>Order Now</Text>
+              <Image
+                style={{ width: 15, height: 15 }}
+                source={require("../../assets/images/icons/arrow.png")}
+              />
             </TouchableOpacity>
           </View>
         </View>
@@ -968,7 +999,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginTop: 6,
-    gap : 5
+    gap: 5,
   },
 
   price: {
@@ -993,7 +1024,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
   },
 
   stepperBtn: {
