@@ -33,6 +33,7 @@ export const useAddToCart = () => {
         productPrice: selectedVariant?.price,
         slug: product?.slug,
         variantId : selectedVariant.id,
+        variantQuantity : selectedVariant.quantity,
         color: false,
         hascolor: false,
         vendorId: product?.userId,
