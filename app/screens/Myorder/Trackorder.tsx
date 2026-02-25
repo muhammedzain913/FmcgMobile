@@ -16,6 +16,9 @@ import { useLocationSelector } from "../../hooks/useLocationSelector";
 import ProductCard from "../Product/ProductCard";
 import OrderSuccess from "./OrderSuccess";
 import Svg, { Defs, RadialGradient, Stop, Circle } from "react-native-svg";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import DashedLine from "../../components/Common/DashedLine";
+import { formatDateTime } from "../../utils/formatDateTime";
 
 const apiPath = ApiClient();
 
@@ -520,114 +523,180 @@ const Trackorder = ({ route, navigation }: TrackorderScreenProps) => {
                   gap: 5,
                   justifyContent: "center",
                   borderRadius: 7,
+                  paddingHorizontal: 15,
                 }}
               >
-                <Text
-                  style={{
-                    textAlign: "center",
-                    flexShrink: 1,
-                    color: "#fff",
-                    fontSize: 10,
-                    fontFamily: "Lato-Regular",
-                  }}
-                >
-                  Order Placed
-                </Text>
-                <Text
-                  style={{
-                    textAlign: "center",
-                    flexShrink: 1,
-                    color: "#fff",
-                    fontSize: 10,
-                    fontFamily: "Lato-Regular",
-                  }}
-                >
-                  Order Confirmed
-                </Text>
-                <Text
-                  style={{
-                    textAlign: "center",
-                    flexShrink: 1,
-                    color: "#fff",
-                    fontSize: 10,
-                    fontFamily: "Lato-Regular",
-                  }}
-                >
-                  Delivery Partner Assigned
-                </Text>
-                <Text
-                  style={{
-                    textAlign: "center",
-                    flexShrink: 1,
-                    color: "#fff",
-                    fontSize: 10,
-                    fontFamily: "Lato-Regular",
-                  }}
-                >
-                  Out For Delivery
-                </Text>
+                <View style={{ alignItems: "flex-start", flexBasis: "22%" }}>
+                  <Text
+                    style={{
+                      textAlign: "center",
+                      color: currentStepIndex == 1 ? "#059B5D" : "#fff",
+                      fontSize: 10,
+                      fontFamily: "Lato-Regular",
+                    }}
+                  >
+                    Order
+                  </Text>
+                  <Text
+                    style={{
+                      textAlign: "center",
+                      color: currentStepIndex == 1 ? "#059B5D" : "#fff",
+                      fontSize: 10,
+                      fontFamily: "Lato-Regular",
+                    }}
+                  >
+                    Placed
+                  </Text>
+                </View>
+
+                <View style={{ alignItems: "center", flexBasis: "28%" }}>
+                  <Text
+                    style={{
+                      textAlign: "center",
+                      color: currentStepIndex == 2 ? "#059B5D" : "#fff",
+                      fontSize: 10,
+                      fontFamily: "Lato-Regular",
+                    }}
+                  >
+                    Order
+                  </Text>
+                  <Text
+                    style={{
+                      textAlign: "center",
+                      color: currentStepIndex == 2 ? "#059B5D" : "#fff",
+                      fontSize: 10,
+                      fontFamily: "Lato-Regular",
+                    }}
+                  >
+                    Confirmed
+                  </Text>
+                </View>
+
+                <View style={{ alignItems: "center", flexBasis: "28%" }}>
+                  <Text
+                    style={{
+                      textAlign: "center",
+                      color: currentStepIndex == 3 ? "#059B5D" : "#fff",
+                      fontSize: 10,
+                      fontFamily: "Lato-Regular",
+                    }}
+                  >
+                    Delivery Partner
+                  </Text>
+                  <Text
+                    style={{
+                      textAlign: "center",
+                      color: currentStepIndex == 3 ? "#059B5D" : "#fff",
+                      fontSize: 10,
+                      fontFamily: "Lato-Regular",
+                    }}
+                  >
+                    Assigned
+                  </Text>
+                </View>
+
+                <View style={{ alignItems: "flex-end", flexBasis: "22%" }}>
+                  <Text
+                    style={{
+                      textAlign: "center",
+                      color: currentStepIndex == 3 ? "#059B5D" : "#fff",
+                      fontSize: 10,
+                      fontFamily: "Lato-Regular",
+                    }}
+                  >
+                    Out For
+                  </Text>
+                  <Text
+                    style={{
+                      textAlign: "center",
+                      color: currentStepIndex == 3 ? "#059B5D" : "#fff",
+                      fontSize: 10,
+                      fontFamily: "Lato-Regular",
+                    }}
+                  >
+                    Delivery
+                  </Text>
+                </View>
               </View>
             </View>
 
-            <View
-              style={{
-                marginTop: 30,
-                borderWidth: 1,
-                borderColor: "#fff",
-                borderRadius: 30,
-                paddingHorizontal: 15,
-                paddingVertical: 10,
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
+            <View style={{ paddingHorizontal: 40 }}>
               <View
-                style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
+                style={{
+                  marginTop: 30,
+                  borderWidth: 1,
+                  borderColor: "#fff",
+                  borderRadius: 30,
+                  paddingHorizontal: 8,
+                  paddingVertical: 7,
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
               >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 10,
+                  }}
+                >
+                  <Image
+                    style={{ width: 30, height: 30, borderRadius: 20 }}
+                    source={require("../../assets/images/face.png")}
+                  />
+                  <Text style={{ color: "#fff" }}>
+                    {order?.deliveryAgent?.name}
+                  </Text>
+                </View>
                 <Image
-                  style={{ width: 40, height: 40, borderRadius: 20 }}
-                  source={require("../../assets/images/face.png")}
+                  style={{ width: 20, height: 20 }}
+                  source={require("../../assets/images/icons/phonedelivery.png")}
                 />
-                <Text style={{ color: "#fff" }}>
-                  {order?.deliveryAgent?.name}
-                </Text>
               </View>
-              <Image
-                source={require("../../assets/images/icons/phonedelivery.png")}
-              />
             </View>
           </View>
 
           <View
             style={{
-              backgroundColor: "#fff",
               paddingHorizontal: 10,
               paddingVertical: 10,
               gap: 20,
+              borderRadius: 8,
+              backgroundColor: "#ffff",
             }}
           >
-            <Text style={{ fontSize: 15, fontWeight: "bold" }}>
-              DELIVERING TO
-            </Text>
-
-            <View style={{ gap: 10, flexDirection: "row" }}>
-              <View
+            <View
+              style={{
+                flexDirection: "row",
+                gap: 10,
+                alignItems: "center",
+                overflow: "hidden",
+              }}
+            >
+              <Text
                 style={{
-                  width: 32,
-                  height: 32,
-                  borderWidth: 1,
-                  borderColor: "rgba(240, 240, 240, 1)",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  borderRadius: 100,
+                  color: "rgba(5, 155, 93, 1)",
+                  fontSize: 16,
+                  fontFamily: "Lato-Bold",
                 }}
               >
-                <Image
-                  source={require("../../assets/images/icons/House.png")}
-                />
-              </View>
+                Delivering To
+              </Text>
+              <Image
+                style={{ width: 15, height: 15 }}
+                source={require("../../assets/images/icons/delivery-bike.png")}
+              />
+              <DashedLine />
+            </View>
 
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
               <View>
                 <View
                   style={{
@@ -637,34 +706,33 @@ const Trackorder = ({ route, navigation }: TrackorderScreenProps) => {
                   }}
                 >
                   <Image
-                    style={{ resizeMode: "contain" }}
-                    source={require("../../assets/images/icons/locationblack.png")}
+                    style={{ height: 15, width: 15, resizeMode: "contain" }}
+                    source={require("../../assets/images/icons/locationpinblack.png")}
                   />
                   <Text
                     style={{
-                      fontFamily: "Lato",
+                      fontFamily: "Lato-Bold",
                       fontSize: 15,
-                      fontWeight: "700",
                       lineHeight: 28,
                       color: "#141313",
                     }}
                   >
-                    {order?.governorate}
+                    {order?.streetAddress || "Home"}
                   </Text>
                 </View>
 
                 <View>
                   <Text
                     style={{
-                      fontFamily: "Lato",
+                      fontFamily: "Lato-Regular",
                       fontSize: 13,
-                      fontWeight: "400",
                       lineHeight: 28,
                       color: "rgb(17, 17, 17)",
                     }}
                   >
-                    {order?.city} , Block {order?.block} ,{" "}
-                    {order?.streetAddress} , {order?.apartmentNumber}
+                    Street {order?.streetAddress} , Apartment{" "}
+                    {order?.apartmentNumber}{" "}
+                    {order?.phone ? `, ${order?.phone}` : ""}
                   </Text>
                 </View>
               </View>
@@ -680,91 +748,37 @@ const Trackorder = ({ route, navigation }: TrackorderScreenProps) => {
             }}
           >
             <View style={styles.billContainer}>
-              <Text style={{ fontWeight: 500 }}>ORDER DETAILS</Text>
-              <Text style={{}}>{order?.createdAt}</Text>
+              <Text
+                style={{
+                  color: "#000",
+                  fontSize: 15,
+                  fontFamily: "Lato-SemiBold",
+                }}
+              >
+                ORDER DETAILS
+              </Text>
+              <Text style={{fontSize: 12, fontFamily: "Lato-Regular", color: "#454545" }}>{formatDateTime(order?.createdAt)}</Text>
             </View>
-            <View style={{ justifyContent: "center", alignItems: "center" }}>
-              <Image
-                style={{ width: 400 }}
-                source={require("../../assets/images/icons/linebill.png")}
-              />
-            </View>
+
+            <DashedLine />
+
             {order?.orderItems?.map((item: any, index: number) => {
               return (
                 <View style={styles.billContainer}>
-                  <Text style={{}}>{item.title}</Text>
-                  <Text style={{}}>₹ {item.price}</Text>
+                  <Text
+                    style={{
+                      color: "#5D5D5D",
+                      fontSize: 13,
+                      fontFamily: "Lato-Regular",
+                    }}
+                  >
+                    {item.title}
+                  </Text>
+                  <Text style={{}}>{item.price}</Text>
                 </View>
               );
             })}
           </View>
-          {/* 
-          <View
-            style={[
-              GlobalStyleSheet.container,
-              {
-                paddingHorizontal: 20,
-                paddingBottom: 10,
-                backgroundColor: "#fff",
-              },
-            ]}
-          >
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <Text
-                style={{
-                  fontFamily: "Lato",
-                  fontSize: 15,
-                  fontWeight: "700", // Bold
-                  lineHeight: 20,
-                  letterSpacing: -0.39, // -3% of 13px ≈ -0.39
-                  color: "rgba(31, 31, 31, 1)",
-                  textTransform: "uppercase", // Cap height look
-                }}
-              >
-                SIMILAR PRODUCTS
-              </Text>
-
-              <View
-                style={{
-                  flexDirection: "row", // Flow: Horizontal
-                  alignItems: "center", // Inner alignment
-                  height: 30, // Fixed height
-                  paddingVertical: 7.78,
-                  paddingHorizontal: 10,
-                  borderRadius: 8,
-                  borderWidth: 1,
-
-                  borderColor: "rgba(240, 240, 240, 1)",
-                  backgroundColor: "rgba(255, 255, 255, 0.6)",
-                }}
-              >
-                <Image
-                  style={{ height: 10, width: 10, marginTop: 4 }}
-                  source={require("../../assets/images/icons/top-right.png")}
-                />
-              </View>
-            </View>
-
-            <ScrollView
-              contentContainerStyle={{}}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-            >
-              {DUMMY_PRODUCTS?.map((data: any, index: any) => {
-                return (
-                  <>
-                    <ProductCard product={data} addToCart={() => {}} navigation={navigation} />
-                  </>
-                );
-              })}
-            </ScrollView>
-          </View> */}
         </View>
       </ScrollView>
     </View>

@@ -61,6 +61,7 @@ export type RootStackParamList = {
   AddDeleveryAddress: undefined;
   Myorder: undefined;
   Notification: undefined;
+  SavedAddresses: undefined;
   Home: undefined;
   Accordion: undefined;
   BottomSheet: undefined;

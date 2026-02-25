@@ -15,6 +15,7 @@ import {
   SafeAreaView,
   ImageBackground,
   StyleSheet,
+  Alert,
 } from "react-native";
 import Header from "../../layout/Header";
 import { GlobalStyleSheet } from "../../constants/StyleSheet";
@@ -27,6 +28,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/reducer/userReducer";
 import { StatusBar } from "expo-status-bar";
 import { LinearGradient } from "expo-linear-gradient";
+import iconSet from "@expo/vector-icons/build/Fontisto";
 
 type ProfileScreenProps = StackScreenProps<RootStackParamList, "Profile">;
 
@@ -39,26 +41,61 @@ const Profile = ({ navigation }: ProfileScreenProps) => {
   const { colors }: { colors: any } = theme;
 
   const MENU = [
-    { label: "My Orders", icon: "receipt-outline" },
-    { label: "Saved Addresses", icon: "location-outline" },
-    { label: "My Cart", icon: "cart-outline" },
-    { label: "FAQ", icon: "help-circle-outline" },
-    { label: "Help", icon: "information-circle-outline" },
-    { label: "Support", icon: "headset-outline" },
+    { label: "My Orders", icon: IMAGES.myordersprofile },
+    { label: "Saved Addresses", icon: IMAGES.bookmark },
+    { label: "My Cart", icon: IMAGES.mycart },
+    { label: "FAQ", icon: IMAGES.Chat },
+    { label: "Help", icon: IMAGES.information },
+    { label: "Support", icon: IMAGES.support },
+    { label: "Log Out", icon: IMAGES.logout },
   ];
 
   //const navigation = useNavigation();
 
   const handleLogout = () => {
-    setLoading(true);
-    setTimeout(() => {
-      dologout();
-    }, 5000);
+    Alert.alert(
+      "Log Out",
+      "Are you sure you want to log out?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Log Out",
+          style: "destructive",
+          onPress: () => {
+            setLoading(true);
+            setTimeout(() => {
+              dispatch(logout());
+              setLoading(false);
+            }, 5000);
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
 
-    const dologout = () => {
-      dispatch(logout());
-      setLoading(false);
-    };
+  const handleMenuPress = (label: string) => {
+    switch (label) {
+      case "My Orders":
+        navigation.navigate("Myorder");
+        break;
+      case "My Cart":
+        navigation.navigate("MyCart");
+        break;
+      case "Saved Addresses":
+        navigation.navigate("SavedAddresses");
+        break;
+      case "Log Out":
+        handleLogout();
+        break;
+      // Add more cases for other menu items as needed
+      default:
+        // Handle other menu items or do nothing
+        break;
+    }
   };
 
   if (loading) {
@@ -86,7 +123,7 @@ const Profile = ({ navigation }: ProfileScreenProps) => {
     );
   }
   return (
-    <SafeAreaView style={{ backgroundColor: colors.card, flex: 1 }}>
+    <SafeAreaView style={{ backgroundColor: "#FAFAFA", flex: 1 }}>
       <StatusBar translucent={true} backgroundColor="#1E123D" style="light" />
       <ScrollView
         contentContainerStyle={{ gap: 30 }}
@@ -131,7 +168,7 @@ const Profile = ({ navigation }: ProfileScreenProps) => {
                 <View style={styles.profileRow}>
                   {/* Profile Image */}
                   <Image
-                    source={require('../../assets/images/profilepic.jpg')}
+                    source={require("../../assets/images/profilepic.jpg")}
                     style={styles.profileImage}
                   />
 
@@ -169,13 +206,21 @@ const Profile = ({ navigation }: ProfileScreenProps) => {
 
         <View style={styles.menuContainer}>
           {MENU.map((item, index) => (
-            <TouchableOpacity key={index} style={styles.menuItem}>
+            <TouchableOpacity
+              key={index}
+              style={styles.menuItem}
+              onPress={() => handleMenuPress(item.label)}
+            >
               <View style={styles.menuLeft}>
-                <Ionicons name={item.icon as any} size={18} color="#1F1F1F" />
+                <Image
+                  style={{ width: 20, height: 20, tintColor: "#000" }}
+                  source={item?.icon}
+                />
                 <Text style={styles.menuText}>{item.label}</Text>
               </View>
-
-              <Ionicons name="chevron-forward" size={18} color="#1E123D" />
+              {index !== MENU.length - 1 && (
+                <Ionicons name="chevron-forward" size={18} color="#1E123D" />
+              )}
             </TouchableOpacity>
           ))}
 
@@ -373,7 +418,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     backgroundColor: "#FFFFFF",
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 20,
     borderRadius: 12,
   },
 
@@ -385,6 +430,7 @@ const styles = StyleSheet.create({
 
   menuText: {
     fontSize: 15,
+    fontFamily: "Lato-SemiBold",
     fontWeight: "500",
     color: "#1F1F1F",
   },
