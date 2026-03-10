@@ -9,14 +9,13 @@ import { LocationResponse } from "../../types/response/locationResponse";
 import { AddressRequest } from "../../types/requests/addressRequest";
 import { AddressResponse } from "../../types/response/addressResponse";
 
-
 const mobileAxios = axios.create({
-  baseURL : Url,
-  headers : {
-    'Content-Type' : 'aplication/json',
-    'X-Client-Type' : 'mobile'
-  }
-})
+  baseURL: Url,
+  headers: {
+    "Content-Type": "aplication/json",
+    "X-Client-Type": "mobile",
+  },
+});
 
 const apiPath = ApiClient();
 
@@ -53,13 +52,13 @@ export const registerUser = createAsyncThunk<
   console.log("reached thunk successfully");
   try {
     const response = await mobileAxios.post(`${Url}/api/users`, userData);
-    console.log('response from register',response)
+    console.log("response from register", response);
     console.log("from api", response.data);
     return response.data;
   } catch (error: any) {
     console.log(error.message);
     return rejectWithValue(
-      error.response?.data?.message || "Something went wrong"
+      error.response?.data?.message || "Something went wrong",
     );
   }
 });
@@ -75,10 +74,10 @@ export const loginUser = createAsyncThunk(
     } catch (error: any) {
       console.log(error.message);
       return rejectWithValue(
-        error.response?.data?.message || "Something went wrong"
+        error.response?.data?.message || "Something went wrong",
       );
     }
-  }
+  },
 );
 
 export const test = createAsyncThunk(
@@ -92,10 +91,10 @@ export const test = createAsyncThunk(
     } catch (error: any) {
       console.log(error.message);
       return rejectWithValue(
-        error.response?.data?.message || "Something went wrong"
+        error.response?.data?.message || "Something went wrong",
       );
     }
-  }
+  },
 );
 
 export const saveUserLocation = createAsyncThunk<
@@ -115,12 +114,11 @@ export const saveUserLocation = createAsyncThunk<
     } catch (error: any) {
       console.log(error.message);
       return rejectWithValue(
-        error.response?.data?.message || "Failed to save location"
+        error.response?.data?.message || "Failed to save location",
       );
     }
-  }
+  },
 );
-
 
 export const saveUserAddress = createAsyncThunk<
   any,
@@ -139,10 +137,10 @@ export const saveUserAddress = createAsyncThunk<
     } catch (error: any) {
       console.log(error.message);
       return rejectWithValue(
-        error.response?.data?.message || "Failed to save address"
+        error.response?.data?.message || "Failed to save address",
       );
     }
-  }
+  },
 );
 
 export const updateUserAddress = createAsyncThunk<
@@ -151,22 +149,29 @@ export const updateUserAddress = createAsyncThunk<
   { rejectValue: string }
 >(
   "user/updateUserAddress",
-  async (address: AddressRequest & { id: string }, { getState, rejectWithValue }) => {
+  async (
+    address: AddressRequest & { id: string },
+    { getState, rejectWithValue },
+  ) => {
     console.log("reached update address thunk successfully", address);
 
     try {
       const { id, ...addressData } = address; // Extract id from address
-      const response = await apiPath.put(`${Url}/api/addresses/${id}`, addressData, {});
+      const response = await apiPath.put(
+        `${Url}/api/addresses/${id}`,
+        addressData,
+        {},
+      );
       console.log("updated address from api", response.data);
 
       return response.data;
     } catch (error: any) {
       console.log(error.message);
       return rejectWithValue(
-        error.response?.data?.message || "Failed to update address"
+        error.response?.data?.message || "Failed to update address",
       );
     }
-  }
+  },
 );
 
 export const deleteUserAddress = createAsyncThunk<
@@ -186,12 +191,11 @@ export const deleteUserAddress = createAsyncThunk<
     } catch (error: any) {
       console.log(error.message);
       return rejectWithValue(
-        error.response?.data?.message || "Failed to delete address"
+        error.response?.data?.message || "Failed to delete address",
       );
     }
-  }
+  },
 );
-
 
 export const userSlice = createSlice({
   name: "user",
@@ -202,9 +206,13 @@ export const userSlice = createSlice({
       state.userInfo.refreshToken = action.payload.refreshToken;
     },
     setSelectedAddress: (state, action) => {
+      console.log('setSelectedAddress reducer - payload:', action.payload);
+      console.log('setSelectedAddress reducer - payload ID:', action.payload?.id);
+      console.log('setSelectedAddress reducer - current state:', state.selectedAddress?.id);
       state.selectedAddress = action.payload;
+      console.log('setSelectedAddress reducer - new state:', state.selectedAddress?.id);
     },
- 
+
     logout(state) {
       // Reset to initial state
       state.userInfo = {};
@@ -237,13 +245,14 @@ export const userSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         console.log("payload");
         state.status = "succeeded";
-        const { location, addresses,...userWithoutLocation } = action.payload;
+        const { location, addresses, ...userWithoutLocation } = action.payload;
         console.log("user info reducer login", action.payload);
         console.log("login info without location", userWithoutLocation);
         state.userInfo = userWithoutLocation;
         state.defaultAddress = location || null;
         state.addresses = addresses || [];
-        state.selectedAddress = addresses && addresses.length > 0 ? addresses[0] : null;
+        state.selectedAddress =
+          addresses && addresses.length > 0 ? addresses[0] : null;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.status = "failed";
@@ -256,7 +265,12 @@ export const userSlice = createSlice({
         console.log("payload");
         state.status = "succeeded";
         console.log("location payload", action.payload);
-        console.log("default address before api", action.payload.governorate, action.payload.city, action.payload.block);
+        console.log(
+          "default address before api",
+          action.payload.governorate,
+          action.payload.city,
+          action.payload.block,
+        );
         state.defaultAddress = action.payload.data;
       })
       .addCase(saveUserLocation.rejected, (state, action) => {
@@ -293,6 +307,8 @@ export const userSlice = createSlice({
             ...state.addresses.filter((addr) => addr.id !== updatedAddress.id),
             updatedAddress,
           ];
+
+          state.selectedAddress = action.payload.data;
         }
       })
       .addCase(updateUserAddress.rejected, (state, action) => {
@@ -309,7 +325,7 @@ export const userSlice = createSlice({
         // Filter out the deleted address by id
         if (action.payload?.id) {
           state.addresses = state.addresses.filter(
-            (addr) => addr.id !== action.payload.id
+            (addr) => addr.id !== action.payload.id,
           );
         }
       })
@@ -323,10 +339,6 @@ export const userSlice = createSlice({
   },
 });
 
-
-
-
-export const { setToken, logout } =
-  userSlice.actions;
+export const { setToken, setSelectedAddress, logout } = userSlice.actions;
 
 export default userSlice.reducer;

@@ -2,6 +2,11 @@ interface Category {
   title : string
 }
 
+interface SubCategory {
+  title : string
+  id : string
+}
+
 export interface Variant {
   id?: string;
   salePrice: number;
@@ -26,6 +31,6 @@ export interface Product {
   updatedAt?: string;
   productImages: string[];
   unit : string; // Keep unit at product level if it's not variant-specific
-  category : Category;
+  subCategory : SubCategory;
   variants: Variant[]; // Array of variants
 }

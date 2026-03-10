@@ -88,7 +88,7 @@ const LocationSelectionView: React.FC<LocationSelectionViewProps> = ({
         <Button
           variant="non"
           color={"#1E123D"}
-          title="Continue"
+          title="Submit"
           onPress={onContinue}
         />
       </View>

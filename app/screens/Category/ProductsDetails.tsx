@@ -170,7 +170,7 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
             >
               <View>
                 <Text style={styles.categoryText}>
-                  {product?.category.title}
+                  {product?.subCategory.title}
                 </Text>
               </View>
               <View

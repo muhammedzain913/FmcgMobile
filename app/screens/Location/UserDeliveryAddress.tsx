@@ -81,6 +81,10 @@ const UserDeliveryAddress = ({
     setBlockVisible,
   } = useLocationSelector();
 
+  useEffect(() => {
+    console.log('settted ',governorate)
+  })
+
   const onSaveAddress = () => {
     if (!savedAddress.type) {
       Alert.alert("Error", "Please select an address type");

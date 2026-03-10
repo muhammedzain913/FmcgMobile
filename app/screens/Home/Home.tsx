@@ -74,7 +74,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
   const [dealCategoryProducts, setDealCategoryProducts] = useState<any[]>();
   const [searchQuery, setSearchQuety] = useState<string>("");
   const totalQuantity = useSelector(selectCartTotalQuantity);
-  const [view, setView] = useState<"LIST" | "EDIT" | "LOCATION">("LIST");
+  
   const [editingAddress, setEditingAddress] = useState<any>(null); // Store address being edited
   const toggleSheet = () => {
     isOpen.value = !isOpen.value;
@@ -146,6 +146,11 @@ const Home = ({ navigation }: HomeScreenProps) => {
     };
     fetchProducts();
   }, [searchQuery, governorate, city, block]);
+
+
+  useEffect(() => {
+    console.log('this are the ',governorate,city,block)
+  },[])
 
   useEffect(() => {
     const setDealProducts = async () => {
@@ -321,6 +326,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
               <CategoryCard
                 key={index}
                 title={data.title}
+                image={data.imageUrl}
                 onPress={() => {
                   setSelectedCategory(data.title);
                   // Navigate to StackNavigator's Categories screen (not BottomNavigation's Categories tab)
@@ -410,67 +416,11 @@ const Home = ({ navigation }: HomeScreenProps) => {
 
 
       <LocationBottomSheet isOpen={isOpen} toggleSheet={toggleSheet}>
-        {view === "LIST" && (
-          <Animated.View style={styles.bottomSheetContent}>
-            <BottomSheetHeader title="CHANGE ADDRESS" onClose={toggleSheet} />
-            <AddressList
-              addresses={addresses}
-              onEdit={(address) => {
-                setEditingAddress(address); // Set the address to be edited
-                toggleSheetEdit();
-                setView("EDIT");
-              }}
-              onRemove={(address) => {
-                Alert.alert(
-                  "Delete Address",
-                  "Are you sure you want to delete this address?",
-                  [
-                    {
-                      text: "Cancel",
-                      style: "cancel",
-                    },
-                    {
-                      text: "Delete",
-                      style: "destructive",
-                      onPress: () => {
-                        deleteAddress({
-                          id: address.id,
-                          onSuccess: () => {
-                            // Address will be removed from Redux state automatically
-                          },
-                          onError: (error) => {
-                            Alert.alert(
-                              "Error",
-                              error || "Failed to delete address",
-                            );
-                          },
-                        });
-                      },
-                    },
-                  ],
-                );
-              }}
-              onAddNew={() => {
-                setEditingAddress(null); // Clear editing address (add new mode)
-                setView("EDIT");
-              }}
-            />
-          </Animated.View>
-        )}
+  
+      
 
-        {view === "EDIT" && (
-          <Animated.View style={{ ...styles.bottomSheetContent, gap: 40 }}>
-            <BottomSheetHeader title="CHANGE ADDRESS" onClose={toggleSheet} />
-            <UserDeliveryAddressDropDown
-              addressToEdit={editingAddress} // Pass address if editing, null if adding new
-              onChangeLocation={() => {
-                setView("LOCATION");
-              }}
-            />
-          </Animated.View>
-        )}
-
-        {view === "LOCATION" && (
+   
+   
           <Animated.View
             style={{
               ...styles.bottomSheetContent,
@@ -529,7 +479,6 @@ const Home = ({ navigation }: HomeScreenProps) => {
                     },
                     onSuccess: () => {
                       isOpen.value = false;
-                      setView("EDIT"); // Go back to EDIT view after saving location
                     },
                     onError: (error) => {
                       Alert.alert("Error", error || "Failed to save location");
@@ -539,7 +488,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
               />
             </View>
           </Animated.View>
-        )}
+        
       </LocationBottomSheet>
       <GlobalCartNotification />
     </SafeAreaView>

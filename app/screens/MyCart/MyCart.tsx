@@ -42,6 +42,8 @@ import LocationSelectionView from "../../components/BottomSheet/LocationSelectio
 import { useSaveUserLocation } from "../../hooks/useSaveUserLocation";
 import Input from "../../components/Input/Input";
 import DashedLine from "../../components/Common/DashedLine";
+import { setSelectedAddress } from "../../redux/reducer/userReducer";
+import { AddressResponse } from "../../types/response/addressResponse";
 
 type MyCartScreenProps = StackScreenProps<RootStackParamList, "MyCart">;
 
@@ -72,7 +74,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
   const isOpen = useSharedValue(false);
   const isOpenEdit = useSharedValue(false);
 
-  const [view, setView] = useState<"LIST" | "EDIT" | "LOCATION">("LIST");
+  const [view, setView] = useState<"LIST" | "EDIT" | "LOCATION">("LOCATION");
   const [editingAddress, setEditingAddress] = useState<any>(null); // Store address being edited
   const toggleSheet = () => {
     isOpen.value = !isOpen.value;
@@ -102,7 +104,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
   }, 0);
 
   useEffect(() => {
-    console.log("first item", cart[0]);
+    console.log("first item", selectedAddress);
   });
 
   const {
@@ -168,6 +170,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
         block: userLocation.block.name, // block → district
         streetAddress: selectedAddress?.street, // street → streetAddress
         phone: selectedAddress?.contactPhone || user.phone, // Fallback to user phone or dummy if selectedAddress is missing
+        apartmentNumber : selectedAddress.apartmentNumber,
         paymentMethod: "Cash On Delivery",
       };
 
@@ -534,7 +537,9 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
       <LocationBottomSheet isOpen={isOpen} toggleSheet={toggleSheet}>
         {view === "LIST" && (
           <Animated.View style={styles.bottomSheetContent}>
-            <BottomSheetHeader title="CHANGE ADDRESS" onClose={toggleSheet} />
+            <BottomSheetHeader title="CHANGE ADDRESS" onClose={() => {
+             setView("LOCATION");  toggleSheet();
+            }} />
             <AddressList
               addresses={addresses}
               onEdit={(address) => {
@@ -575,6 +580,10 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
               onAddNew={() => {
                 setEditingAddress(null); // Clear editing address (add new mode)
                 setView("EDIT");
+              }}
+
+              onSelect = {(address : AddressResponse) => {
+                dispatch(setSelectedAddress(address))
               }}
             />
           </Animated.View>
@@ -665,8 +674,6 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                       },
                       onSuccess: () => {
                         isOpen.value = false;
-                        setView("LIST");
-                        // Cart is cleared globally when saveUserLocation succeeds
                         navigation.navigate("Home");
                       },
                       onError: (error) => {
@@ -694,9 +701,8 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                     return;
                   }
 
-                  // No gov/city/block change: no warning and no location API call
-                  isOpen.value = false;
-                  setView("LIST");
+                  setView('LIST')
+               
                 }}
               />
             </View>

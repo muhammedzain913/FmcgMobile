@@ -142,24 +142,6 @@ const UserDeliveryAddressDropDown = ({
         >
           <View style={{ justifyContent: "space-between" }}>
             <View style={{ gap: 30 }}>
-              <View style={{ gap: 50 }}>
-                <View
-                  style={{
-                    borderBottomWidth: 1,
-                    borderBottomColor: "grey",
-                    paddingBottom: 20,
-                  }}
-                >
-                  <LocationDisplay
-                    governorate={governorate}
-                    city={city}
-                    block={block}
-                    showChangeButton={true}
-                    onChangePress={onChangeLocation}
-                    textColor="#000"
-                  />
-                </View>
-              </View>
 
               <View style={{ gap: 15 }}>
                 <Input

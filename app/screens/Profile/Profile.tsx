@@ -34,7 +34,8 @@ type ProfileScreenProps = StackScreenProps<RootStackParamList, "Profile">;
 
 const Profile = ({ navigation }: ProfileScreenProps) => {
   const user = useSelector((x: any) => x.user.userInfo);
-  const address = useSelector((x: any) => x.user.defaultAddress);
+  const selectedAddress = useSelector((x: any) => x.user.selectedAddress);
+  const address = selectedAddress; // Use selectedAddress instead of defaultAddress
   const dispatch = useDispatch();
   const [loading, setLoading] = useState<boolean>(false);
   const theme = useTheme();
@@ -85,8 +86,8 @@ const Profile = ({ navigation }: ProfileScreenProps) => {
       case "My Cart":
         navigation.navigate("MyCart");
         break;
-      case "Saved Addresses":
-        navigation.navigate("SavedAddresses");
+      // case "Saved Addresses":
+      //   navigation.navigate("SavedAddresses");
         break;
       case "Log Out":
         handleLogout();

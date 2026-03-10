@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { createStackNavigator, CardStyleInterpolators } from "@react-navigation/stack";
+import {
+  createStackNavigator,
+  CardStyleInterpolators,
+} from "@react-navigation/stack";
 import { RootStackParamList } from "./RootStackParamList";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -71,7 +74,7 @@ import OrderSuccess from "../screens/Myorder/OrderSuccess";
 import OrderPlacedSuccess from "../screens/Myorder/OrderPlacedSuccess";
 import GiveRating from "../screens/Myorder/GiveRating";
 import ShopByBrand from "../screens/Brand/ShopByBrand";
-import SavedAddresses from "../screens/Profile/SavedAddresses";
+// import SavedAddresses from "../screens/Profile/SavedAddresses";
 //import BottomNavigation from './BottomNavigation';
 
 const StackComponent = createStackNavigator<RootStackParamList>();
@@ -80,9 +83,9 @@ const StackNavigator = () => {
   const authState = useSelector((state: any) => state.user);
   const defaultAddress = useSelector((x: any) => x.user?.defaultAddress);
 
+  const isDeliveryAddressExist = useSelector((x) => x.user.addresses);
+
   // Determine initial route based on whether user has saved location
-  const isDeliveryAddressExist =
-    defaultAddress?.street !== null && defaultAddress?.building !== null;
 
   const initialRouteName =
     defaultAddress && isDeliveryAddressExist
@@ -90,7 +93,13 @@ const StackNavigator = () => {
       : "UserLocation";
 
   useEffect(() => {
-    console.log("true or not", isDeliveryAddressExist);
+    console.log("arrar", isDeliveryAddressExist);
+    console.log("info frm info", authState.userInfo);
+
+  });
+
+  useEffect(() => {
+    console.log("default", defaultAddress);
     try {
       OneSignal.Debug.setLogLevel(LogLevel.Verbose);
       OneSignal.initialize("9a5c6e06-280d-4a50-8b1c-8c95d71f2c45");
@@ -122,10 +131,6 @@ const StackNavigator = () => {
     }
   }, [authState.userInfo?.id]);
 
-  useEffect(() => {
-    console.log("Initial Route Name:", isDeliveryAddressExist, defaultAddress);
-  }, [isDeliveryAddressExist]);
-
   return (
     <SafeAreaView style={{ width: "100%", flex: 1 }} edges={[]}>
       {/* <StatusBar style="auto" /> */}
@@ -138,20 +143,20 @@ const StackNavigator = () => {
           cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
           transitionSpec: {
             open: {
-              animation: 'timing',
+              animation: "timing",
               config: {
                 duration: 300,
               },
             },
             close: {
-              animation: 'timing',
+              animation: "timing",
               config: {
                 duration: 250,
               },
             },
           },
           gestureEnabled: true,
-          gestureDirection: 'horizontal',
+          gestureDirection: "horizontal",
         }}
       >
         <StackComponent.Screen name="Demo" component={Demo} />
@@ -174,15 +179,14 @@ const StackNavigator = () => {
           component={ConfirmLocation}
         />
 
-        
-        <StackComponent.Screen
-          name="ShopByBrand"
-          component={ShopByBrand}
-        />
+        <StackComponent.Screen name="ShopByBrand" component={ShopByBrand} />
         <StackComponent.Screen name="Brands" component={Brands} />
 
         <StackComponent.Screen name="OrderSuccess" component={OrderSuccess} />
-        <StackComponent.Screen name="OrderPlacedSuccess" component={OrderPlacedSuccess} />
+        <StackComponent.Screen
+          name="OrderPlacedSuccess"
+          component={OrderPlacedSuccess}
+        />
         <StackComponent.Screen name="GiveRating" component={GiveRating} />
         <StackComponent.Screen name="AllCategories" component={AllCategories} />
         <StackComponent.Screen name="Categories" component={Categories} />
@@ -220,7 +224,7 @@ const StackNavigator = () => {
         <StackComponent.Screen name="Writereview" component={Writereview} />
         <StackComponent.Screen name="Profile" component={Profile} />
         <StackComponent.Screen name="EditProfile" component={EditProfile} />
-        <StackComponent.Screen name="SavedAddresses" component={SavedAddresses} />
+        {/* <StackComponent.Screen name="SavedAddresses" component={SavedAddresses} /> */}
         <StackComponent.Screen name="Language" component={Language} />
         <StackComponent.Screen name="Questions" component={Questions} />
         <StackComponent.Screen name="Coupons" component={Coupons} />

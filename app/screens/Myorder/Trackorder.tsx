@@ -95,6 +95,7 @@ const Trackorder = ({ route, navigation }: TrackorderScreenProps) => {
       try {
         const response = await apiPath.get(`${Url}/api/orders/${orderId}`);
         setOrder(response.data);
+        console.log('this is the specified order',response.data)
         setOrderStatus(response.data.orderStatus);
         setDeliveryAgentStatus(response.data.deliveryAgentStatus);
       } catch (error: any) {
@@ -153,102 +154,39 @@ const Trackorder = ({ route, navigation }: TrackorderScreenProps) => {
     );
   };
 
-  const renderOrderStatuses = (title: string, scenario: string) => {
-    return (
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 20,
-          marginTop: 40,
-        }}
-      >
-        {isStepCompleted(scenario, order) ? (
-          <Image
-            style={{ height: 24, width: 24, resizeMode: "contain" }}
-            source={IMAGES.check}
-          />
-        ) : (
-          renderNotCompleted()
-        )}
-        ``
-        <View>
-          <Text
-            style={{
-              ...FONTS.fontMedium,
-              fontSize: 16,
-              color: isStepCompleted(scenario, order) ? "green" : "black",
-            }}
-          >
-            {title}
-            <Text
-              style={{
-                ...FONTS.fontRegular,
-                fontSize: 14,
-                color: "rgba(0, 0, 0, 0.50)",
-              }}
-            >
-              {" "}
-              27 Dec 2023
-            </Text>
-          </Text>
-          <Text
-            style={{
-              ...FONTS.fontRegular,
-              fontSize: 14,
-              color: colors.title,
-            }}
-          >
-            We has been confirmed
-          </Text>
-        </View>
-        <View
-          style={{
-            height: isStepCompleted(scenario, order) ? 60 : 60,
-            width: 2,
-            backgroundColor: isStepCompleted(scenario, order)
-              ? "green"
-              : "grey",
-            position: "absolute",
-            left: 11,
-            top: 33,
-          }}
-        ></View>
-      </View>
-    );
-  };
+  
 
   // Calculate current step index based on order status and delivery agent status
   const getCurrentStepIndex = () => {
     if (!order) return 0;
 
     // Step 0: Order Placed (always completed if order exists)
-    // Step 1: Order Confirmed (if orderStatus is PROCESSING, SHIPPED, or DELIVERED)
-    // Step 2: Delivery Partner Assigned (if deliveryAgentStatus is ASSIGNED, ACCEPTED, PICKED_UP, or DELIVERED)
-    // Step 3: Out For Delivery (if orderStatus is SHIPPED or deliveryAgentStatus is PICKED_UP or DELIVERED)
+    // Step 1: Order Confirmed (when orderStatus === "PROCESSING")
+    // Step 2: Delivery Partner Assigned (when deliveryAgentStatus === "ASSIGNED")
+    // Step 3: Out For Delivery (when deliveryAgentStatus === "PICKED_UP" AND orderStatus === "SHIPPED")
 
     let step = 0; // Order Placed is always completed
 
-    // Check if Order Confirmed
-    if (["PROCESSING", "SHIPPED", "DELIVERED"].includes(order?.orderStatus)) {
+    // Step 1: Order Confirmed - when vendor accepts the order
+    if (order?.orderStatus === "PROCESSING") {
       step = 1;
     }
 
-    // Check if Delivery Partner Assigned
-    if (
-      ["ASSIGNED", "ACCEPTED", "PICKED_UP", "DELIVERED"].includes(
-        order?.deliveryAgentStatus,
-      )
-    ) {
+    // Step 2: Delivery Partner Assigned - when vendor assigns a delivery agent
+    if (order?.deliveryAgentStatus === "ASSIGNED") {
       step = 2;
     }
 
-    // Check if Out For Delivery
+    // Step 3: Out For Delivery - when delivery agent picks up AND order is shipped
     if (
-      order?.orderStatus === "SHIPPED" ||
-      order?.deliveryAgentStatus === "PICKED_UP" ||
-      order?.deliveryAgentStatus === "DELIVERED"
+      order?.deliveryAgentStatus === "PICKED_UP" &&
+      order?.orderStatus === "SHIPPED"
     ) {
+      step = 3;
+    }
+
+    // If order is delivered, show as completed (step 3)
+    if (order?.orderStatus === "DELIVERED") {
       step = 3;
     }
 
@@ -457,7 +395,20 @@ const Trackorder = ({ route, navigation }: TrackorderScreenProps) => {
                       height: "100%",
                       top: 0,
                       left: 0,
-                      width: `100%`,
+                      // Progress bar should reach the center of the current step's marker
+                      // With 4 markers evenly spaced using space-between:
+                      // Marker 1 (Order Placed) at ~0%
+                      // Marker 2 (Order Confirmed) at ~33.33%
+                      // Marker 3 (Delivery Partner Assigned) at ~66.66%
+                      // Marker 4 (Out For Delivery) at ~100%
+                      // Adding small buffer to ensure it visually reaches the marker center
+                      width: currentStepIndex === 0 
+                        ? "6%" // Small progress to show Order Placed is done
+                        : currentStepIndex === 1 
+                        ? "38%" // Reaches and covers 2nd marker (Order Confirmed)
+                        : currentStepIndex === 2 
+                        ? "69%" // Reaches and covers 3rd marker (Delivery Partner Assigned)
+                        : "100%", // Fully complete (Out For Delivery)
                     }}
                   ></View>
                   {/* Step 0: Order Placed - Always completed */}
@@ -466,10 +417,7 @@ const Trackorder = ({ route, navigation }: TrackorderScreenProps) => {
                       style={{
                         width: 8,
                         height: 8,
-                        backgroundColor:
-                          currentStepIndex >= 1
-                            ? "#fff"
-                            : "rgba(255, 255, 255, 0.3)",
+                        backgroundColor: "#fff", // Always completed
                         borderRadius: 8,
                       }}
                     ></View>
@@ -495,7 +443,9 @@ const Trackorder = ({ route, navigation }: TrackorderScreenProps) => {
                         width: 8,
                         height: 8,
                         backgroundColor:
-                          currentStepIndex >= 2 ? "#fff" : "#fff",
+                          currentStepIndex >= 2
+                            ? "#fff"
+                            : "rgba(255, 255, 255, 0.3)",
                         borderRadius: 8,
                       }}
                     ></View>
@@ -530,7 +480,11 @@ const Trackorder = ({ route, navigation }: TrackorderScreenProps) => {
                   <Text
                     style={{
                       textAlign: "center",
-                      color: currentStepIndex == 1 ? "#059B5D" : "#fff",
+                      color: currentStepIndex === 0 
+                        ? "#059B5D" 
+                        : currentStepIndex > 0 
+                        ? "#fff" 
+                        : "rgba(255, 255, 255, 0.5)",
                       fontSize: 10,
                       fontFamily: "Lato-Regular",
                     }}
@@ -540,7 +494,11 @@ const Trackorder = ({ route, navigation }: TrackorderScreenProps) => {
                   <Text
                     style={{
                       textAlign: "center",
-                      color: currentStepIndex == 1 ? "#059B5D" : "#fff",
+                      color: currentStepIndex === 0 
+                        ? "#059B5D" 
+                        : currentStepIndex > 0 
+                        ? "#fff" 
+                        : "rgba(255, 255, 255, 0.5)",
                       fontSize: 10,
                       fontFamily: "Lato-Regular",
                     }}
@@ -553,7 +511,11 @@ const Trackorder = ({ route, navigation }: TrackorderScreenProps) => {
                   <Text
                     style={{
                       textAlign: "center",
-                      color: currentStepIndex == 2 ? "#059B5D" : "#fff",
+                      color: currentStepIndex === 1 
+                        ? "#059B5D" 
+                        : currentStepIndex > 1 
+                        ? "#fff" 
+                        : "rgba(255, 255, 255, 0.5)",
                       fontSize: 10,
                       fontFamily: "Lato-Regular",
                     }}
@@ -563,7 +525,11 @@ const Trackorder = ({ route, navigation }: TrackorderScreenProps) => {
                   <Text
                     style={{
                       textAlign: "center",
-                      color: currentStepIndex == 2 ? "#059B5D" : "#fff",
+                      color: currentStepIndex === 1 
+                        ? "#059B5D" 
+                        : currentStepIndex > 1 
+                        ? "#fff" 
+                        : "rgba(255, 255, 255, 0.5)",
                       fontSize: 10,
                       fontFamily: "Lato-Regular",
                     }}
@@ -576,7 +542,11 @@ const Trackorder = ({ route, navigation }: TrackorderScreenProps) => {
                   <Text
                     style={{
                       textAlign: "center",
-                      color: currentStepIndex == 3 ? "#059B5D" : "#fff",
+                      color: currentStepIndex === 2 
+                        ? "#059B5D" 
+                        : currentStepIndex > 2 
+                        ? "#fff" 
+                        : "rgba(255, 255, 255, 0.5)",
                       fontSize: 10,
                       fontFamily: "Lato-Regular",
                     }}
@@ -586,7 +556,11 @@ const Trackorder = ({ route, navigation }: TrackorderScreenProps) => {
                   <Text
                     style={{
                       textAlign: "center",
-                      color: currentStepIndex == 3 ? "#059B5D" : "#fff",
+                      color: currentStepIndex === 2 
+                        ? "#059B5D" 
+                        : currentStepIndex > 2 
+                        ? "#fff" 
+                        : "rgba(255, 255, 255, 0.5)",
                       fontSize: 10,
                       fontFamily: "Lato-Regular",
                     }}
@@ -599,7 +573,9 @@ const Trackorder = ({ route, navigation }: TrackorderScreenProps) => {
                   <Text
                     style={{
                       textAlign: "center",
-                      color: currentStepIndex == 3 ? "#059B5D" : "#fff",
+                      color: currentStepIndex === 3 
+                        ? "#059B5D" 
+                        : "rgba(255, 255, 255, 0.5)",
                       fontSize: 10,
                       fontFamily: "Lato-Regular",
                     }}
@@ -609,7 +585,9 @@ const Trackorder = ({ route, navigation }: TrackorderScreenProps) => {
                   <Text
                     style={{
                       textAlign: "center",
-                      color: currentStepIndex == 3 ? "#059B5D" : "#fff",
+                      color: currentStepIndex === 3 
+                        ? "#059B5D" 
+                        : "rgba(255, 255, 255, 0.5)",
                       fontSize: 10,
                       fontFamily: "Lato-Regular",
                     }}

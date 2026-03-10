@@ -28,6 +28,7 @@ const Categories = ({ navigation, route }: CategoriesScreenProps) => {
   const [selectedCategory, setSelectedCategory] = useState<string>(
     route.params?.categoryTitle || "All",
   );
+  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string | null>(null);
   const isOpen = useSharedValue(false);
   const [displayedProducts, setDisplayedProducts] = useState<any[]>();
   const [dealCategory, setDealCategory] = useState<any>();
@@ -67,18 +68,43 @@ const Categories = ({ navigation, route }: CategoriesScreenProps) => {
         "Britannia",
       ],
     },
-    // {
-    //   title: "SORT",
-    //   values: [
-    //     "Price (Low To High)",
-    //     "Price (High To Low)",
-    //     "Discount (High To Low)",
-    //   ],
-    // },
   ];
 
   const toggleSheet = () => {
     isOpen.value = !isOpen.value;
+  };
+
+  // Fetch products by subcategory ID
+  const fetchProductsBySubcategory = async (subcategoryId: string) => {
+    if (!address) {
+      console.log("No address available");
+      return;
+    }
+
+    // Get location IDs
+    const governorateId = address.governorate?.id || address.governorateId;
+    const cityId = address.city?.id || address.cityId;
+    const blockId = address.block?.id || address.blockId;
+
+    if (!governorateId || !cityId || !blockId) {
+      console.log("Missing location data in address");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await apiPath.get(
+        `${Url}/api/products?subCatId=${subcategoryId}&gov=${governorateId}&city=${cityId}&block=${blockId}&search =${searchQuery}`,
+      );
+      console.log("Products by subcategory API", response.data.length);
+      setProducts(response.data);
+      setDisplayedProducts(response.data);
+    } catch (error: any) {
+      console.error("Error fetching products by subcategory:", error);
+      setError(error.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -108,10 +134,20 @@ const Categories = ({ navigation, route }: CategoriesScreenProps) => {
   useEffect(() => {
     const fetchCategory = async () => {
       try {
-        const response = await apiPath.get(`${Url}/api/categories`);
-        console.log("category api", response.data);
-        setCategories(response.data);
-        // setDealCategory(dealCategory);
+        setLoading(true);
+        // If categoryId is provided, fetch subcategories for that category
+        if (route.params?.categoryId) {
+          const response = await apiPath.get(
+            `${Url}/api/categories/${route.params.categoryId}/subcategories`
+          );
+          console.log("subcategories api", response.data);
+          setCategories(response.data);
+        } else {
+          // If no categoryId, fetch all categories (fallback)
+          const response = await apiPath.get(`${Url}/api/categories`);
+          console.log("category api", response.data);
+          setCategories(response.data);
+        }
       } catch (error: any) {
         setError(error.message || "Something went wrong");
       } finally {
@@ -119,7 +155,7 @@ const Categories = ({ navigation, route }: CategoriesScreenProps) => {
       }
     };
     fetchCategory();
-  }, []);
+  }, [route.params?.categoryId]);
 
   // Handle initial category selection from route params - set selectedCategory for indicator
   useEffect(() => {
@@ -134,65 +170,55 @@ const Categories = ({ navigation, route }: CategoriesScreenProps) => {
     }
   }, [route.params?.categoryTitle, categories]);
 
-  // Handle category change when products are loaded and route params exist
+  // Auto-select first subcategory and fetch products when subcategories are loaded
   useEffect(() => {
-    if (!products || products.length === 0) return;
     if (!categories || categories.length === 0) return;
-
-    if (route.params?.categoryId) {
-      handleCategoryChange(route.params.categoryId);
-    } else if (route.params?.categoryTitle) {
-      const category = categories.find(
-        (cat: any) => cat.title === route.params?.categoryTitle,
-      );
-      if (category) {
-        handleCategoryChange(category.id);
-      }
-    }
-  }, [
-    route.params?.categoryId,
-    route.params?.categoryTitle,
-    products,
-    categories,
-  ]);
-
-  useEffect(() => {
     if (!address) return;
-    if (!address.governorate) return;
-    const fetchProducts = async () => {
-      try {
-        const response = await apiPath.get(
-          `${Url}/api/products?gov=${address.governorate.id}&city=${address.city.id}&block=${address.block.id}&search =${searchQuery}`,
-        );
-        console.log("product api", response.data.length);
-        setProducts(response.data);
-        setDisplayedProducts(response.data);
-      } catch (error: any) {
-        setError(error.message || "Something went wrong");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProducts();
+    if (selectedSubcategoryId) return; // Don't auto-select if already selected
+
+    // Auto-select the first subcategory
+    const firstSubcategory = categories[0];
+    if (firstSubcategory) {
+      setSelectedCategory(firstSubcategory.title);
+      setSelectedSubcategoryId(firstSubcategory.id);
+      // Fetch products for the first subcategory
+      fetchProductsBySubcategory(firstSubcategory.id);
+    }
+  }, [categories, address]);
+
+  // Refetch products when search query changes (if subcategory is selected)
+  useEffect(() => {
+    if (selectedSubcategoryId && address) {
+      fetchProductsBySubcategory(selectedSubcategoryId);
+    }
   }, [searchQuery]);
 
-  const handleCategoryChange = (categoryId?: string) => {
-    console.log("ID", categoryId);
-    if (categoryId === undefined) {
-      setDisplayedProducts(products);
-      return;
-    }
-    const productsOfCategoryById = products?.filter(
-      (p: any) => p.category.id === categoryId,
-    );
 
-    console.log("filtered", productsOfCategoryById);
-    setDisplayedProducts(productsOfCategoryById);
-  };
+  // useEffect(() => {
+  //   if (!address) return;
+  //   if (!address.governorate) return;
+  //   const fetchProducts = async () => {
+  //     try {
+  //       const response = await apiPath.get(
+  //         `${Url}/api/products?gov=${address.governorate.id}&city=${address.city.id}&block=${address.block.id}&search =${searchQuery}`,
+  //       );
+  //       console.log("product api", response.data.length);
+  //       setProducts(response.data);
+  //       setDisplayedProducts(response.data);
+  //     } catch (error: any) {
+  //       setError(error.message || "Something went wrong");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchProducts();
+  // }, [searchQuery]);
 
-  const handleCategorySelect = (categoryId: string, categoryTitle: string) => {
+  const handleCategorySelect = (subcategoryId: string, categoryTitle: string) => {
     setSelectedCategory(categoryTitle);
-    handleCategoryChange(categoryId);
+    setSelectedSubcategoryId(subcategoryId);
+    // Fetch products from API with subcategory ID
+    fetchProductsBySubcategory(subcategoryId);
   };
 
   return (

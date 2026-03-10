@@ -1,17 +1,27 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
-import { AddressResponse } from '../../types/response/addressResponse';
+import React from "react";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
+import { AddressResponse } from "../../types/response/addressResponse";
+import { useDispatch, useSelector } from "react-redux";
+import { setSelectedAddress } from "../../redux/reducer/userReducer";
 
 interface AddressCardProps {
   address: AddressResponse;
   onEdit: () => void;
   onRemove: () => void;
+  onSelect : () => void;
 }
 
 const AddressCard: React.FC<AddressCardProps> = ({
   address,
   onEdit,
   onRemove,
+  onSelect
 }) => {
   const location = address.user?.location;
   const governorate = location?.governorate;
@@ -20,83 +30,124 @@ const AddressCard: React.FC<AddressCardProps> = ({
 
   const getAddressTypeLabel = (type: string) => {
     switch (type?.toUpperCase()) {
-      case 'HOME':
-        return 'HOME';
-      case 'WORK':
-        return 'WORK';
-      case 'OTHER':
-        return 'OTHER';
+      case "HOME":
+        return "HOME";
+      case "WORK":
+        return "WORK";
+      case "OTHER":
+        return "OTHER";
       default:
-        return type?.toUpperCase() || 'ADDRESS';
+        return type?.toUpperCase() || "ADDRESS";
     }
   };
 
   const getAddressIcon = (type: string) => {
     switch (type?.toUpperCase()) {
-      case 'HOME':
+      case "HOME":
         return require("../../assets/images/icons/House.png");
-      case 'WORK':
+      case "WORK":
         return require("../../assets/images/icons/briefcase.png");
       default:
         return require("../../assets/images/icons/House.png");
     }
   };
 
+  const dispatch = useDispatch();
+  const selectedAddress = useSelector((x: any) => x?.user?.selectedAddress);
+  // Ensure both IDs are compared as strings to avoid type mismatch
+  const isSelected = String(selectedAddress?.id) === String(address.id);
+
+
+
+
+  const handleCardPress = () => {
+    onSelect()
+  };
+
+  const handleEditPress = () => {
+
+    onEdit();
+    // Reset after a short delay
+    setTimeout(() => {
+  
+    }, 100);
+  };
+
+  const handleRemovePress = () => {
+    onRemove();
+    // Reset after a short delay
+    setTimeout(() => {
+
+    }, 100);
+  };
+
   return (
-    <View style={styles.addressCard}>
-      <View style={styles.addressCardContent}>
-        <View style={styles.addressActions}>
-          <TouchableOpacity onPress={onEdit}>
-            <Text style={styles.editText}>Edit</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={onRemove}>
-            <Text style={{ ...styles.editText, color: "#EB0000" }}>
-              Remove
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.addressRow}>
-          <View style={styles.addressIconContainer}>
-            <Image
-              source={getAddressIcon(address.type)}
-            />
-          </View>
-          <View style={styles.addressInfo}>
-            <View style={styles.addressLocationRow}>
-              <Image
-                style={{
-                  resizeMode: "contain",
-                  width: 15,
-                  height: 15,
-                }}
-                source={require("../../assets/images/icons/locationpinblack.png")}
-              />
-              <Text style={styles.addressTItle}>
-                {getAddressTypeLabel(address.type)}
+      <TouchableOpacity
+        onPress={handleCardPress}
+        activeOpacity={0.7}
+        style={{
+          ...styles.addressCard,
+          borderColor: isSelected ? "#1E123D" : "transparent",
+          borderWidth: isSelected ? 2 : 1,
+        }}
+      >
+        <View
+          style={{
+            ...styles.addressCardContent
+          }}
+        >
+          <View style={styles.addressActions}>
+            <TouchableOpacity
+              onPress={handleEditPress}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.editText}>Edit</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleRemovePress}
+              activeOpacity={0.7}
+            >
+              <Text style={{ ...styles.editText, color: "#EB0000" }}>
+                Remove
               </Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.addressRow}>
+            <View style={styles.addressIconContainer}>
+              <Image source={getAddressIcon(address.type)} />
             </View>
-            <View style={{ gap: 5 }}>
-              {governorate && city && block && (
-                <Text style={styles.addressContent}>
-                  {governorate.name}, {city.name}, {block.name}
+            <View style={styles.addressInfo}>
+              <View style={styles.addressLocationRow}>
+                <Image
+                  style={{
+                    resizeMode: "contain",
+                    width: 15,
+                    height: 15,
+                  }}
+                  source={require("../../assets/images/icons/locationpinblack.png")}
+                />
+                <Text style={styles.addressTItle}>
+                  {getAddressTypeLabel(address.type)}
                 </Text>
-              )}
-              <Text style={styles.addressContent}>
-                {address.street && `${address.street}, `}
-                {address.building && `${address.building}`}
-                {address.contactPhone && `, ${address.contactPhone}`}
-              </Text>
-              {address.apartmentNumber && (
+              </View>
+              <View style={{ gap: 5 }}>
                 <Text style={styles.addressContent}>
-                  Apt {address.apartmentNumber}
-                  {address.floorNumber && `, Floor ${address.floorNumber}`}
+                  {address.street && `${address.street}, `}
+                  {address.building && `${address.building}`}
+                  {address.contactPhone && `, ${address.contactPhone}`}
                 </Text>
-              )}
+                {address.apartmentNumber && (
+                  <Text style={styles.addressContent}>
+                    Apt {address.apartmentNumber}
+                    {address.floorNumber && `, Floor ${address.floorNumber}`}
+                  </Text>
+                )}
+              </View>
             </View>
           </View>
         </View>
-      </View>
-    </View>
+      </TouchableOpacity>
+ 
   );
 };
 
@@ -104,16 +155,10 @@ const styles = StyleSheet.create({
   addressCard: {
     backgroundColor: "#fff",
     borderRadius: 12,
-    padding: 16,
+    padding: 10,
     marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 2,
   },
   addressCardContent: {
-    backgroundColor: "#fff",
     paddingHorizontal: 10,
     paddingVertical: 10,
   },

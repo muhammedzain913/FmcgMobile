@@ -20,9 +20,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
         <View style={styles.categoryImageContainer}>
           <Image
             style={styles.categoryImage}
-            source={
-              image || require("../../assets/images/item/fruitcatimage.png")
-            }
+            source={{uri : image}}
           />
         </View>
         <View>

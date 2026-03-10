@@ -10,15 +10,30 @@ import Button from "../../components/Button/Button";
 type OrderSuccessScreenProps = StackScreenProps<
   RootStackParamList,
   "OrderSuccess"
->;
+> & {
+  order?: any; // Optional order prop for when used as a component
+  route?: any; // Make route optional for component usage
+};
 
-const OrderSuccess = ({ navigation }: OrderSuccessScreenProps) => {
+const OrderSuccess = ({ navigation, route, order: orderProp }: OrderSuccessScreenProps) => {
+  // Get order from route params if navigating, or from prop if rendering as component
+  const order = route?.params?.order || orderProp;
+
   const handleContinueShopping = () => {
-    navigation.navigate("Home");
+    navigation.navigate("DrawerNavigation", {
+      screen: "BottomNavigation",
+      params: {
+        screen: "Home",
+      },
+    });
   };
 
   const handleRateOrder = () => {
-    navigation.navigate("GiveRating");
+    if (order) {
+      navigation.navigate("GiveRating", { order });
+    } else {
+      navigation.navigate("GiveRating");
+    }
   };
 
   return (

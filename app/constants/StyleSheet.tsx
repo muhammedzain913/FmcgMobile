@@ -155,5 +155,32 @@ export const GlobalStyleSheet = StyleSheet.create({
         alignItems:'center',
         justifyContent:'center',
         borderRadius:8,
-    }
+    },
+    // Product styles
+    discountBadge: {
+        fontFamily: "Lato-SemiBold",
+        fontSize: 13,
+        lineHeight: 16,
+        letterSpacing: -0.36,
+        color: "#008A19",
+    },
+    salePrice: {
+        fontFamily: "Lato-Regular",
+        fontSize: 13,
+        lineHeight: 16,
+        letterSpacing: -0.36,
+        color: "rgba(0, 0, 0, 1)",
+    },
+    originalPrice: {
+        fontFamily: "Lato-Medium",
+        fontSize: 14,
+        lineHeight: 16,
+        letterSpacing: -0.36,
+        color: "#8C8C8C",
+        textDecorationLine: "line-through",
+    },
+    priceContainer: {
+        flexDirection: "row",
+        gap: 10,
+    },
 });

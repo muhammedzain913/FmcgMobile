@@ -1,5 +1,5 @@
 import { useTheme } from "@react-navigation/native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   Animated,
   Image,
+  RefreshControl,
+  ActivityIndicator,
 } from "react-native";
 import Header from "../../layout/Header";
 import { COLORS, SIZES, FONTS } from "../../constants/theme";
@@ -36,23 +38,13 @@ type MyorderScreenProps = StackScreenProps<RootStackParamList, "Myorder">;
 const Myorder = ({ navigation }: MyorderScreenProps) => {
   const apiPath = ApiClient();
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const theme = useTheme();
   const { colors }: { colors: any } = theme;
   const userInfo = useSelector((x: any) => x.user.userInfo);
   const id = useSelector((x: any) => x?.user?.userInfo?.id);
   const [orders, setOrders] = useState<any>();
-  const scrollRef = useRef<any>();
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const scrollX = useRef(new Animated.Value(0)).current;
-
-  const onPressTouch = (val: number) => {
-    setCurrentIndex(val);
-    scrollRef.current.scrollTo({
-      x: SIZES.width * val,
-      animated: true,
-    });
-  };
 
   const dispatch = useDispatch();
 
@@ -60,21 +52,33 @@ const Myorder = ({ navigation }: MyorderScreenProps) => {
     dispatch(addTowishList(data));
   };
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const response = await apiPath.get(
-          `${Url}/api/orders`,
-        );
-        setOrders(response.data);
-      } catch (error: any) {
-        setError(error.message || "Something went wrong");
-      } finally {
-        setLoading(false);
+  const fetchOrders = useCallback(async (isRefresh = false) => {
+    try {
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
       }
-    };
+      setError(null);
+      const response = await apiPath.get(`${Url}/api/orders`);
+      setOrders(response.data);
+    } catch (error: any) {
+      setError(error.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [apiPath]);
+
+  // Fetch on mount (first time only)
+  useEffect(() => {
     fetchOrders();
   }, []);
+
+  // Handle pull-to-refresh
+  const onRefresh = useCallback(() => {
+    fetchOrders(true);
+  }, [fetchOrders]);
 
   const getSubTotal = (orderItems: any[]) => {
     return orderItems
@@ -99,7 +103,17 @@ const Myorder = ({ navigation }: MyorderScreenProps) => {
   return (
     <View style={{ flex: 1, backgroundColor: "rgba(250, 250, 250, 1)" }}>
       <StatusBar translucent backgroundColor="transparent" />
-      <ScrollView contentContainerStyle={{ gap: 20 }}>
+      <ScrollView 
+        contentContainerStyle={{ gap: 20 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#1E123D"]}
+            tintColor="#1E123D"
+          />
+        }
+      >
         <View
           style={{
             paddingHorizontal: 20,
@@ -136,7 +150,24 @@ const Myorder = ({ navigation }: MyorderScreenProps) => {
         </View>
         <View style={{ paddingHorizontal: 20, gap: 30 }}>
           <Text style={{ fontSize: 15, fontFamily: "Lato-SemiBold"}}>ACTIVE ORDERS</Text>
-          {orders?.map((item: any, index: number) => {
+          {loading && !orders ? (
+            <View style={{ paddingVertical: 40, alignItems: "center" }}>
+              <ActivityIndicator size="large" color="#1E123D" />
+            </View>
+          ) : error ? (
+            <View style={{ paddingVertical: 40, alignItems: "center" }}>
+              <Text style={{ color: "red", fontFamily: "Lato-Regular", fontSize: 14 }}>
+                {error}
+              </Text>
+            </View>
+          ) : !orders || orders.length === 0 ? (
+            <View style={{ paddingVertical: 40, alignItems: "center" }}>
+              <Text style={{ fontFamily: "Lato-Regular", fontSize: 16, color: "#454545" }}>
+                No orders found
+              </Text>
+            </View>
+          ) : (
+            orders.map((item: any, index: number) => {
             return (
               <>
                 <View
@@ -221,7 +252,8 @@ const Myorder = ({ navigation }: MyorderScreenProps) => {
                 </View>
               </>
             );
-          })}
+            })
+          )}
         </View>
       </ScrollView>
     </View>

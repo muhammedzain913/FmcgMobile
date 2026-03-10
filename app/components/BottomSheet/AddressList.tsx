@@ -1,14 +1,16 @@
-import React from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
-import AddressCard from './AddressCard';
-import Button from '../Button/Button';
-import { AddressResponse } from '../../types/response/addressResponse';
+import React from "react";
+import { View, StyleSheet, ScrollView, TouchableHighlight } from "react-native";
+import AddressCard from "./AddressCard";
+import Button from "../Button/Button";
+import { AddressResponse } from "../../types/response/addressResponse";
+import { useSelector } from "react-redux";
 
 interface AddressListProps {
   addresses: AddressResponse[];
   onEdit: (address: AddressResponse) => void;
   onRemove: (address: AddressResponse) => void;
   onAddNew: () => void;
+  onSelect : (address : AddressResponse) => void;
 }
 
 const AddressList: React.FC<AddressListProps> = ({
@@ -16,10 +18,13 @@ const AddressList: React.FC<AddressListProps> = ({
   onEdit,
   onRemove,
   onAddNew,
+  onSelect
 }) => {
+
+
   return (
     <View style={styles.container}>
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -29,8 +34,9 @@ const AddressList: React.FC<AddressListProps> = ({
             <AddressCard
               key={address.id}
               address={address}
-              onEdit={() => onEdit(address)}
+              onEdit={() => onEdit(address)}  
               onRemove={() => onRemove(address)}
+              onSelect = {() => onSelect(address)}
             />
           ))}
         </View>
@@ -51,7 +57,8 @@ const AddressList: React.FC<AddressListProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
+    marginTop : 20
   },
   scrollView: {
     flex: 1,
@@ -62,6 +69,7 @@ const styles = StyleSheet.create({
   },
   addressList: {
     gap: 10,
+    backgroundColor : '#fff'
   },
   buttonContainer: {
     paddingTop: 20,

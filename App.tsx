@@ -31,6 +31,7 @@ export default function App() {
     // Lato fonts - load with exact names used in code
     Lato: require("./app/assets/fonts/Lato-Regular.ttf"),
     "Lato-Regular": require("./app/assets/fonts/Lato-Regular.ttf"),
+    "Lato-BoldItalic" : require("./app/assets/fonts/Lato-BoldItalic.ttf"),
     "Lato-Bold": require("./app/assets/fonts/Lato-Bold.ttf"),
     "Lato-Light": require("./app/assets/fonts/Lato-Light.ttf"),
     "Lato-Black": require("./app/assets/fonts/Lato-Black.ttf"),
@@ -39,6 +40,8 @@ export default function App() {
     // Map SemiBold and Medium to Bold (since those font files don't exist)
     "Lato-SemiBold": require("./app/assets/fonts/Lato-Bold.ttf"),
     "Lato-Medium": require("./app/assets/fonts/Lato-Regular.ttf"),
+    "Manrope": require("./app/assets/fonts/Manrope-VariableFont_wght.ttf"),
+    "Manrope-SemiBold": require("./app/assets/fonts/Manrope-SemiBold.ttf"),
   });
 
   if (!loaded) {
