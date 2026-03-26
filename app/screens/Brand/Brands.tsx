@@ -6,7 +6,6 @@ import {
   View,
   TextInput,
   TouchableOpacity,
-  ActivityIndicator,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { StackScreenProps } from "@react-navigation/stack";
@@ -27,6 +26,7 @@ const Brands = ({ navigation }: BrandsScreenProps) => {
 
   useEffect(() => {
     const fetchBrands = async () => {
+      console.log("fetching brands");
       try {
         setLoading(true);
         const response = await apiPath.get(`${Url}/api/brands`);
@@ -47,7 +47,7 @@ const Brands = ({ navigation }: BrandsScreenProps) => {
       setFilteredBrands(brands);
     } else {
       const filtered = brands.filter((brand) =>
-        brand.name?.toLowerCase().includes(searchQuery.toLowerCase())
+        brand.name?.toLowerCase().includes(searchQuery.toLowerCase()),
       );
       setFilteredBrands(filtered);
     }
@@ -59,15 +59,24 @@ const Brands = ({ navigation }: BrandsScreenProps) => {
       <View style={styles.content}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={styles.backButton}
+          <View
+            style={{
+              flexDirection: "row", // Flow: Horizontal
+              alignItems: "center", // Inner alignment
+              height: 36, // Fixed height // Padding
+              paddingVertical: 7.78,
+              borderRadius: 8,
+              borderWidth: 1,
+              borderColor: "#E5E5E5",
+              width: 36,
+              justifyContent: "center",
+            }}
           >
             <Image
-              source={require("../../assets/images/icons/CaretLeft.png")}
-              style={styles.backIcon}
+              style={{ height: 20, width: 15, marginTop: 4 }}
+              source={require("../../assets/images/icons/left-chevron.png")}
             />
-          </TouchableOpacity>
+          </View>
           <Text style={styles.headerTitle}>Our Brands</Text>
           <View style={styles.placeholderView} />
         </View>
@@ -91,11 +100,7 @@ const Brands = ({ navigation }: BrandsScreenProps) => {
         </View>
 
         {/* Brands Grid */}
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#1E123D" />
-          </View>
-        ) : filteredBrands.length === 0 ? (
+        {loading ? null : filteredBrands.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>No brands found</Text>
           </View>
@@ -111,7 +116,10 @@ const Brands = ({ navigation }: BrandsScreenProps) => {
                   style={styles.brandCard}
                   onPress={() => {
                     // Navigate to brand products with brandId and brand details
-                    navigation.navigate("ShopByBrand", { brandId: brand.id, brand: brand });
+                    navigation.navigate("ShopByBrand", {
+                      brandId: brand.id,
+                      brand: brand,
+                    });
                   }}
                 >
                   <View style={styles.brandImageContainer}>

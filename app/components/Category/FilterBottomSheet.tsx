@@ -6,6 +6,7 @@ import {
   Animated,
   TouchableOpacity,
   Image,
+  ScrollView,
 } from "react-native";
 import BottomSheetHeader from "../BottomSheet/BottomSheetHeader";
 import Button from "../Button/Button";
@@ -14,11 +15,19 @@ import { filterCriteria } from "../../types/filterCrieria";
 interface FilterBottomSheetProps {
   onClose: () => void;
   filterCriterias: filterCriteria[];
+  onApply?: (filters: {
+    priceRanges: string[];
+    brands: string[];
+    sort: string;
+  }) => void;
+  onClear?: () => void;
 }
 
 const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
   onClose,
   filterCriterias,
+  onApply,
+  onClear,
 }) => {
   const [selectedFilter, setSelectedFilter] = useState<string>("PRICE RANGE");
 
@@ -44,14 +53,10 @@ const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
   // const sortOptions = [
 
   // ];
-  const [selectedSortOption, setSelectedSortOption] = useState<string>(
-    "Price (High To Low)",
-  );
-
-  const [selectedCriteria, setSelectedCriteria] = useState<filterCriteria>({
-    title: "",
-    values: [],
-  });
+  const [selectedSortOption, setSelectedSortOption] =
+    useState<string>("Price (High To Low)");
+  const [selectedPriceRanges, setSelectedPriceRanges] = useState<string[]>([]);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
 
   const getFilterContent = () => {
     switch (selectedFilter) {
@@ -69,12 +74,6 @@ const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
         return filterCriterias[0].values;
     }
   };
-
-  useEffect(() => {
-    console.log("arrays", selectedCriteria);
-    console.log("sort", selectedSortOption);
-
-  });
 
   useEffect(() => {
     // Find the index of the selected filter
@@ -135,29 +134,52 @@ const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
     );
   };
 
-  const emptyCriteria = () => {
-    setSelectedCriteria({ title: "", values: [] });
-  };
-
-  useEffect(() => {
-    console.log("this is the selected one", selectedCriteria);
-  }, [selectedCriteria]);
-
   const handleMultiSelect = (item: string, isSingle: boolean) => {
     if (isSingle) {
-      setSelectedSortOption(prev => (
-        prev === item ? '' : item
-      ));
-    } else {
-      const updatedArray = selectedCriteria.values.includes(item)
-        ? selectedCriteria.values.filter(
-            (criteria: string) => criteria !== item,
-          )
-        : [...selectedCriteria.values, item];
-      setSelectedCriteria({ title: selectedFilter, values: updatedArray });
+      setSelectedSortOption((prev) => (prev === item ? "" : item));
+      return;
+    }
+
+    if (selectedFilter === "PRICE RANGE") {
+      setSelectedPriceRanges((prev) =>
+        prev.includes(item) ? prev.filter((x) => x !== item) : [...prev, item],
+      );
+      return;
+    }
+
+    if (selectedFilter === "BRANDS") {
+      setSelectedBrands((prev) =>
+        prev.includes(item) ? prev.filter((x) => x !== item) : [...prev, item],
+      );
+      return;
     }
   };
+
+  const isSelectedItem = (item: string) => {
+    if (selectedFilter === "SORT") return selectedSortOption === item;
+    if (selectedFilter === "PRICE RANGE") return selectedPriceRanges.includes(item);
+    if (selectedFilter === "BRANDS") return selectedBrands.includes(item);
+    return false;
+  };
+
+  const handleClear = () => {
+    setSelectedPriceRanges([]);
+    setSelectedBrands([]);
+    setSelectedSortOption("Price (High To Low)");
+    onClear?.();
+  };
+
+  const handleApply = () => {
+    onApply?.({
+      priceRanges: selectedPriceRanges,
+      brands: selectedBrands,
+      sort: selectedSortOption,
+    });
+    onClose();
+  };
+
   return (
+    <Animated.ScrollView>
     <Animated.View
       style={{
         ...styles.bottomSheetContent,
@@ -177,7 +199,7 @@ const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
             <TouchableOpacity
               key={index}
               onPress={() => {
-                (setSelectedFilter(filter.title), emptyCriteria());
+                setSelectedFilter(filter.title);
               }}
             >
               <View
@@ -203,7 +225,7 @@ const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
 
           <TouchableOpacity
             onPress={() => {
-              (setSelectedFilter("SORT"), emptyCriteria());
+              setSelectedFilter("SORT");
             }}
           >
             <View
@@ -241,6 +263,7 @@ const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
         </View>
 
         <View style={{ flex: 1, backgroundColor: "#fff" }}>
+          <ScrollView showsVerticalScrollIndicator={false}>
           {getFilterContent().map((item: string, index: number) => {
             return (
               <TouchableOpacity
@@ -257,7 +280,7 @@ const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
                   }}
                 >
                   {radioButton(
-                    selectedCriteria.values.includes(item) || selectedSortOption === item,
+                    isSelectedItem(item),
                     selectedFilter === "SORT",
                   )}
                   <Text style={{ fontFamily: "Lato-Regular", fontSize: 14 }}>
@@ -267,6 +290,7 @@ const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
               </TouchableOpacity>
             );
           })}
+          </ScrollView>
         </View>
       </View>
 
@@ -286,6 +310,7 @@ const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
             text={"green"}
             color={"#fff"}
             title="Clear Filters"
+            onPress={handleClear}
           ></Button>
         </View>
         <View style={{ flex: 1 }}>
@@ -294,10 +319,12 @@ const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
             text={"#fff"}
             color={"#1E123D"}
             title="Apply Filters"
+            onPress={handleApply}
           ></Button>
         </View>
       </View>
     </Animated.View>
+    </Animated.ScrollView>
   );
 };
 
@@ -307,7 +334,7 @@ const styles = StyleSheet.create({
   bottomSheetContent: {
     flex: 1,
     backgroundColor: "#F5F5F5",
-    height: 700,
+    height: 800,
     // paddingHorizontal: 20,
     paddingTop: 50,
   },

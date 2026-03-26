@@ -6,13 +6,13 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
 import Header from "../../layout/Header";
 import StarRating from "../../components/Rating/StarRating";
-import Button from "../../components/Button/Button";
 import { GlobalStyleSheet } from "../../constants/StyleSheet";
 import { ApiClient } from "../../redux/api";
 import { Url } from "../../redux/userConstant";
@@ -39,6 +39,7 @@ const GiveRating = ({ navigation, route }: GiveRatingScreenProps) => {
   const orderFromParams = route.params?.order;
   const [order, setOrder] = useState<any>(orderFromParams);
   const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [rating, setRating] = useState<Rating[]>([]);
 
@@ -93,6 +94,8 @@ const GiveRating = ({ navigation, route }: GiveRatingScreenProps) => {
   };
 
   const handleSubmitRating = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     try {
       const payload = {
         productRatings: rating,
@@ -107,7 +110,12 @@ const GiveRating = ({ navigation, route }: GiveRatingScreenProps) => {
     } catch (error) {
       console.error("Error submitting ratings:", error);
     } finally {
-      navigation.goBack();
+      setIsSubmitting(false);
+      if ((navigation as any)?.canGoBack?.()) {
+        navigation.goBack();
+      } else {
+        navigation.navigate("Myorder");
+      }
     }
   };
 
@@ -286,13 +294,21 @@ const GiveRating = ({ navigation, route }: GiveRatingScreenProps) => {
 
       {/* Submit Rating Button */}
       <View style={styles.buttonContainer}>
-        <Button
-          variant="non"
-          color="#1E123D"
-          text="#FFFFFF"
-          title="Submit Rating"
+        <TouchableOpacity
+          activeOpacity={0.85}
           onPress={handleSubmitRating}
-        />
+          disabled={isSubmitting}
+          style={[
+            styles.submitButton,
+            isSubmitting && { opacity: 0.7 },
+          ]}
+        >
+          {isSubmitting ? (
+            <ActivityIndicator size="small" color="#FFFFFF" />
+          ) : (
+            <Text style={styles.submitButtonText}>Submit Rating</Text>
+          )}
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -429,6 +445,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     backgroundColor: "#FFFFFF",
+  },
+  submitButton: {
+    height: 48,
+    backgroundColor: "#1E123D",
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  submitButtonText: {
+    color: "#FFFFFF",
+    fontSize: 17,
+    fontFamily: "Lato-Medium",
   },
    imageBox: {
     width: 60,

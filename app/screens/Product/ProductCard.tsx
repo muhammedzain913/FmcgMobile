@@ -1,17 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Image,
   Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
+  Vibration,
   View,
 } from "react-native";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
 import { Product, Variant } from "../../types/product";
 import { NavigationProp } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
 import {
   decrementQuantity,
@@ -27,52 +27,81 @@ type ProductCardProps = {
 
   navigation?: NavigationProp<RootStackParamList>; // Optional navigation prop
   containerStyle?: object; // Optional style for the outer container
+  imageContainerHeight?: number; // Optional: override image container height
 };
 
 const ProductCard = React.memo(
-  ({ product, addToCart, navigation, containerStyle }: ProductCardProps) => {
-    const insets = useSafeAreaInsets();
+  ({
+    product,
+    addToCart,
+    navigation,
+    containerStyle,
+    imageContainerHeight,
+  }: ProductCardProps) => {
     const [isAdded, setIsAdded] = useState<boolean>(false);
-    const selectedVariant = product?.variants?.[0] || null; 
+    const selectedVariant = product?.variants?.[0] || null;
     const dispatch = useDispatch<AppDispatch>();
     const cartItem = useSelector(selectCartItemById(product.id));
 
     const handleProductPress = () => {
+      console.log("product card pressed");
       if (navigation) {
-        console.log("Product ID", product.slug);
+        const productId = product?.slug || String(product?.id || "");
+        if (!productId) {
+          console.warn("Product navigation skipped: missing slug/id", product);
+          return;
+        }
+        console.log("Product ID", productId);
         navigation.navigate("ProductsDetails", {
-          productId: product.slug,
+          productId,
         });
       } else {
         console.warn("Navigation not provided to ProductCard");
       }
     };
 
+    const triggerTouchFeedback = () => {
+      // Subtle vibration to give tactile feedback on cart actions.
+      Vibration.vibrate(5);
+    };
+
+
+    useEffect(() => {
+      console.log("product in product card", product);
+    }, [product]);
     return (
-      <View style={[{ width: "100%" }, containerStyle]}>
-        <Pressable style={{ flex: 1 }} onPress={handleProductPress}>
+      <TouchableOpacity
+        style={{ flex: 1 }}
+        activeOpacity={0.95}
+        delayPressIn={0}
+        hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
+        pressRetentionOffset={{ top: 24, bottom: 24, left: 24, right: 24 }}
+        onPress={handleProductPress}
+      >
+        <View style={[{ width: "100%" }, containerStyle]}>
           <View
             style={{
               borderWidth: 1,
               borderRadius: 10,
-              borderColor: "#F5F5F5",
+              borderColor: "#F1F1F1",
               backgroundColor: "#FFFFFF",
               padding: 10,
               width: "100%",
-              height: 150,
+              height: imageContainerHeight ?? 150,
               overflow: "hidden",
             }}
           >
             <Image
               source={{ uri: product.imageUrl }}
               style={{ height: "100%", width: "100%" }}
-              resizeMode="cover"
+              resizeMode= "contain"
             />
             {cartItem ? (
               <LinearGradient
                 colors={["#059B5D", "#023520"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
+                pointerEvents="box-none"
                 style={{
                   paddingHorizontal: 10,
                   paddingVertical: 5,
@@ -87,17 +116,19 @@ const ProductCard = React.memo(
                 }}
               >
                 <View style={{ marginTop: 8 }}>
-                  <TouchableOpacity
-                    onPress={(e) => {
-                      e.stopPropagation();
-                      dispatch(decrementQuantity({ id: product.id }));
+                  <Pressable
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    onPressIn={() => {
+                      triggerTouchFeedback();
+                      console.log("decrement quantity");
+                      dispatch(decrementQuantity({ id: product.id } as any));
                     }}
                   >
                     <Image
                       style={{ width: 10, height: 10 }}
                       source={require("../../assets/images/icons/subtract.png")}
                     />
-                  </TouchableOpacity>
+                  </Pressable>
                 </View>
                 <Text
                   style={{
@@ -109,17 +140,19 @@ const ProductCard = React.memo(
                   {cartItem?.quantity}
                 </Text>
                 <View>
-                  <TouchableOpacity
-                    onPress={(e) => {
-                      e.stopPropagation();
-                      dispatch(incrementQuantity({ id: product.id }));
+                  <Pressable
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    onPressIn={() => {
+                      triggerTouchFeedback();
+                      console.log("increment quantity");
+                      dispatch(incrementQuantity({ id: product.id } as any));
                     }}
                   >
                     <Image
                       style={{ width: 10, height: 15 }}
                       source={require("../../assets/images/icons/add.png")}
                     />
-                  </TouchableOpacity>
+                  </Pressable>
                 </View>
               </LinearGradient>
             ) : (
@@ -131,10 +164,11 @@ const ProductCard = React.memo(
                   bottom: 0,
                   right: 0,
                 }}
-                onPress={(e) => {
-                  addToCart(product,selectedVariant );
+                onPressIn={() => {
+                  console.log("add to cart");
+                  triggerTouchFeedback();
+                  addToCart(product, selectedVariant);
                   setIsAdded(true);
-                  e.stopPropagation();
                 }}
               >
                 <View
@@ -150,7 +184,7 @@ const ProductCard = React.memo(
                   }}
                 >
                   <Image
-                    style={{width : 15,height : 15}}
+                    style={{ width: 15, height: 15 }}
                     source={require("../../assets/images/icons/plusgreen.png")}
                   />
                 </View>
@@ -158,10 +192,23 @@ const ProductCard = React.memo(
             )}
           </View>
 
-          <View style={{ marginTop: 8, gap: 4 , alignItems : 'flex-start'}}>
-            <View style={{flexDirection : 'row', gap :5,alignItems : 'center'}}>
-              <Image style={{width : 14,height : 14}} source={require('../../assets/images/icons/ratingstar.png')}/>
-              <Text style={{fontFamily :'Lato-Regular', fontSize : 12,color : 'orange'}}>{product.averageRating}</Text>
+          <View style={{ marginTop: 8, gap: 4, alignItems: "flex-start" }}>
+            <View
+              style={{ flexDirection: "row", gap: 5, alignItems: "center" }}
+            >
+              <Image
+                style={{ width: 14, height: 14 }}
+                source={require("../../assets/images/icons/ratingstar.png")}
+              />
+              <Text
+                style={{
+                  fontFamily: "Lato-Regular",
+                  fontSize: 12,
+                  color: "orange",
+                }}
+              >
+                {product.averageRating}
+              </Text>
             </View>
             <Text
               style={styles.itemDescription}
@@ -170,13 +217,30 @@ const ProductCard = React.memo(
             >
               {product.title}
             </Text>
-            <Text style={styles.itemDescription}> {product.variants[0]?.quantity} {product.unit === 'KILOGRAM' ? 'KG' : product.unit === 'LITER' ? 'L' : product.unit}</Text>
+            <Text style={styles.itemDescription}>
+              {product.variants[0]?.quantity}{" "}
+              {product.unit === "KILOGRAM"
+                ? "KG"
+                : product.unit === "LITER"
+                  ? "L"
+                  : product.unit}
+            </Text>
             {product.variants[0]?.price > product.variants[0]?.salePrice && (
-              <Text style={{...styles.itemDescription,color : '#008A19',fontFamily : 'Lato-SemiBold'}}>
-                {calculateDiscountPercentage(product.variants[0]?.price, product.variants[0]?.salePrice)}% OFF
+              <Text
+                style={{
+                  ...styles.itemDescription,
+                  color: "#008A19",
+                  fontFamily: "Lato-SemiBold",
+                }}
+              >
+                {calculateDiscountPercentage(
+                  product.variants[0]?.price,
+                  product.variants[0]?.salePrice,
+                )}
+                % OFF
               </Text>
             )}
-            <View style={{ flexDirection: "row",gap : 10 }}>
+            <View style={{ flexDirection: "row", gap: 10 }}>
               <Text
                 style={{
                   ...styles.itemDescription,
@@ -186,21 +250,24 @@ const ProductCard = React.memo(
               >
                 KD {product?.variants[0]?.salePrice}
               </Text>
-              <Text
-                style={{
-                  ...styles.itemDescription,
-                  fontFamily: "Lato-Medium",
-                  fontSize: 14,
-                  color : '#8C8C8C',
-                  textDecorationLine : 'line-through'
-                }}
-              >
-                KD {product.variants[0]?.price}
-              </Text>
+
+              {product.variants[0].salePrice < product.variants[0].price && (
+                <Text
+                  style={{
+                    ...styles.itemDescription,
+                    fontFamily: "Lato-Medium",
+                    fontSize: 14,
+                    color: "#8C8C8C",
+                    textDecorationLine: "line-through",
+                  }}
+                >
+                  KD {product.variants[0]?.price}
+                </Text>
+              )}
             </View>
           </View>
-        </Pressable>
-      </View>
+        </View>
+      </TouchableOpacity>
     );
   },
 );

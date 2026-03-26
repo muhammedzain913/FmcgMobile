@@ -22,9 +22,23 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({
       <ScrollView
         contentContainerStyle={{
           paddingVertical: 10,
+          position: "relative",
         }}
         showsVerticalScrollIndicator={false}
       >
+        <Animated.View
+          pointerEvents="none"
+          style={{
+            height: indicatorHeight,
+            position: "absolute",
+            right: 0,
+            top: 0,
+            width: 4,
+            backgroundColor: "green",
+            borderRadius: 10,
+            transform: [{ translateY: categoryChangeAnim }],
+          }}
+        />
         {categories?.map((item: any, index: number) => {
           return (
             <TouchableOpacity
@@ -76,18 +90,6 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({
           );
         })}
       </ScrollView>
-      <Animated.View
-        style={{
-          height: indicatorHeight,
-          position: "absolute",
-          right: 0,
-          top: 0,
-          width: 4,
-          backgroundColor: "green",
-          borderRadius: 10,
-          transform: [{ translateY: categoryChangeAnim }],
-        }}
-      />
     </View>
   );
 };

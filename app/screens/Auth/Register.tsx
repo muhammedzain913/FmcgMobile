@@ -10,16 +10,11 @@ import {
   ActivityIndicator,
   ImageBackground,
 } from "react-native";
-import { useTheme } from "@react-navigation/native";
-import { COLORS, FONTS } from "../../constants/theme";
-import { IMAGES } from "../../constants/Images";
+import { COLORS } from "../../constants/theme";
 import Input from "../../components/Input/Input";
-import { FontAwesome } from "@expo/vector-icons";
 import Button from "../../components/Button/Button";
-import SocialBtn from "../../components/Socials/SocialBtn";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
 import { StackScreenProps } from "@react-navigation/stack";
-import Checkbox from "expo-checkbox";
 import { useDispatch } from "react-redux";
 import { registerUser } from "../../redux/reducer/userReducer";
 import { AppDispatch } from "../../redux/store";
@@ -29,9 +24,7 @@ type RegisterScreenProps = StackScreenProps<RootStackParamList, "Register">;
 
 const Register = ({ navigation }: RegisterScreenProps) => {
   const dispatch = useDispatch<AppDispatch>();
-  const theme = useTheme();
   const [loading, setLoading] = useState(false);
-  const { colors }: { colors: any } = theme;
   const [registerData, setRegisterData] = useState({
     name: "",
     email: "",
@@ -47,8 +40,6 @@ const Register = ({ navigation }: RegisterScreenProps) => {
       [name]: value,
     });
   };
-
-  const [isChecked, setChecked] = useState(false);
 
   async function onSubmit() {
     const { name, email, password } = registerData;
@@ -153,7 +144,7 @@ const Register = ({ navigation }: RegisterScreenProps) => {
                 textAlign: "center",
               }}
             >
-              Log In using Phone, Google or Apple ID
+              Create your account with email and password
             </Text>
           </View>
         </ImageBackground>
@@ -184,45 +175,11 @@ const Register = ({ navigation }: RegisterScreenProps) => {
             />
           </View>
 
-          <View>
-            <Input
-              type={"password"}
-              placeholder="Password"
-              onChangeText={(value) => handleInputChange("password", value)}
-            />
-
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                margin: 10,
-              }}
-            >
-              <Checkbox
-                //style={{}}
-                value={isChecked}
-                onValueChange={setChecked}
-                color={
-                  isChecked
-                    ? theme.dark
-                      ? COLORS.primary
-                      : colors.title
-                    : undefined
-                }
-              />
-              <Text
-                style={{
-                  ...FONTS.fontRegular,
-                  fontSize: 15,
-                  color: colors.title,
-                  textAlign: "left",
-                }}
-              >
-                {" "}
-                I agree to all Term, Privacy and Fees
-              </Text>
-            </View>
-          </View>
+          <Input
+            type={"password"}
+            placeholder="Password"
+            onChangeText={(value) => handleInputChange("password", value)}
+          />
 
           <View style={{ marginBottom: 20 }}>
             {loading ? (
@@ -238,77 +195,23 @@ const Register = ({ navigation }: RegisterScreenProps) => {
             )}
           </View>
 
-          <Text
-            style={{
-              fontFamily: "Lato-Medium",
-              fontSize: 13,
-              lineHeight: 13,
-              letterSpacing: -0.39,
-              color: "#545454",
-              textAlign: "center",
-              marginVertical: 10,
-            }}
-          >
-            OR
-          </Text>
-
-          <View style={{ gap: 15 ,paddingBottom : 30 }}>
-            <View>
-              <SocialBtn
-                icon={
-                  <Image
-                    style={{ height: 20, width: 20, resizeMode: "contain" }}
-                    source={IMAGES.google2}
-                  />
-                }
-                color={colors.card}
-                rounded
-                text="Continue with Google"
-                //gap
-              />
-            </View>
-            <View>
-              <SocialBtn
-                icon={
-                  <FontAwesome name="apple" size={20} color={colors.title} />
-                }
-                color={colors.card}
-                rounded
-                text="Continue with Apple"
-                //gap
-              />
-            </View>
-
-            <View
-              style={{
-                alignItems: "center",
-                flexDirection: "row",
-                justifyContent: "center",
-              }}
-            >
+          <View style={{ paddingBottom: 30 }}>
+            <Text style={styles.accountPrompt}>
+              Already have an account?{" "}
               <Text
-                style={{
-                  ...FONTS.fontRegular,
-                  fontSize: 15,
-                  color: colors.title,
-                }}
+                onPress={() => navigation.navigate("Login")}
+                style={styles.signInLink}
               >
-                Already have an account?
+                Sign In
               </Text>
-              <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-                <Text
-                  style={{
-                    ...FONTS.fontMedium,
-                    // borderBottomWidth: 1,
-                    // borderBottomColor: colors.title,
-                    color: colors.title,
-                    textDecorationLine: "underline",
-                  }}
-                >
-                  Sign In
-                </Text>
-              </TouchableOpacity>
-            </View>
+            </Text>
+
+            <Text style={styles.termsText}>
+              By Continuing, you agree to our{" "}
+              <Text style={styles.termsLink}>Terms of Use</Text>
+              {" & "}
+              <Text style={styles.termsLink}>Privacy Policy</Text>
+            </Text>
           </View>
         </View>
         {/* </View> */}
@@ -326,5 +229,36 @@ const styles = StyleSheet.create({
   map: {
     width: "100%",
     height: "100%",
+  },
+  accountPrompt: {
+    fontFamily: "Lato-Regular",
+    fontSize: 14,
+    lineHeight: 22,
+    color: "#545454",
+    textAlign: "center",
+  },
+  signInLink: {
+    fontFamily: "Lato-Bold",
+    fontSize: 14,
+    lineHeight: 22,
+    color: "#1E123D",
+  },
+  termsText: {
+    fontFamily: "Lato-Regular",
+    fontWeight: "400",
+    fontSize: 11,
+    lineHeight: 18,
+    letterSpacing: 0,
+    color: "#545454",
+    textAlign: "center",
+    marginTop: 28,
+  },
+  termsLink: {
+    fontFamily: "Lato-SemiBold",
+    fontSize: 11,
+    lineHeight: 18,
+    letterSpacing: 0,
+    color: "#1E123D",
+    textDecorationLine: "underline",
   },
 });

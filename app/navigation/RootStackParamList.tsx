@@ -18,6 +18,7 @@ export type RootStackParamList = {
     order: any; // Order object with orderItems, orderStatus, etc.
   };
   Product : undefined;
+  OnboardingHero: undefined;
   Login: undefined;
   Register: undefined;
   ForgotPassword: undefined;
@@ -52,6 +53,8 @@ export type RootStackParamList = {
   Profile: undefined;
   Wishlist: undefined;
   Search: undefined;
+  ProductSearch: undefined;
+  ShopBySearch: { title?: string; products: any[] };
   Components: undefined;
   Coupons: undefined;
   DeleveryAddress: undefined;

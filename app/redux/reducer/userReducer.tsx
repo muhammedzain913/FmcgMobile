@@ -187,7 +187,7 @@ export const deleteUserAddress = createAsyncThunk<
       const response = await apiPath.del(`${Url}/api/addresses/${id}`);
       console.log("deleted address from api", response.data);
 
-      return response.data; // Returns { id }
+      return response.data.data; // Returns { id }
     } catch (error: any) {
       console.log(error.message);
       return rejectWithValue(
@@ -323,10 +323,19 @@ export const userSlice = createSlice({
         state.status = "succeeded";
         console.log("deleted address payload", action.payload);
         // Filter out the deleted address by id
-        if (action.payload?.id) {
+        console.log("deleted address id", action.payload?.id);
+        const deletedId = action.payload?.id;
+        if (deletedId) {
+          const deletedIdStr = String(deletedId);
           state.addresses = state.addresses.filter(
-            (addr) => addr.id !== action.payload.id,
+            (addr) => String(addr.id) !== deletedIdStr,
           );
+          if (
+            state.selectedAddress &&
+            String(state.selectedAddress.id) === deletedIdStr
+          ) {
+            state.selectedAddress = null;
+          }
         }
       })
       .addCase(deleteUserAddress.rejected, (state, action) => {

@@ -1,18 +1,28 @@
 import { useTheme } from "@react-navigation/native";
-import React, { useEffect, useState } from "react";
-import { View, Text, Image, StyleSheet, LayoutAnimation } from "react-native";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  LayoutAnimation,
+  useWindowDimensions,
+  ScrollView,
+} from "react-native";
+import PagerView from "react-native-pager-view";
 import { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
 import { useDispatch, useSelector } from "react-redux";
 import {
   decrementQuantity,
   incrementQuantity,
+  removeFromCart,
   selectCartItemById,
 } from "../../redux/reducer/cartReducer";
 import { Url } from "../../redux/userConstant";
 import { ApiClient } from "../../redux/api";
 import { Product, Variant } from "../../types/product";
-import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
+import { TouchableOpacity } from "react-native-gesture-handler";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
@@ -21,6 +31,7 @@ import SectionContainer from "../../components/Home/SectionContainer";
 import SectionHeader from "../../components/Home/SectionHeader";
 import { calculateDiscountPercentage } from "../../utils/calculateDiscountPercentage";
 import { useAddToCart } from "../../hooks/useAddToCart";
+import GroceryGifLoader from "../../components/loading/GroceryGifLoader";
 
 const apiPath = ApiClient();
 
@@ -52,61 +63,130 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
   // const isStockExist = product?.productStock ?? 0 > 0;
 
   const [currentSlide, setCurrentSlide] = useState(0);
+  const galleryPagerRef = useRef<PagerView>(null);
+  const { width: windowWidth } = useWindowDimensions();
+
+  const galleryUrls = useMemo(() => {
+    if (!product) return [];
+    const raw = (product as any).productImages;
+    const urls: string[] = [];
+    if (Array.isArray(raw)) {
+      for (const item of raw) {
+        const u =
+          typeof item === "string"
+            ? item
+            : item?.url ?? item?.imageUrl ?? item?.src;
+        if (u && typeof u === "string" && u.trim()) {
+          urls.push(u.trim());
+        }
+      }
+    }
+    const seen = new Set<string>();
+    const unique = urls.filter((u) => (seen.has(u) ? false : (seen.add(u), true)));
+    if (unique.length > 0) {
+      return unique;
+    }
+    if (product.imageUrl?.trim()) {
+      return [product.imageUrl.trim()];
+    }
+    return [];
+  }, [product]);
+
+  useEffect(() => {
+    setCurrentSlide(0);
+    galleryPagerRef.current?.setPage(0);
+  }, [product?.id]);
 
   const [show, setshow] = useState(false);
 
   const dispatch = useDispatch();
 
-  const TABS = ["Description", "Ingredients", "How To Consume"];
-  const [activeTab, setActiveTab] = useState("Description");
+  const [activeTab, setActiveTab] = useState("");
   const [expanded, setExpanded] = useState(false);
+  const [hasUserSelectedVariant, setHasUserSelectedVariant] = useState(false);
+
+
 
   useEffect(() => {
-    console.log("cart item in details page rere", cartItem);
-  }, [cartItem]);
+    if (!product?.id) return;
+    // New product details screen instance: allow initialization from cart/default.
+    setHasUserSelectedVariant(false);
+  }, [product?.id]);
 
   useEffect(() => {
-    setSelectedVariant(
-      product?.variants?.find(
-        (variant) => variant.id === cartItem?.variantId,
-      ) ||
-        product?.variants?.[0] ||
-        null,
-    );
-  }, [product, cartItem]);
+    // On open/reopen, highlight cart variant if present; otherwise first variant.
+    // After user manually taps a variant, do not auto-override their selection.
+    if (!product?.variants?.length || hasUserSelectedVariant) return;
+
+    const variantFromCart = cartItem?.variantId
+      ? product.variants.find(
+          (variant) => String(variant.id) === String(cartItem.variantId),
+        )
+      : null;
+
+    setSelectedVariant(variantFromCart || product.variants[0]);
+  }, [product, cartItem?.variantId, hasUserSelectedVariant]);
 
   useEffect(() => {
-    console.log("is there in the cart", cartItem, productId);
+    if (!productId) {
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
     const fetchProduct = async () => {
+      setLoading(true);
       try {
         const response = await apiPath.get(
           `${Url}/api/products/product/${productId}`,
         );
+        if (cancelled) return;
         const productData = response.data?.data || response.data;
+        console.log("product data images", productData.productImages);
         setproduct(productData);
       } catch (error: any) {
-        setError(error.message || "Something went wrong");
+        if (!cancelled) {
+          setError(error.message || "Something went wrong");
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
     fetchProduct();
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [productId]);
 
-  // Debug: Log product state whenever it changes
+
+
+  const productDetailsTabs = [
+    {
+      key: "Description",
+      value: (product as any)?.description,
+    },
+    {
+      key: "Ingredients",
+      value:
+        (product as any)?.ingredients ??
+        (product as any)?.ingredient ??
+        (product as any)?.ingredientsText,
+    },
+  ].filter((tab) => String(tab.value ?? "").trim().length > 0);
+
+  const activeTabContent =
+    productDetailsTabs.find((tab) => tab.key === activeTab)?.value ?? "";
+
   useEffect(() => {
-    if (product) {
-      console.log("Product state updated:", product);
-      console.log("Selected variant:", selectedVariant);
-      console.log("Product variants length:", product.variants?.length);
+    if (!productDetailsTabs.length) {
+      setActiveTab("");
+      return;
     }
-  }, [product, selectedVariant]);
-
- 
-
-  
-  const descriptionText =
-    "Lorem ipsum dolor sit amet consectetur. Quam diam elementum lacus vulputate tortor rhoncus at. Nulla sit a dictum tellus sit ac amet diam. Vestibulum fringilla arcu nullam at sagittis. At vitae dolor quisque vivamus et maecenas ut. Lectus vel fermentum tempor laoreet phasellus. Neque imperdiet pharetra vestibulum ut sit eu cras ultricies. In sit eget habitant pharetra sagittis sed senectus egestas. Quam vel ut eget ultricies non in phasellus mauris.Ut risus egestas enim cursus odio adipiscing. Nisl suscipit l Lorem ipsum dolor sit amet consectetur. Quam diam elementum lacus vulputate tortor rhoncus at. Nulla sit a dictum tellus sit ac amet diam. Vestibulum fringilla arcu nullam at sagittis. At vitae dolor quisque vivamus et maecenas ut. Lectus vel fermentum tempor laoreet phasellus. Neque imperdiet pharetra vestibulum ut sit eu cras ultricies. In sit eget habitant pharetra sagittis sed senectus egestas. Quam vel ut eget ultricies non in phasellus mauris.Ut risus egestas enim cursus odio adipiscing. Nisl suscipit l";
+    if (!activeTab || !productDetailsTabs.some((tab) => tab.key === activeTab)) {
+      setActiveTab(productDetailsTabs[0].key);
+    }
+  }, [product, activeTab, productDetailsTabs]);
 
   const [textExceeds, setTextExceeds] = useState(false);
   const addItemToCart = useAddToCart();
@@ -119,9 +199,12 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
       }}
     >
       <StatusBar translucent={true} backgroundColor="rgba(245, 245, 245, 1)" />
-      <ScrollView>
+      <ScrollView
+        nestedScrollEnabled
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.imageSection}>
-          {/* Header icons */}
           <View style={styles.topIcons}>
             <TouchableOpacity
               onPress={() => navigation.goBack()}
@@ -140,13 +223,56 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
               />
             </View>
           </View>
-
-          {/* PRODUCT IMAGE */}
-          <Image
-            source={{ uri: product?.imageUrl }}
-            // resizeMode="contain"
-            style={styles.productImage}
-          />
+          {galleryUrls.length > 0 ? (
+            <>
+              <PagerView
+                ref={galleryPagerRef}
+                key={product?.id ?? "gallery"}
+                style={{ width: windowWidth, height: 320 }}
+                initialPage={0}
+                offscreenPageLimit={2}
+                onPageSelected={(e) => {
+                  setCurrentSlide(e.nativeEvent.position);
+                }}
+              >
+                {galleryUrls.map((uri, index) => (
+                  <View
+                    key={`${uri}-${index}`}
+                    collapsable={false}
+                    style={{
+                      width: windowWidth,
+                      height: 320,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Image
+                      source={{ uri }}
+                      style={[styles.productImage, { width: windowWidth }]}
+                      resizeMode="contain"
+                    />
+                  </View>
+                ))}
+              </PagerView>
+              {galleryUrls.length > 1 ? (
+                <View style={styles.dotsRow}>
+                  {galleryUrls.map((_, i) => (
+                    <View
+                      key={i}
+                      style={[
+                        styles.dot,
+                        i === currentSlide && styles.dotActive,
+                      ]}
+                    />
+                  ))}
+                </View>
+              ) : null}
+            </>
+          ) : (
+            <View
+              style={[styles.productImage, { width: windowWidth }]}
+            />
+          )}
         </View>
 
         <View style={{ paddingHorizontal: 20, gap: 20 }}>
@@ -236,7 +362,16 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
                       key={index}
                     >
                       <TouchableOpacity
-                        onPress={() => setSelectedVariant(variant)}
+                        onPress={() => {
+                          setHasUserSelectedVariant(true);
+                          if (
+                            cartItem &&
+                            String(cartItem?.variantId) !== String(variant?.id)
+                          ) {
+                            dispatch(removeFromCart({ id: product?.id } as any));
+                          }
+                          setSelectedVariant(variant);
+                        }}
                       >
                         <View style={{ gap: 10 }}>
                           <Text
@@ -294,7 +429,9 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
                   KD {selectedVariant?.price}
                 </Text>
 
-                {selectedVariant?.price > selectedVariant?.salePrice && (
+                {selectedVariant?.price != null &&
+                  selectedVariant?.salePrice != null &&
+                  selectedVariant.price > selectedVariant.salePrice && (
                   <Text
                     style={{
                       ...styles.itemDescription,
@@ -303,8 +440,8 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
                     }}
                   >
                     {calculateDiscountPercentage(
-                      selectedVariant?.price,
-                      selectedVariant?.salePrice,
+                      selectedVariant.price,
+                      selectedVariant.salePrice,
                     )}
                     % OFF
                   </Text>
@@ -318,7 +455,6 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
               ...styles.descriptionContainer,
               flexDirection: "row",
               justifyContent: "space-between",
-              // gap: 20,
             }}
           >
             <View style={styles.productQualityContainer}>
@@ -365,40 +501,47 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
               borderRadius: 8,
               paddingHorizontal: 10,
               paddingVertical: 20,
+              marginBottom: 20,
             }}
           >
             <View
               style={{
                 flexDirection: "row",
-                gap: 20,
-                justifyContent: "space-between",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 30,
                 paddingHorizontal: 20,
               }}
             >
-              {TABS.map((tab) => (
+              {productDetailsTabs.map((tab) => (
                 <TouchableOpacity
-                  key={tab}
+                  key={tab.key}
                   onPress={() => {
-                    setActiveTab(tab);
-                    setExpanded(false); // reset when switching tabs
+                    setActiveTab(tab.key);
+                    setExpanded(false); 
+                    setTextExceeds(false);
                   }}
                 >
                   <Text
                     style={{
                       fontSize: 14,
                       fontFamily:
-                        activeTab === tab ? "Lato-Bold" : "Lato-SemiBold",
-                      color: activeTab === tab ? "#0E8A4A" : "#9A9A9A",
-                      borderBottomWidth: activeTab === tab ? 2 : 0,
+                        activeTab === tab.key ? "Lato-Bold" : "Lato-SemiBold",
+                      color: activeTab === tab.key ? "#0E8A4A" : "#9A9A9A",
+                      borderBottomWidth: activeTab === tab.key ? 2 : 0,
                       borderBottomColor: "#0E8A4A",
                       paddingBottom: 6,
                     }}
                   >
-                    {tab}
+                    {tab.key}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
+
+            <View>
+
+
 
             <Text
               style={{
@@ -408,13 +551,13 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
               }}
               numberOfLines={expanded ? undefined : 7}
               onTextLayout={(e) => {
-                if (e.nativeEvent.lines.length > 7) {
-                  setTextExceeds(true);
-                }
+                setTextExceeds(e.nativeEvent.lines.length > 7);
               }}
             >
-              {descriptionText}
+              {activeTabContent}
             </Text>
+            </View>
+
 
             {textExceeds && (
               <TouchableOpacity
@@ -441,7 +584,7 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
             )}
           </View>
         </View>
-
+{/* 
         <SectionContainer>
           <SectionHeader
             title="SIMILAR PRODUCTS"
@@ -461,23 +604,8 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
             showsHorizontalScrollIndicator={false}
             nestedScrollEnabled={true}
           >
-            {/* {DUMMY_PRODUCTS?.map((data: any) => {
-              return (
-                <ProductCard
-                  key={data.id || data.slug}
-                  addToCart={() => {}}
-                  product={data}
-                  navigation={navigation}
-                  containerStyle={{
-                    width: wp("38%"),
-                    minWidth: 140,
-                    maxWidth: 180,
-                  }}
-                />
-              );
-            })} */}
           </ScrollView>
-        </SectionContainer>
+        </SectionContainer> */}
       </ScrollView>
 
       <View
@@ -520,7 +648,7 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
                       "decrementing quantity for product ID:",
                       product?.id,
                     );
-                    dispatch(decrementQuantity({ id: product?.id }));
+                    dispatch(decrementQuantity({ id: product?.id } as any) as any);
                   }}
                 >
                   <Image
@@ -540,7 +668,7 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
                 </Text>
                 <TouchableOpacity
                   onPress={() => {
-                    dispatch(incrementQuantity({ id: product?.id }));
+                    dispatch(incrementQuantity({ id: product?.id } as any) as any);
                   }}
                 >
                   <Image
@@ -576,6 +704,9 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
           >
             <TouchableOpacity
               onPress={() => {
+                if (!cartItem && product && selectedVariant) {
+                  addItemToCart(product, selectedVariant);
+                }
                 navigation.navigate("MyCart");
               }}
             >
@@ -584,6 +715,7 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
           </View>
         </View>
       </View>
+      <GroceryGifLoader visible={loading} />
     </SafeAreaView>
   );
 };
@@ -621,7 +753,7 @@ const styles = StyleSheet.create({
     borderColor: "#059B5D",
     gap: 10,
     padding: 10,
-    width: "32%",
+    // width: "32%",
     backgroundColor: "rgba(5, 155, 93, 0.03)",
   },
 
@@ -662,8 +794,28 @@ const styles = StyleSheet.create({
   },
 
   productImage: {
-    width: "100%",
-    height: 320, // 👈 image size (smaller than container)
+    height: 320,
+  },
+  dotsRow: {
+    position: "absolute",
+    bottom: 16,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 6,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "rgba(0, 0, 0, 0.25)",
+  },
+  dotActive: {
+    backgroundColor: "#059B5D",
+    width: 18,
+    borderRadius: 4,
   },
 
   topIcons: {

@@ -2,12 +2,12 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
-  ScrollView,
   Image,
   TouchableOpacity,
   ImageBackground,
   StyleSheet,
 } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 import { useTheme } from "@react-navigation/native";
 import { GlobalStyleSheet } from "../../constants/StyleSheet";
 import { IMAGES } from "../../constants/Images";
@@ -52,6 +52,9 @@ const Home = ({ navigation }: HomeScreenProps) => {
   const { deleteAddress, loading: deleteLoading } = useUserAddress();
   const { saveLocation, loading: locationLoading } = useSaveUserLocation();
   const isOpen = useSharedValue(false);
+  const SHEET_DURATION = 500;
+  const [isLocationSheetMounted, setIsLocationSheetMounted] = useState(false);
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isOpenEdit = useSharedValue(false);
   const [banner, setBanner] = useState<{
     title?: string;
@@ -68,7 +71,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
   const [brands, setBrands] = useState<[]>();
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
-  const [rotatingCategoryIndex, setRotatingCategoryIndex] = useState<number>(0);
+  const [rotatingProductIndex, setRotatingProductIndex] = useState<number>(0);
   const [displayedProducts, setDisplayedProducts] = useState<any[]>();
   const [dealCategory, setDealCategory] = useState<any>();
   const [dealCategoryProducts, setDealCategoryProducts] = useState<any[]>();
@@ -76,8 +79,33 @@ const Home = ({ navigation }: HomeScreenProps) => {
   const totalQuantity = useSelector(selectCartTotalQuantity);
   
   const [editingAddress, setEditingAddress] = useState<any>(null); // Store address being edited
+  const openLocationSheet = () => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+    // Set open state before mount to avoid first-frame blink.
+    isOpen.value = true;
+    setIsLocationSheetMounted(true);
+  };
+
+  const closeLocationSheet = () => {
+    isOpen.value = false;
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+    }
+    closeTimeoutRef.current = setTimeout(() => {
+      setIsLocationSheetMounted(false);
+      closeTimeoutRef.current = null;
+    }, SHEET_DURATION);
+  };
+
   const toggleSheet = () => {
-    isOpen.value = !isOpen.value;
+    if (isOpen.value) {
+      closeLocationSheet();
+    } else {
+      openLocationSheet();
+    }
   };
 
   const toggleSheetEdit = () => {
@@ -161,8 +189,6 @@ const Home = ({ navigation }: HomeScreenProps) => {
         setDealCategoryProducts(dealProducts);
       } catch (error: any) {
         setError(error.message || "Something went wrong");
-      } finally {
-        setLoading(false);
       }
     };
     setDealProducts();
@@ -185,19 +211,21 @@ const Home = ({ navigation }: HomeScreenProps) => {
     fetchCategory();
   }, []);
 
-  // Rotate category title in search box every 3 seconds
+  // Rotate product title in search placeholder every 3 seconds
   useEffect(() => {
-    if (!categories || categories.length === 0) return;
+    if (searchQuery) return; // placeholder is only visible when searchQuery is empty
+
+    const list = displayedProducts?.length ? displayedProducts : products;
+    if (!list || list.length === 0) return;
 
     const interval = setInterval(() => {
-      setRotatingCategoryIndex((prevIndex) => {
-        // Rotate through all categories
-        return (prevIndex + 1) % categories.length;
+      setRotatingProductIndex((prevIndex) => {
+        return (prevIndex + 1) % list.length;
       });
-    }, 3000); // Change every 3 seconds
+    }, 3000);
 
     return () => clearInterval(interval);
-  }, [categories]);
+  }, [displayedProducts, products, searchQuery]);
 
   useEffect(() => {
     const fetchBrands = async () => {
@@ -221,11 +249,19 @@ const Home = ({ navigation }: HomeScreenProps) => {
   const sheetRef = useRef<any>(null);
   const addItemToCart = useAddToCart();
 
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+      }
+    };
+  }, []);
+
   return (
     <SafeAreaView style={{ backgroundColor: colors.card, flex: 1 }} edges={[]}>
       <StatusBar translucent={true} backgroundColor="#1E123D" style="light" />
       <ScrollView
-        contentContainerStyle={{ paddingBottom: totalQuantity > 0 ? 100 : 20 }}
+        contentContainerStyle={{ paddingBottom: totalQuantity > 0 ? 180 : 30 }}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.headerContainer}>
@@ -243,8 +279,8 @@ const Home = ({ navigation }: HomeScreenProps) => {
                 setSearchQuety(e);
               }}
               searchPlaceholder={
-                categories && categories.length > 0 && categories[rotatingCategoryIndex]?.title
-                  ? `Search '${categories[rotatingCategoryIndex].title}'`
+                displayedProducts?.[rotatingProductIndex]?.title
+                  ? `Search '${displayedProducts[rotatingProductIndex].title}'`
                   : "Search Product"
               }
             />
@@ -284,7 +320,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
                   {banner.imageUrl && (
                     <Image
                       style={styles.bannerImage}
-                      source={{ uri: banner.imageUrl }}
+                      source={require("../../assets/images/bannerimg.webp")}
                       resizeMode="contain"
                     />
                   )}
@@ -310,6 +346,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
         <SectionContainer>
           <SectionHeader
             title="Categories"
+            showViewAll={true}
             onViewAllPress={() => navigation.navigate("Categories")}
           />
 
@@ -343,8 +380,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
 
         <SectionContainer>
           <SectionHeader
-            title="PRODUCTS"
-            showViewAll={true}
+            title="NEW PRODUCTS"
             onViewAllPress={() => {
               navigation.navigate("ShopByBrand", {});
             }}
@@ -354,11 +390,54 @@ const Home = ({ navigation }: HomeScreenProps) => {
               gap: 15,
               flexDirection: "row",
               marginTop: 20,
-              paddingRight: 20,
+              paddingRight: 44,
             }}
             horizontal
             showsHorizontalScrollIndicator={false}
-            nestedScrollEnabled={true}
+            nestedScrollEnabled
+            directionalLockEnabled={true}
+            keyboardShouldPersistTaps="handled"
+            overScrollMode="never"
+          >
+            {displayedProducts?.map((data: any) => {
+              return (
+                <ProductCard
+                  key={data.id || data.slug}
+                  addToCart={addItemToCart}
+                  product={data}
+                  navigation={navigation}
+                  containerStyle={{
+                    width: wp("30%"),
+                    minWidth: 120,
+                    maxWidth: 160,
+                  }}
+                />
+              );
+            })}
+          </ScrollView>
+        </SectionContainer>
+
+
+        <SectionContainer>
+          <SectionHeader
+            title="DEAL OF THE DAY"
+            onViewAllPress={() => {
+              navigation.navigate("ShopByBrand", {});
+            }}
+          />
+          <ScrollView
+            contentContainerStyle={{
+              gap: 15,
+              flexDirection: "row",
+              marginTop: 20,
+              paddingRight: 44,
+            }}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            nestedScrollEnabled
+            directionalLockEnabled={true}
+            keyboardShouldPersistTaps="handled"
+            overScrollMode="never"
           >
             {displayedProducts?.map((data: any) => {
               return (
@@ -413,14 +492,13 @@ const Home = ({ navigation }: HomeScreenProps) => {
       </ScrollView>
       <BottomSheet2 ref={sheetRef} />
 
+      {isLocationSheetMounted && (
+      <LocationBottomSheet
+        isOpen={isOpen}
+        toggleSheet={toggleSheet}
+        duration={SHEET_DURATION}
+      >
 
-
-      <LocationBottomSheet isOpen={isOpen} toggleSheet={toggleSheet}>
-  
-      
-
-   
-   
           <Animated.View
             style={{
               ...styles.bottomSheetContent,
@@ -478,7 +556,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
                       country: "Kuwait",
                     },
                     onSuccess: () => {
-                      isOpen.value = false;
+                      closeLocationSheet();
                     },
                     onError: (error) => {
                       Alert.alert("Error", error || "Failed to save location");
@@ -490,6 +568,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
           </Animated.View>
         
       </LocationBottomSheet>
+      )}
       <GlobalCartNotification />
     </SafeAreaView>
   );

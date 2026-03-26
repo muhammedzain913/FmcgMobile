@@ -223,7 +223,7 @@ const DrawerMenu = ({ navigation }: any) => {
           <Text
             style={[FONTS.fontSemiBold, { color: colors.title, fontSize: 13 }]}
           >
-            FootFlare <Text style={[FONTS.fontRegular]}>Shoes Store</Text>
+            Sooper <Text style={[FONTS.fontRegular]}>Shoes Store</Text>
           </Text>
           <Text
             style={[FONTS.fontRegular, { color: colors.title, fontSize: 13 }]}

@@ -168,6 +168,7 @@ import { StatusBar } from "expo-status-bar";
 import Svg, { Defs, RadialGradient, Stop, Rect } from "react-native-svg";
 import { SvgUri } from "react-native-svg";
 import { StackScreenProps } from "@react-navigation/stack";
+import { CommonActions } from "@react-navigation/native";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
 
 type OrderPlacedSuccessScreenProps = StackScreenProps<
@@ -203,12 +204,24 @@ const SoftBlob = ({ color, style }: { color: string; style: any }) => {
 
 const OrderPlacedSuccess = ({ navigation }: OrderPlacedSuccessScreenProps) => {
   const handlePress = () => {
-    (navigation as any).navigate("DrawerNavigation", {
-      screen: "BottomNavigation",
-      params: {
-        screen: "Home",
-      },
-    });
+    // Reset navigation so going "Home" behaves like a fresh app open.
+    // This prevents the previous checkout/order screens from staying in the stack.
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [
+          {
+            name: "DrawerNavigation",
+            params: {
+              screen: "BottomNavigation",
+              params: {
+                screen: "Home",
+              },
+            },
+          },
+        ],
+      })
+    );
   };
 
   return (

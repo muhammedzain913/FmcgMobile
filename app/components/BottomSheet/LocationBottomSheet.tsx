@@ -6,6 +6,7 @@ import {
   Text,
   View,
   TouchableOpacity,
+  Dimensions,
 } from "react-native";
 import Animated, {
   useSharedValue,
@@ -27,7 +28,9 @@ const LocationBottomSheet = ({
   
 }) => {
   const { colors, dark } = useTheme();
-  const height = useSharedValue(0);
+  // Start with a non-zero height so the "closed" sheet is offscreen
+  // even before onLayout runs (prevents first-render flash/open).
+  const height = useSharedValue(Dimensions.get("window").height);
   const progress = useDerivedValue(() =>
     withTiming(isOpen.value ? 0 : 1, { duration })
   );

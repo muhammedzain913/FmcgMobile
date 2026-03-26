@@ -157,6 +157,10 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({
                   value={searchQuery}
                   style={styles.textInput}
                   onChangeText={onSearchChange}
+                  onFocus={() => {
+                    // Open dedicated search screen instead of typing on Home.
+                    navigation.navigate("ProductSearch");
+                  }}
                 />
 
                 {/* Custom Placeholder with Colored Category */}

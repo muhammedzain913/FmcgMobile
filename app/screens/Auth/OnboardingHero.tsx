@@ -13,10 +13,11 @@ import { LinearGradient } from "expo-linear-gradient";
 const OnboardingHero = ({ navigation }: any) => {
   return (
     <>
-      {/* Light status bar for image background */}
-      <StatusBar barStyle="light-content" />
+      {/* Light, translucent status bar so the image shows under the notification area */}
+      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
 
-      <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
+      {/* Use only bottom safe area so content can extend under the status bar */}
+      <SafeAreaView style={styles.safeArea} edges={["bottom"]}>
         <ImageBackground
           source={require("../../assets/images/onboardimage.png")} // 👈 your image path
           style={styles.image}
@@ -90,7 +91,8 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 36,
     lineHeight: 36,
-    fontWeight: "700",
+    fontFamily : 'Lato-Regular',
+    fontStyle : 'italic',
     marginBottom: 20,
   },
 

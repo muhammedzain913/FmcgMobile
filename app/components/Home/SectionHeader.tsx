@@ -10,7 +10,7 @@ interface SectionHeaderProps {
 const SectionHeader: React.FC<SectionHeaderProps> = ({
   title,
   onViewAllPress,
-  showViewAll = true,
+  showViewAll
 }) => {
   return (
     <View style={styles.container}>

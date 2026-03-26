@@ -1,27 +1,27 @@
 {
   "expo": {
-    "name": "footflare",
-    "slug": "footflare",
+    "name": "sooper",
+    "slug": "sooper",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/appicon.png",
+    "icon": "./assets/sooper logoooo 2.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/soopersplashimg.png",
+      "image": "./assets/sooper logoooo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.muhammedzain.footflare"
+      "bundleIdentifier": "com.muhammedzain.sooper"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/appicon.png",
+        "foregroundImage": "./assets/sooper logoooo 2.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.muhammedzain.footflare",
+      "package": "com.muhammedzain.sooper",
       "softwareKeyboardLayoutMode": "pan"
     },
     "web": {

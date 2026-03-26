@@ -8,7 +8,6 @@ import {
   Animated,
   Image,
   RefreshControl,
-  ActivityIndicator,
 } from "react-native";
 import Header from "../../layout/Header";
 import { COLORS, SIZES, FONTS } from "../../constants/theme";
@@ -28,8 +27,7 @@ import { generateSlug } from "../../utils/generateSlug";
 import { StatusBar } from "expo-status-bar";
 import Button from "../../components/Button/Button";
 import DashedLine from "../../components/Common/DashedLine";
-
-
+import GroceryGifLoader from "../../components/loading/GroceryGifLoader";
 
 type MyorderScreenProps = StackScreenProps<RootStackParamList, "Myorder">;
 
@@ -100,6 +98,10 @@ const Myorder = ({ navigation }: MyorderScreenProps) => {
     }
   };
 
+  useEffect(() => {
+    console.log("orders", orders);
+  }, [orders]);
+
   return (
     <View style={{ flex: 1, backgroundColor: "rgba(250, 250, 250, 1)" }}>
       <StatusBar translucent backgroundColor="transparent" />
@@ -150,11 +152,7 @@ const Myorder = ({ navigation }: MyorderScreenProps) => {
         </View>
         <View style={{ paddingHorizontal: 20, gap: 30 }}>
           <Text style={{ fontSize: 15, fontFamily: "Lato-SemiBold"}}>ACTIVE ORDERS</Text>
-          {loading && !orders ? (
-            <View style={{ paddingVertical: 40, alignItems: "center" }}>
-              <ActivityIndicator size="large" color="#1E123D" />
-            </View>
-          ) : error ? (
+          {loading && orders === undefined ? null : error ? (
             <View style={{ paddingVertical: 40, alignItems: "center" }}>
               <Text style={{ color: "red", fontFamily: "Lato-Regular", fontSize: 14 }}>
                 {error}
@@ -256,6 +254,7 @@ const Myorder = ({ navigation }: MyorderScreenProps) => {
           )}
         </View>
       </ScrollView>
+      <GroceryGifLoader visible={loading && orders === undefined} />
     </View>
   );
 };

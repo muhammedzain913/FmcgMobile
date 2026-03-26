@@ -25,7 +25,7 @@ import Button from "../../components/Button/Button";
 import SocialBtn from "../../components/Socials/SocialBtn";
 import { IMAGES } from "../../constants/Images";
 import { FontAwesome } from "@expo/vector-icons";
-import { COLORS, FONTS } from "../../constants/theme";
+import { COLORS } from "../../constants/theme";
 import { StatusBar } from "expo-status-bar";
 
 type LoginScreenProps = StackScreenProps<RootStackParamList, "Login">;
@@ -148,7 +148,7 @@ const Login = ({ navigation }: LoginScreenProps) => {
               textAlign: "center",
             }}
           >
-            Log In using Phone, Google or Apple ID
+            Log In using Email, Google or Apple ID
           </Text>
         </View>
       </ImageBackground>
@@ -182,6 +182,23 @@ const Login = ({ navigation }: LoginScreenProps) => {
             placeholder="Password"
           />
 
+          <TouchableOpacity
+            style={{ alignSelf: "flex-end", marginTop: 4, marginBottom: 4 }}
+            onPress={() => navigation.navigate("ForgotPassword")}
+            activeOpacity={0.7}
+          >
+            <Text
+              style={{
+                fontFamily: "Lato-SemiBold",
+                fontSize: 14,
+                lineHeight: 20,
+                color: "#1E123D",
+              }}
+            >
+              Forgot password?
+            </Text>
+          </TouchableOpacity>
+
           <View style={{ marginVertical: 10 }}>
             {loading ? (
               <ActivityIndicator size="large" color={COLORS.primary} />
@@ -209,9 +226,15 @@ const Login = ({ navigation }: LoginScreenProps) => {
             OR
           </Text>
 
-          <View style={{gap : 30}}>
-            <View style={{ gap: 15 }}>
-              <View>
+          <View style={{ gap: 30 }}>
+            {/* Social login row */}
+            <View
+              style={{
+                flexDirection: "row",
+                columnGap: 12,
+              }}
+            >
+              <View style={{ flex: 1 }}>
                 <SocialBtn
                   icon={
                     <Image
@@ -221,47 +244,37 @@ const Login = ({ navigation }: LoginScreenProps) => {
                   }
                   color={colors.card}
                   rounded
-                  text="Continue with Google"
-                  //gap
+                  text="Google"
                 />
               </View>
-              <View>
+              <View style={{ flex: 1 }}>
                 <SocialBtn
                   icon={
                     <FontAwesome name="apple" size={20} color={colors.title} />
                   }
                   color={colors.card}
                   rounded
-                  text="Continue with Apple"
-                  //gap
+                  text="Apple ID"
                 />
               </View>
             </View>
 
             <View>
-              <TouchableOpacity
-                style={{ justifyContent: "center" }}
-                onPress={() => navigation.navigate("Register")}
-              >
+              <Text style={styles.accountPrompt}>
+                Don&apos;t have an account?{" "}
                 <Text
-                  style={{
-                    ...FONTS.fontMedium,
-                    // borderBottomWidth: 1,
-                    // borderBottomColor: colors.title,
-                    color: colors.title,
-                    textDecorationLine: "underline",
-                    textAlign: "center",
-                  }}
+                  onPress={() => navigation.navigate("Register")}
+                  style={styles.createAccountLink}
                 >
-                  Create an account
+                  Create Account
                 </Text>
-              </TouchableOpacity>
+              </Text>
 
               <Text style={styles.termsText}>
                 By Continuing, you agree to our{" "}
-                <Text style={styles.termsLink}>
-                  Terms of Use & Privacy Policy
-                </Text>
+                <Text style={styles.termsLink}>Terms of Use</Text>
+                {" & "}
+                <Text style={styles.termsLink}>Privacy Policy</Text>
               </Text>
             </View>
           </View>
@@ -274,22 +287,38 @@ const Login = ({ navigation }: LoginScreenProps) => {
 export default Login;
 
 const styles = StyleSheet.create({
-  termsText: {
+  accountPrompt: {
     fontFamily: "Lato-Regular",
-    fontWeight: "400", // Explicitly set to normal weight
-    fontSize: 11,
-    lineHeight: 24,
-    letterSpacing: 0,
-    color: "#000000",
+    fontSize: 14,
+    lineHeight: 22,
+    color: "#545454",
     textAlign: "center",
   },
 
-  termsLink: {
-    fontFamily: "Lato-SemiBold", // or "Lato" + fontWeight
+  createAccountLink: {
+    fontFamily: "Lato-Bold",
+    fontSize: 14,
+    lineHeight: 22,
+    color: "#1E123D",
+  },
+
+  termsText: {
+    fontFamily: "Lato-Regular",
+    fontWeight: "400",
     fontSize: 11,
-    lineHeight: 24,
+    lineHeight: 18,
     letterSpacing: 0,
-    color: "#000000",
+    color: "#545454",
+    textAlign: "center",
+    marginTop: 28,
+  },
+
+  termsLink: {
+    fontFamily: "Lato-SemiBold",
+    fontSize: 11,
+    lineHeight: 18,
+    letterSpacing: 0,
+    color: "#1E123D",
     textDecorationLine: "underline",
   },
 });

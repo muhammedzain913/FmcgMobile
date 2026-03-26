@@ -44,6 +44,7 @@ const UserDeliveryAddress = ({
   const [savedAddress, setSavedAddress] = useState<AddressRequest>({
     type: "HOME",
     street: "",
+    apartmentName: "",
     apartmentNumber: "",
     contactPhone: "",
   });
@@ -174,6 +175,12 @@ const UserDeliveryAddress = ({
                   variant="dark"
                   placeholder="Street"
                   value={savedAddress.street || ""}
+                />
+                <Input
+                  onChangeText={(value) => handleChange(value, "apartmentName")}
+                  variant="dark"
+                  placeholder="Apartment"
+                  value={savedAddress.apartmentName || ""}
                 />
                 <Input
                   onChangeText={(value) => handleChange(value, "apartmentNumber")}

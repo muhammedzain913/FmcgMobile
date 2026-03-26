@@ -38,6 +38,8 @@ import OTPAuthentication from "../screens/Auth/OTPAuthentication";
 import ResetPassword from "../screens/Auth/ResetPassword";
 import DrawerNavigation from "./DrawerNavigation";
 import Search from "../screens/Search/Search";
+import ProductSearchScreen from "../screens/Search/ProductSearchScreen";
+import ShopBySearch from "../screens/Search/ShopBySearch";
 import Notification from "../screens/Notification/Notification";
 import Products from "../screens/Category/Products";
 import ProductsDetails from "../screens/Category/ProductsDetails";
@@ -201,6 +203,11 @@ const StackNavigator = () => {
           component={DrawerNavigation}
         />
         <StackComponent.Screen name="Search" component={Search} />
+        <StackComponent.Screen
+          name="ProductSearch"
+          component={ProductSearchScreen}
+        />
+        <StackComponent.Screen name="ShopBySearch" component={ShopBySearch} />
         <StackComponent.Screen name="Notification" component={Notification} />
         <StackComponent.Screen name="MyCart" component={MyCart} />
         <StackComponent.Screen name="Products" component={Products} />

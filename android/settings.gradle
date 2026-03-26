@@ -21,7 +21,7 @@ extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
   }
 }
 
-rootProject.name = 'footflare'
+rootProject.name = 'sooper'
 
 dependencyResolutionManagement {
   versionCatalogs {

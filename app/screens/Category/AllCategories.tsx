@@ -82,13 +82,8 @@ const AllCategories = ({ navigation }: AllCategoriesScreenProps) => {
 
   const sheetRef = useRef<any>(null);
 
-  const {
-    governorate,
-    city,
-    block,
-    setGovVisible,
-  } = useLocationSelector();
-  
+  const { governorate, city, block, setGovVisible } = useLocationSelector();
+
   const toggleSheet = () => {
     // Handle location sheet toggle if needed
     // For now, just a placeholder
@@ -98,7 +93,10 @@ const AllCategories = ({ navigation }: AllCategoriesScreenProps) => {
   return (
     <SafeAreaView style={{ backgroundColor: colors.card, flex: 1 }}>
       <StatusBar translucent={true} backgroundColor="#1E123D" style="light" />
-      <ScrollView contentContainerStyle={{gap : 30}} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={{ gap: 30 }}
+        showsVerticalScrollIndicator={false}
+      >
         <View
           style={{
             borderBottomLeftRadius: 30,
@@ -119,7 +117,9 @@ const AllCategories = ({ navigation }: AllCategoriesScreenProps) => {
                 setSearchQuety(e);
               }}
               searchPlaceholder={
-                categories && categories.length > 0 && categories[rotatingCategoryIndex]?.title
+                categories &&
+                categories.length > 0 &&
+                categories[rotatingCategoryIndex]?.title
                   ? `Search '${categories[rotatingCategoryIndex].title}'`
                   : "Search Product"
               }
@@ -127,15 +127,15 @@ const AllCategories = ({ navigation }: AllCategoriesScreenProps) => {
           </LinearGradient>
         </View>
 
-                <View
-                  style={{
+        <View
+          style={{
             flexDirection: "row",
             flexWrap: "wrap",
             justifyContent: "flex-start",
             gap: 10,
             paddingHorizontal: 15,
-                  }}
-                >
+          }}
+        >
           {categories?.map((data: any, index: any) => (
             <CategoryCard
               key={index}
@@ -146,7 +146,8 @@ const AllCategories = ({ navigation }: AllCategoriesScreenProps) => {
                   categoryId: data.id,
                 });
               }}
-              containerStyle={{ width: "23%" }}
+              image={data.imageUrl}
+              containerStyle={{ width: '22%' }}
             />
           ))}
         </View>

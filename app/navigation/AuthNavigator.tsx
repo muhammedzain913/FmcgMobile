@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import OnBoarding from '../screens/OnBoarding/OnBoarding';
 import { useTheme } from '@react-navigation/native';
+import OnboardingHero from '../screens/Auth/OnboardingHero';
 import Login from '../screens/Auth/Login';
 import Register from '../screens/Auth/Register';
 import Forgotpassword from '../screens/Auth/Forgotpassword';
@@ -25,10 +26,10 @@ const AuthNavigator = () => {
     
 
     return (
-        <SafeAreaView style={{width : '100%',flex:1}}>
+        <SafeAreaView style={{width : '100%',flex:1, backgroundColor: '#000'}}>
             {/* <StatusBar style="auto" /> */}
             <StackComponent.Navigator
-                initialRouteName= {"Login"} 
+                initialRouteName= {"OnboardingHero"} 
                 screenOptions={{
                     headerShown:false,
                     cardStyle: { backgroundColor: "transparent",flex:1  },
@@ -54,6 +55,7 @@ const AuthNavigator = () => {
             >
                 <StackComponent.Screen name="Demo" component={Demo} />
                 <StackComponent.Screen name="OnBoarding" component={OnBoarding} />
+                <StackComponent.Screen name="OnboardingHero" component={OnboardingHero} />
                 <StackComponent.Screen name="Login" component={Login} />
                 <StackComponent.Screen name="Register" component={Register} />
                 <StackComponent.Screen name="ForgotPassword" component={Forgotpassword} />

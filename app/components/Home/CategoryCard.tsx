@@ -19,6 +19,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
       <TouchableOpacity style={styles.touchable} onPress={onPress}>
         <View style={styles.categoryImageContainer}>
           <Image
+            resizeMode="contain"
             style={styles.categoryImage}
             source={{uri : image}}
           />
@@ -39,17 +40,23 @@ const styles = StyleSheet.create({
   },
   touchable: {
     gap: 10,
+    width: "100%",
+    alignItems: "center",
   },
   categoryImageContainer: {
     backgroundColor: "rgba(245, 245, 245, 1)",
     borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 5,
+    paddingVertical: 0,
+    width: "100%",
+    aspectRatio: 1,
+    overflow: "hidden",
   },
   categoryImage: {
-    width: 85,
-    height: 85,
+    width: "80%",
+    height: undefined,
+    aspectRatio: 1,
   },
   categoryText: {
     fontFamily: "Lato-SemiBold",

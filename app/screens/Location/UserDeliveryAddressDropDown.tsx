@@ -47,6 +47,7 @@ const UserDeliveryAddressDropDown = ({
       return {
         type: addressToEdit.type || "HOME",
         street: addressToEdit.street || "",
+        apartmentName: addressToEdit.apartmentName || "",
         apartmentNumber: addressToEdit.apartmentNumber || "",
         contactPhone: addressToEdit.contactPhone || "",
       };
@@ -55,6 +56,7 @@ const UserDeliveryAddressDropDown = ({
       return {
         type: "HOME",
         street: "",
+        apartmentName: "",
         apartmentNumber: "",
         contactPhone: "",
       };
@@ -67,6 +69,7 @@ const UserDeliveryAddressDropDown = ({
       setSavedAddress({
         type: addressToEdit.type || "HOME",
         street: addressToEdit.street || "",
+        apartmentName: addressToEdit.apartmentName || "",
         apartmentNumber: addressToEdit.apartmentNumber || "",
         contactPhone: addressToEdit.contactPhone || "",
       });
@@ -74,6 +77,7 @@ const UserDeliveryAddressDropDown = ({
       setSavedAddress({
         type: "HOME",
         street: "",
+        apartmentName: "",
         apartmentNumber: "",
         contactPhone: "",
       });
@@ -148,6 +152,11 @@ const UserDeliveryAddressDropDown = ({
                   value={savedAddress.street || ""}
                   onChangeText={(value) => handleChange(value, "street")}
                   placeholder="Street"
+                />
+                <Input
+                  value={savedAddress.apartmentName || ""}
+                  onChangeText={(value) => handleChange(value, "apartmentName")}
+                  placeholder="Apartment"
                 />
                 <Input
                   value={savedAddress.apartmentNumber || ""}

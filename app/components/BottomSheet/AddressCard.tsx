@@ -61,11 +61,11 @@ const AddressCard: React.FC<AddressCardProps> = ({
 
 
   const handleCardPress = () => {
-    onSelect()
+    onSelect();
   };
 
-  const handleEditPress = () => {
-
+  const handleEditPress = (e?: any) => {
+    e?.stopPropagation?.();
     onEdit();
     // Reset after a short delay
     setTimeout(() => {
@@ -73,7 +73,8 @@ const AddressCard: React.FC<AddressCardProps> = ({
     }, 100);
   };
 
-  const handleRemovePress = () => {
+  const handleRemovePress = (e?: any) => {
+    e?.stopPropagation?.();
     onRemove();
     // Reset after a short delay
     setTimeout(() => {
@@ -87,8 +88,7 @@ const AddressCard: React.FC<AddressCardProps> = ({
         activeOpacity={0.7}
         style={{
           ...styles.addressCard,
-          borderColor: isSelected ? "#1E123D" : "transparent",
-          borderWidth: isSelected ? 2 : 1,
+          borderColor: isSelected ? "#1E123D" : "rgba(0,0,0,0.08)",
         }}
       >
         <View
@@ -96,18 +96,20 @@ const AddressCard: React.FC<AddressCardProps> = ({
             ...styles.addressCardContent
           }}
         >
-          <View style={styles.addressActions}>
+          <View style={styles.addressActions} pointerEvents="box-none">
             <TouchableOpacity
-              onPress={handleEditPress}
+              onPress={(e) => handleEditPress(e)}
               activeOpacity={0.7}
+              style={styles.actionBtn}
             >
               <Text style={styles.editText}>Edit</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={handleRemovePress}
+              onPress={(e) => handleRemovePress(e)}
               activeOpacity={0.7}
+              style={styles.actionBtn}
             >
-              <Text style={{ ...styles.editText, color: "#EB0000" }}>
+              <Text style={[styles.editText, { color: "#EB0000" }]}>
                 Remove
               </Text>
             </TouchableOpacity>
@@ -136,9 +138,10 @@ const AddressCard: React.FC<AddressCardProps> = ({
                   {address.building && `${address.building}`}
                   {address.contactPhone && `, ${address.contactPhone}`}
                 </Text>
-                {address.apartmentNumber && (
+                {(address.apartmentName || address.apartmentNumber) && (
                   <Text style={styles.addressContent}>
-                    Apt {address.apartmentNumber}
+                    {address.apartmentName ? `${address.apartmentName}` : "Apt"}
+                    {address.apartmentNumber ? ` ${address.apartmentNumber}` : ""}
                     {address.floorNumber && `, Floor ${address.floorNumber}`}
                   </Text>
                 )}
@@ -157,15 +160,27 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 10,
     marginBottom: 16,
+    width: "100%",
+    borderWidth: 1,
+    overflow: "hidden",
   },
   addressCardContent: {
     paddingHorizontal: 10,
     paddingVertical: 10,
+    paddingTop: 44,
   },
   addressActions: {
+    position: "absolute",
+    top: 10,
+    right: 10,
     flexDirection: "row",
-    gap: 10,
-    alignSelf: "flex-end",
+    alignItems: "center",
+    zIndex: 10,
+  },
+  actionBtn: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
   },
   addressRow: {
     flexDirection: "row",

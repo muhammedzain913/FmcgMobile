@@ -1,14 +1,21 @@
 import React from "react";
-import { View, Text, Image, StyleSheet } from "react-native";
+import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../../navigation/RootStackParamList";
+
+type Nav = StackNavigationProp<RootStackParamList>;
 
 const CategoriesHeader = () => {
+  const navigation = useNavigation<Nav>();
   return (
     <LinearGradient
       colors={["transparent", "transparent"]}
       style={{ gap: 20, padding: 20 }}
     >
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 20 }}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 20 ,justifyContent : "space-between" }}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
         <View
           style={{
             flexDirection: "row",
@@ -27,6 +34,7 @@ const CategoriesHeader = () => {
             source={require("../../assets/images/icons/left-chevron.png")}
           />
         </View>
+        </TouchableOpacity>
         <Text
           style={{
             fontFamily: "Lato-Bold",
@@ -39,9 +47,10 @@ const CategoriesHeader = () => {
         >
           Categories
         </Text>
+        <View></View>
       </View>
 
-      <View>
+      {/* <View>
         <View style={styles.searchBoxCotainer}>
           <Image
             source={require("../../assets/images/icons/searchiconimg.png")}
@@ -52,7 +61,7 @@ const CategoriesHeader = () => {
             Search <Text style={styles.highlight}>"Snacks"</Text>
           </Text>
         </View>
-      </View>
+      </View> */}
     </LinearGradient>
   );
 };

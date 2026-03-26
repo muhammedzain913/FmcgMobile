@@ -6,17 +6,16 @@ import {
   Text,
   View,
   TouchableOpacity,
-  ActivityIndicator,
 } from "react-native";
 import { FlatList, ScrollView } from "react-native-gesture-handler";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
 import { StackScreenProps } from "@react-navigation/stack";
 import { ApiClient } from "../../redux/api";
 import { Url } from "../../redux/userConstant";
-import ProductCard from "../Product/ProductCard";
 import { useAddToCart } from "../../hooks/useAddToCart";
 import { useSelector } from "react-redux";
 import ProductGrid from "../../components/Category/ProductGrid";
+import GroceryGifLoader from "../../components/loading/GroceryGifLoader";
 
 type ShopByBrandScreenProps = StackScreenProps<
   RootStackParamList,
@@ -61,6 +60,7 @@ const ShopByBrand = ({ navigation, route }: ShopByBrandScreenProps) => {
       }
 
       try {
+        console.log("fetching products for brand", brandId);
         setLoading(true);
 
         // Fetch products using brands API endpoint
@@ -71,6 +71,7 @@ const ShopByBrand = ({ navigation, route }: ShopByBrandScreenProps) => {
 
         // Handle response structure
         if (response.data?.products) {
+          console.log("products for brand", response.data.products);
           setProducts(response.data.products);
           // Update brand name from API response if available
           if (response.data?.brand?.name) {
@@ -89,7 +90,7 @@ const ShopByBrand = ({ navigation, route }: ShopByBrandScreenProps) => {
     fetchProducts();
   }, [brandId, address]);
   return (
-    <View style={{ flex: 1, backgroundColor: "rgba(250, 250, 250, 1)" }}>
+    <View style={{ flex: 1, backgroundColor: "#fff" }}>
       <StatusBar translucent backgroundColor="transparent" />
       <ScrollView contentContainerStyle={{ gap: 20 }}>
         <View
@@ -109,27 +110,31 @@ const ShopByBrand = ({ navigation, route }: ShopByBrandScreenProps) => {
               backgroundColor: "#ffff",
             }}
           >
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              style={{
-                flexDirection: "row", // Flow: Horizontal
-                alignItems: "center", // Inner alignment
-                height: 40, // Fixed height // Padding
-                paddingVertical: 7.78,
-                borderRadius: 8,
-                borderWidth: 1,
-                borderColor: "grey",
-                backgroundColor: "rgba(255, 255, 255, 0.6)", // Required for blur effect
-                width: 40,
-                justifyContent: "center",
-              }}
-            >
-              <Image
-                style={{ height: 20, width: 15, marginTop: 4 }}
-                source={require("../../assets/images/icons/CaretLeft.png")}
-              />
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <View
+                style={{
+                  flexDirection: "row", // Flow: Horizontal
+                  alignItems: "center", // Inner alignment
+                  height: 36, // Fixed height // Padding
+                  paddingVertical: 7.78,
+                  borderRadius: 8,
+                  borderWidth: 1,
+                  borderColor: "#E5E5E5",
+                  backgroundColor: "transparent",
+                  width: 36,
+                  justifyContent: "center",
+                }}
+              >
+                <Image
+                  style={{ height: 20, width: 15, marginTop: 4 }}
+                  source={require("../../assets/images/icons/left-chevron.png")}
+                />
+              </View>
             </TouchableOpacity>
-            <View style={{ position: "absolute", left: 0, right: 0 }}>
+            <View
+              pointerEvents="none"
+              style={{ position: "absolute", left: 0, right: 0 }}
+            >
               <Text
                 style={{
                   fontFamily: "Lato", // preferred if font file exists
@@ -146,37 +151,8 @@ const ShopByBrand = ({ navigation, route }: ShopByBrandScreenProps) => {
             </View>
             <View></View>
           </View>
-
-          <View>
-            <View style={styles.searchBoxCotainer}>
-              {/* Search Icon */}
-              <Image
-                source={require("../../assets/images/icons/searchiconimg.png")}
-                style={styles.icon}
-              />
-
-              {/* Divider */}
-              <View style={styles.searchBoxDivider} />
-
-              {/* Text */}
-              <Text style={styles.placeholder}>
-                Search <Text style={styles.highlight}>"Snacks"</Text>
-              </Text>
-            </View>
-          </View>
         </View>
-        {loading ? (
-          <View
-            style={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-              paddingVertical: 50,
-            }}
-          >
-            <ActivityIndicator size="large" color="#1E123D" />
-          </View>
-        ) : products.length === 0 ? (
+        {loading ? null : products.length === 0 ? (
           <View
             style={{
               flex: 1,
@@ -196,8 +172,9 @@ const ShopByBrand = ({ navigation, route }: ShopByBrandScreenProps) => {
             </Text>
           </View>
         ) : (
-          <View style={{ paddingHorizontal: 20, paddingBottom: 20 }}>
+          <View style={{ paddingHorizontal: 10, paddingBottom: 20 }}>
             <ProductGrid
+              productCardImageHeight={190}
               products={products}
               addToCart={addItemToCart}
               navigation={navigation}
@@ -205,135 +182,9 @@ const ShopByBrand = ({ navigation, route }: ShopByBrandScreenProps) => {
           </View>
         )}
       </ScrollView>
+      <GroceryGifLoader visible={loading} />
     </View>
   );
 };
 
 export default ShopByBrand;
-
-const styles = StyleSheet.create({
-  container: {
-    marginTop: 20,
-    height: 500,
-    backgroundColor: "#1E123D",
-    position: "relative",
-    overflow: "hidden",
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-  },
-
-  backgroundImage: {
-    ...StyleSheet.absoluteFillObject,
-  },
-
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "#1E123D",
-    opacity: 0.85, // tweak: 0.8–0.9 for best match
-  },
-
-  content: {
-    flex: 1,
-    padding: 20,
-    zIndex: 2,
-  },
-  divider: {
-    width: 1,
-    height: "60%",
-    backgroundColor: "#000000",
-    marginHorizontal: 12,
-  },
-  containerW: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "orange",
-  },
-  background: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    height: 300,
-  },
-  button: {
-    padding: 15,
-    alignItems: "center",
-    borderRadius: 5,
-  },
-  text: {
-    backgroundColor: "transparent",
-    fontSize: 15,
-    color: "#fff",
-  },
-  gradientBorder: {
-    borderRadius: 8,
-    padding: 1, // border thickness = 1px
-    shadowColor: "#FFFFFF",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 25,
-    elevation: 6, // Android shadow
-  },
-
-  searchBoxCotainer: {
-    height: 48,
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    gap: 8,
-    borderRadius: 8,
-    backgroundColor: "#FFFFFF",
-    borderColor: "rgba(220, 220, 220, 1)",
-    borderWidth: 1,
-  },
-
-  icon: {
-    width: 18,
-    height: 18,
-    tintColor: "black",
-  },
-
-  searchBoxDivider: {
-    width: 1,
-    height: 20,
-    backgroundColor: "#000000",
-  },
-
-  placeholder: {
-    fontFamily: "Lato",
-    fontSize: 15,
-    color: "rgba(140, 140, 140, 1)",
-  },
-
-  highlight: {
-    color: "#FFC107", // yellow "Snacks"
-    fontWeight: "600",
-  },
-
-  filterText: {
-    fontFamily: "Lato",
-    fontSize: 15,
-    color: "#000000",
-  },
-  filterContainer: {
-    height: 38,
-    flexDirection: "row",
-
-    backgroundColor: "#FFFFFF",
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    borderColor: "rgba(240, 240, 240, 1)",
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  itemDescription: {
-    fontFamily: "Lato",
-    fontSize: 15,
-    fontWeight: "600",
-    lineHeight: 16,
-    letterSpacing: -0.36, // -3% of 12px
-    color: "rgba(0, 0, 0, 1)",
-  },
-});

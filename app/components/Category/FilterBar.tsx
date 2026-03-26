@@ -4,15 +4,19 @@ import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 
 interface FilterBarProps {
   onFilterPress: () => void;
+  backgroundColor?: string;
 }
 
-const FilterBar: React.FC<FilterBarProps> = ({ onFilterPress }) => {
+const FilterBar: React.FC<FilterBarProps> = ({
+  onFilterPress,
+  backgroundColor,
+}) => {
   return (
     <View
       style={{
         paddingVertical: 5,
         paddingHorizontal: 5,
-        backgroundColor: "#F9F9F9",
+        backgroundColor: backgroundColor ? backgroundColor : "#FFF",
       }}
     >
       <ScrollView
@@ -38,42 +42,50 @@ const FilterBar: React.FC<FilterBarProps> = ({ onFilterPress }) => {
             />
           </View>
         </TouchableOpacity>
-        <View style={styles.filterContainer}>
-          <Text style={styles.filterText}>Sort</Text>
-          <Image
-            source={require("../../assets/images/icons/CaretDown.png")}
-            style={{
-              width: 15,
-              height: 15,
-              marginLeft: 5,
-              marginTop: 3,
-            }}
-          />
-        </View>
-        <View style={styles.filterContainer}>
-          <Text style={styles.filterText}>Price</Text>
-          <Image
-            source={require("../../assets/images/icons/CaretDown.png")}
-            style={{
-              width: 15,
-              height: 15,
-              marginLeft: 5,
-              marginTop: 3,
-            }}
-          />
-        </View>
-        <View style={styles.filterContainer}>
-          <Text style={styles.filterText}>Brand</Text>
-          <Image
-            source={require("../../assets/images/icons/CaretDown.png")}
-            style={{
-              width: 15,
-              height: 15,
-              marginLeft: 5,
-              marginTop: 3,
-            }}
-          />
-        </View>
+        <TouchableOpacity onPress={onFilterPress}>
+          <View style={styles.filterContainer}>
+            <Text style={styles.filterText}>Sort</Text>
+            <Image
+              source={require("../../assets/images/icons/CaretDown.png")}
+              style={{
+                width: 15,
+                height: 15,
+                marginLeft: 5,
+                marginTop: 3,
+              }}
+            />
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={onFilterPress}>
+          <View style={styles.filterContainer}>
+            <Text style={styles.filterText}>Price</Text>
+            <Image
+              source={require("../../assets/images/icons/CaretDown.png")}
+              style={{
+                width: 15,
+                height: 15,
+                marginLeft: 5,
+                marginTop: 3,
+              }}
+            />
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={onFilterPress}>
+          <View style={styles.filterContainer}>
+            <Text style={styles.filterText}>Brand</Text>
+            <Image
+              source={require("../../assets/images/icons/CaretDown.png")}
+              style={{
+                width: 15,
+                height: 15,
+                marginLeft: 5,
+                marginTop: 3,
+              }}
+            />
+          </View>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );
@@ -92,7 +104,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     backgroundColor: "#FFFFFF",
     borderRadius: 8,
-    paddingHorizontal: 15,
+    paddingHorizontal: 18,
     borderColor: "rgba(240, 240, 240, 1)",
     borderWidth: 1,
     alignItems: "center",

@@ -65,11 +65,12 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     gap: 10,
+    paddingHorizontal: 16,
     paddingBottom: 10,
   },
   addressList: {
     gap: 10,
-    backgroundColor : '#fff'
+    backgroundColor: "#fff",
   },
   buttonContainer: {
     paddingTop: 20,

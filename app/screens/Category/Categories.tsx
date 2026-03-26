@@ -14,17 +14,33 @@ import CategorySidebar from "../../components/Category/CategorySidebar";
 import FilterBar from "../../components/Category/FilterBar";
 import ProductGrid from "../../components/Category/ProductGrid";
 import FilterBottomSheet from "../../components/Category/FilterBottomSheet";
+import { useFocusEffect } from "@react-navigation/native";
+import GroceryGifLoader from "../../components/loading/GroceryGifLoader";
 
 type CategoriesScreenProps = StackScreenProps<RootStackParamList, "Categories">;
+
+type PriceRange = { min?: number; max?: number };
+type FilterObject = {
+  priceRanges: PriceRange[];
+  brands: string[];
+  sort: "price_asc" | "price_desc" | "newest" | "";
+};
 
 const Categories = ({ navigation, route }: CategoriesScreenProps) => {
   const apiPath = ApiClient();
   const addItemToCart = useAddToCart();
-  const [products, setProducts] = useState<[]>();
+  const [products, setProducts] = useState<any[]>([]);
   const address = useSelector((x: any) => x.user.defaultAddress);
-  const [categories, setCategories] = useState<[]>();
+  const [categories, setCategories] = useState<any[]>([]);
+  const [brandNames, setBrandNames] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [subcategoriesLoading, setSubcategoriesLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [filters, setFilters] = useState<FilterObject>({
+    priceRanges: [],
+    brands: [],
+    sort: "",
+  });
   const [selectedCategory, setSelectedCategory] = useState<string>(
     route.params?.categoryTitle || "All",
   );
@@ -49,29 +65,106 @@ const Categories = ({ navigation, route }: CategoriesScreenProps) => {
     {
       title: "PRICE RANGE",
       values: [
-        "₹500 - ₹1000",
-        "₹1000 - ₹1500",
-        "₹1500 - ₹2000",
-        "₹2000 - ₹2500",
-        "₹2500 - ₹3000",
-        "₹3500 - ₹4000",
+        "KD 1 - KD 5",
+        "KD 5 - KD 10",
+        "KD 10 - KD 15",
+        "KD 15 - KD 20",
+        "KD 20 - KD 25",
+        "KD 25 +",
       ],
     },
     {
       title: "BRANDS",
-      values: [
-        "AVT",
-        "Lays",
-        "Minimalist",
-        "Milma",
-        "Elite Foods",
-        "Britannia",
-      ],
+      values: brandNames,
     },
   ];
 
-  const toggleSheet = () => {
-    isOpen.value = !isOpen.value;
+  const openSheet = () => {
+    isOpen.value = true;
+  };
+
+  const closeSheet = () => {
+    isOpen.value = false;
+  };
+
+  // Ensure the bottom sheet never "sticks" open across navigations / focus changes.
+  useFocusEffect(
+    React.useCallback(() => {
+      isOpen.value = false;
+      return () => {
+        isOpen.value = false;
+      };
+    }, []),
+  );
+
+  const parsePriceRangeLabel = (label: string): PriceRange | null => {
+    const trimmed = label.trim();
+    // Extract all numbers (works for: "KD 1 - KD 5", "KD 25 +", etc.)
+    const nums = trimmed.match(/\d+(?:\.\d+)?/g)?.map((n) => parseFloat(n)) ?? [];
+    if (nums.length === 0) return null;
+
+    if (trimmed.includes("+")) {
+      // "KD 25 +"
+      return { min: nums[0] };
+    }
+
+    if (nums.length >= 2) {
+      const [min, max] = nums;
+      if (!Number.isNaN(min) && !Number.isNaN(max)) return { min, max };
+    }
+
+    // Fallback: single number without '+': treat as min
+    if (!Number.isNaN(nums[0])) return { min: nums[0] };
+    return null;
+  };
+
+  const mapSortOption = (label: string): FilterObject["sort"] => {
+    switch (label) {
+      case "Price (Low To High)":
+        return "price_asc";
+      case "Price (High To Low)":
+        return "price_desc";
+      default:
+        return "";
+    }
+  };
+
+  const getEffectiveSalePrice = (p: any): number | null => {
+    const fromProduct = p?.salePrice;
+    const fromFirstVariant = p?.variants?.[0]?.salePrice;
+    const raw = fromProduct ?? fromFirstVariant;
+    if (raw === null || raw === undefined) return null;
+    const n = typeof raw === "number" ? raw : parseFloat(String(raw));
+    return Number.isFinite(n) ? n : null;
+  };
+
+  const applyFiltersToProducts = (base: any[], nextFilters: FilterObject) => {
+    let out = [...(base || [])];
+
+    if (nextFilters.brands.length > 0) {
+      const set = new Set(nextFilters.brands);
+      out = out.filter((p: any) => (p?.brand?.name ? set.has(p.brand.name) : false));
+    }
+
+    if (nextFilters.priceRanges.length > 0) {
+      out = out.filter((p: any) => {
+        const price = getEffectiveSalePrice(p);
+        if (price === null) return false;
+        return nextFilters.priceRanges.some((r) => {
+          const minOk = r.min === undefined ? true : price >= r.min;
+          const maxOk = r.max === undefined ? true : price <= r.max;
+          return minOk && maxOk;
+        });
+      });
+    }
+
+    if (nextFilters.sort === "price_asc") {
+      out.sort((a: any, b: any) => (getEffectiveSalePrice(a) ?? 0) - (getEffectiveSalePrice(b) ?? 0));
+    } else if (nextFilters.sort === "price_desc") {
+      out.sort((a: any, b: any) => (getEffectiveSalePrice(b) ?? 0) - (getEffectiveSalePrice(a) ?? 0));
+    }
+
+    setDisplayedProducts(out);
   };
 
   // Fetch products by subcategory ID
@@ -98,7 +191,8 @@ const Categories = ({ navigation, route }: CategoriesScreenProps) => {
       );
       console.log("Products by subcategory API", response.data.length);
       setProducts(response.data);
-      setDisplayedProducts(response.data);
+      // Re-apply any active filters to the fresh data
+      applyFiltersToProducts(response.data, filters);
     } catch (error: any) {
       console.error("Error fetching products by subcategory:", error);
       setError(error.message || "Something went wrong");
@@ -130,28 +224,42 @@ const Categories = ({ navigation, route }: CategoriesScreenProps) => {
     }).start();
   }, [selectedCategory, categories]);
 
+  useEffect(() => {
+    const fetchBrands = async () => {
+      try {
+        const response = await apiPath.get(`${Url}/api/brands`);
+        const names =
+          (response.data || [])
+            .map((b: any) => b?.name)
+            .filter(Boolean) || [];
+        setBrandNames(names);
+      } catch (e) {
+        setBrandNames([]);
+      }
+    };
+    fetchBrands();
+  }, []);
+
 
   useEffect(() => {
     const fetchCategory = async () => {
       try {
-        setLoading(true);
+        setSubcategoriesLoading(true);
         // If categoryId is provided, fetch subcategories for that category
         if (route.params?.categoryId) {
           const response = await apiPath.get(
             `${Url}/api/categories/${route.params.categoryId}/subcategories`
           );
-          console.log("subcategories api", response.data);
           setCategories(response.data);
         } else {
           // If no categoryId, fetch all categories (fallback)
           const response = await apiPath.get(`${Url}/api/categories`);
-          console.log("category api", response.data);
           setCategories(response.data);
         }
       } catch (error: any) {
         setError(error.message || "Something went wrong");
       } finally {
-        setLoading(false);
+        setSubcategoriesLoading(false);
       }
     };
     fetchCategory();
@@ -221,8 +329,30 @@ const Categories = ({ navigation, route }: CategoriesScreenProps) => {
     fetchProductsBySubcategory(subcategoryId);
   };
 
+  const handleApplyFilters = (payload: {
+    priceRanges: string[];
+    brands: string[];
+    sort: string;
+  }) => {
+    const next: FilterObject = {
+      priceRanges: payload.priceRanges
+        .map(parsePriceRangeLabel)
+        .filter(Boolean) as PriceRange[],
+      brands: payload.brands,
+      sort: mapSortOption(payload.sort),
+    };
+    setFilters(next);
+    applyFiltersToProducts(products, next);
+  };
+
+  const handleClearFilters = () => {
+    const cleared: FilterObject = { priceRanges: [], brands: [], sort: "" };
+    setFilters(cleared);
+    setDisplayedProducts(products);
+  };
+
   return (
-    <View style={{ flex: 1, backgroundColor: "#ffff", paddingTop: 40 }}>
+    <View style={{ flex: 1, backgroundColor: "#ffff",  }}>
       <View style={{ flex: 1, gap: 0 }}>
         <CategoriesHeader />
 
@@ -236,7 +366,7 @@ const Categories = ({ navigation, route }: CategoriesScreenProps) => {
           />
 
           <View style={{ flex: 1 }}>
-            <FilterBar onFilterPress={toggleSheet} />
+            <FilterBar onFilterPress={openSheet} backgroundColor="#F9F9F9" />
             <ProductGrid
               products={displayedProducts || []}
               addToCart={addItemToCart}
@@ -246,14 +376,17 @@ const Categories = ({ navigation, route }: CategoriesScreenProps) => {
         </View>
       </View>
 
-      <LocationBottomSheet isOpen={isOpen} toggleSheet={toggleSheet}>
+      <LocationBottomSheet isOpen={isOpen} toggleSheet={closeSheet}>
         <FilterBottomSheet
-          onClose={toggleSheet}
+          onClose={closeSheet}
           filterCriterias={filterCriterias}
+          onApply={handleApplyFilters}
+          onClear={handleClearFilters}
         />
       </LocationBottomSheet>
 
       <GlobalCartNotification />
+      <GroceryGifLoader visible={subcategoriesLoading} />
     </View>
   );
 };

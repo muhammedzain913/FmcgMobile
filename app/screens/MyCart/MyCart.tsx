@@ -1,6 +1,7 @@
 import { useTheme } from "@react-navigation/native";
 import React, { useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   View,
   Text,
   ScrollView,
@@ -54,6 +55,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
   const user = useSelector((x: any) => x.user.userInfo);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
+  const [isOrderSubmitting, setIsOrderSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const theme = useTheme();
   const { colors }: { colors: any } = theme;
@@ -99,9 +101,13 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
   const totalQuantity = useSelector(selectCartTotalQuantity);
   const totalPrice = useSelector(selectCartTotalPrice);
 
+  const formattedTotalPrice = Number(totalPrice.toFixed(2));
+
   const savedAmount = cart.reduce((acc: number, item: any) => {
     return acc + (item.productPrice - item.price) * item.quantity;
   }, 0);
+
+  const formattedSavedAmount = Number(savedAmount.toFixed(2));
 
   useEffect(() => {
     console.log("first item", selectedAddress);
@@ -157,7 +163,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
   });
 
   const handleSubmitOrder = async () => {
-    setLoading(true);
+    setIsOrderSubmitting(true);
     console.log("cartItems", orderItems);
     try {
       const checkoutFormData = {
@@ -170,7 +176,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
         block: userLocation.block.name, // block → district
         streetAddress: selectedAddress?.street, // street → streetAddress
         phone: selectedAddress?.contactPhone || user.phone, // Fallback to user phone or dummy if selectedAddress is missing
-        apartmentNumber : selectedAddress.apartmentNumber,
+        apartmentNumber: selectedAddress.apartmentNumber,
         paymentMethod: "Cash On Delivery",
       };
 
@@ -185,7 +191,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
     } catch (error: any) {
       console.log("Error submitting order:", error.message);
     } finally {
-      setLoading(false);
+      setIsOrderSubmitting(false);
     }
   };
 
@@ -237,25 +243,27 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
               backgroundColor: "#ffff",
             }}
           >
-            <View
-              style={{
-                flexDirection: "row", // Flow: Horizontal
-                alignItems: "center", // Inner alignment
-                height: 36, // Fixed height // Padding
-                paddingVertical: 7.78,
-                borderRadius: 8,
-                borderWidth: 1,
-                borderColor: "#E5E5E5",
-                backgroundColor: "rgba(255, 255, 255, 0.6)", // Required for blur effect
-                width: 36,
-                justifyContent: "center",
-              }}
-            >
-              <Image
-                style={{ height: 20, width: 15, marginTop: 4 }}
-                source={require("../../assets/images/icons/left-chevron.png")}
-              />
-            </View>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <View
+                style={{
+                  flexDirection: "row", // Flow: Horizontal
+                  alignItems: "center", // Inner alignment
+                  height: 36, // Fixed height // Padding
+                  paddingVertical: 7.78,
+                  borderRadius: 8,
+                  borderWidth: 1,
+                  borderColor: "#E5E5E5",
+                  backgroundColor: "rgba(255, 255, 255, 0.6)", // Required for blur effect
+                  width: 36,
+                  justifyContent: "center",
+                }}
+              >
+                <Image
+                  style={{ height: 20, width: 15, marginTop: 4 }}
+                  source={require("../../assets/images/icons/left-chevron.png")}
+                />
+              </View>
+            </TouchableOpacity>
             <View style={{ position: "absolute", left: 0, right: 0 }}>
               <Text
                 style={{
@@ -333,59 +341,102 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                 alignItems: "center",
               }}
             >
-              <View>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    gap: 10,
-                    alignItems: "center",
+              {selectedAddress !== null ? (
+                <View style={{ flex: 1, paddingRight: 10 }}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      gap: 10,
+                      alignItems: "center",
+                    }}
+                  >
+                    <Image
+                      style={{ height: 15, width: 15, resizeMode: "contain" }}
+                      source={require("../../assets/images/icons/locationpinblack.png")}
+                    />
+                    <Text
+                      style={{
+                        fontFamily: "Lato-Bold",
+                        fontSize: 15,
+                        lineHeight: 28,
+                        color: "#141313",
+                      }}
+                    >
+                      {selectedAddress.type}
+                    </Text>
+                  </View>
+
+                  <View>
+                    <Text
+                      style={{
+                        fontFamily: "Lato-Regular",
+                        fontSize: 13,
+                        lineHeight: 20,
+                        color: "rgb(17, 17, 17)",
+                        flexShrink: 1,
+                      }}
+                      numberOfLines={2}
+                    >
+                      Street {selectedAddress.street}
+                      {selectedAddress.apartmentName
+                        ? `, Apartment ${selectedAddress.apartmentName}`
+                        : ""}
+                      {selectedAddress.apartmentNumber
+                        ? `, Flat ${selectedAddress.apartmentNumber}`
+                        : ""}
+                      {selectedAddress.contactPhone
+                        ? `, ${selectedAddress.contactPhone}`
+                        : ""}
+                    </Text>
+                  </View>
+                </View>
+              ) : (
+                <View style={{ flex: 1, paddingRight: 10 }}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      gap: 10,
+                      alignItems: "center",
+                    }}
+                  >
+                    <Image
+                      style={{ height: 15, width: 15, resizeMode: "contain" }}
+                      source={require("../../assets/images/icons/locationpinblack.png")}
+                    />
+                    <Text
+                      style={{
+                        fontFamily: "Lato-Bold",
+                        fontSize: 15,
+                        lineHeight: 28,
+                        color: "#141313",
+                      }}
+                    >
+                      Add a delivery address
+                    </Text>
+                  </View>
+                </View>
+              )}
+
+              <View
+                style={{
+                  borderWidth: 1,
+                  borderBlockColor: "black",
+                  paddingHorizontal: 12,
+                  paddingVertical: 7,
+                  borderRadius: 8,
+                }}
+              >
+                <TouchableOpacity
+                  onPress={() => {
+                    setView("LOCATION");
+                    toggleSheet();
                   }}
                 >
-                  <Image
-                    style={{ height: 15, width: 15, resizeMode: "contain" }}
-                    source={require("../../assets/images/icons/locationpinblack.png")}
-                  />
-                  <Text
-                    style={{
-                      fontFamily: "Lato-Bold",
-                      fontSize: 15,
-                      lineHeight: 28,
-                      color: "#141313",
-                    }}
-                  >
-                    {selectedAddress.type}
+                  <Text style={{ fontFamily: "Lato-Regular" }}>
+                    {selectedAddress ? "Change" : "Add"}
                   </Text>
-                </View>
-
-                <View>
-                  <Text
-                    style={{
-                      fontFamily: "Lato-Regular",
-                      fontSize: 13,
-                      lineHeight: 28,
-                      color: "rgb(17, 17, 17)",
-                    }}
-                  >
-                    Sreet {selectedAddress.street} , Apartment{" "}
-                    {selectedAddress.apartmentNumber} ,{" "}
-                    {selectedAddress.contactPhone}
-                  </Text>
-                </View>
+                </TouchableOpacity>
               </View>
-
-              <TouchableOpacity onPress={toggleSheet}>
-                <View
-                  style={{
-                    borderWidth: 1,
-                    borderBlockColor: "black",
-                    paddingHorizontal: 12,
-                    paddingVertical: 7,
-                    borderRadius: 8,
-                  }}
-                >
-                  <Text style={{ fontFamily: "Lato-Regular" }}>Change</Text>
-                </View>
-              </TouchableOpacity>
             </View>
           </View>
 
@@ -399,7 +450,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                     borderRadius: 12,
                     padding: 10,
                     borderBottomWidth: cart.at(-1) === item ? 0 : 1,
-                    paddingBottom : 15,
+                    paddingBottom: 15,
                     borderBottomColor: "#E0E0E0",
                   }}
                 >
@@ -477,7 +528,6 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
               );
             })}
           </View>
-     
 
           <Input
             multiline={true}
@@ -511,7 +561,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
               <View style={styles.billContainer}>
                 <Text style={styles.billDetailsText}>Discount</Text>
                 <Text style={{ color: "rgba(5, 155, 93, 1)" }}>
-                  {savedAmount}
+                  {formattedSavedAmount}
                 </Text>
               </View>
               <View style={styles.billContainer}>
@@ -527,7 +577,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
             <View>
               <View style={styles.billContainer}>
                 <Text>To Pay </Text>
-                <Text> د.ك {totalPrice}</Text>
+                <Text> د.ك {formattedTotalPrice}</Text>
               </View>
             </View>
           </View>
@@ -537,9 +587,13 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
       <LocationBottomSheet isOpen={isOpen} toggleSheet={toggleSheet}>
         {view === "LIST" && (
           <Animated.View style={styles.bottomSheetContent}>
-            <BottomSheetHeader title="CHANGE ADDRESS" onClose={() => {
-             setView("LOCATION");  toggleSheet();
-            }} />
+            <BottomSheetHeader
+              title="CHANGE ADDRESS"
+              onClose={() => {
+                setView("LOCATION");
+                toggleSheet();
+              }}
+            />
             <AddressList
               addresses={addresses}
               onEdit={(address) => {
@@ -581,9 +635,8 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                 setEditingAddress(null); // Clear editing address (add new mode)
                 setView("EDIT");
               }}
-
-              onSelect = {(address : AddressResponse) => {
-                dispatch(setSelectedAddress(address))
+              onSelect={(address: AddressResponse) => {
+                dispatch(setSelectedAddress(address));
               }}
             />
           </Animated.View>
@@ -701,8 +754,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                     return;
                   }
 
-                  setView('LIST')
-               
+                  setView("LIST");
                 }}
               />
             </View>
@@ -748,10 +800,10 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <View style={{ gap: 10 }}>
             <Text style={{ fontFamily: "Lato-Bold", fontSize: 35 }}>
-              د.ك {totalPrice}
+              د.ك {formattedTotalPrice}
             </Text>
             <Text style={{ color: "rgba(0, 138, 25, 1)" }}>
-              Saved د.ك {savedAmount}
+              Saved د.ك {formattedSavedAmount}
             </Text>
           </View>
           <View
@@ -768,6 +820,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
             }}
           >
             <TouchableOpacity
+              disabled={isOrderSubmitting}
               style={{
                 flexDirection: "row",
                 gap: 10,
@@ -778,11 +831,25 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                 handleSubmitOrder();
               }}
             >
-              <Text style={{ color: "#fff", fontSize: 18,fontFamily : 'Lato-Medium' }}>Order Now</Text>
-              <Image
-                style={{ width: 15, height: 15 }}
-                source={require("../../assets/images/icons/arrow.png")}
-              />
+              {isOrderSubmitting ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <>
+                  <Text
+                    style={{
+                      color: "#fff",
+                      fontSize: 18,
+                      fontFamily: "Lato-Medium",
+                    }}
+                  >
+                    Order Now
+                  </Text>
+                  <Image
+                    style={{ width: 15, height: 15 }}
+                    source={require("../../assets/images/icons/arrow.png")}
+                  />
+                </>
+              )}
             </TouchableOpacity>
           </View>
         </View>

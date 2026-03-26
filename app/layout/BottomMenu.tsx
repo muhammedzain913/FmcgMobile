@@ -137,14 +137,24 @@ const BottomMenu = ({state, navigation, descriptors}: Props) => {
                                                     width:24,
                                                     marginBottom:10,
                                                     resizeMode:'contain',
-                                                    // tintColor: isFocused ? COLORS.title : theme.dark ? colors.title : colors.text,
-                                                    // tintColor:colors.title
+                                                    tintColor: label === 'Home' ? undefined : isFocused ? '#000000' : '#8C8C8C',
                                                 }}
                                                 source={
-                                                    label === 'Home'    ?  IMAGES.Home:
-                                                    label === 'My Cart'     ?  IMAGES.mycart:
-                                                    label === 'Categories'   ?  IMAGES.Category:
-                                                    label === 'My Orders'  ?  IMAGES.myorders : IMAGES.Home
+                                                    label === 'Home'
+                                                        ? IMAGES.Home
+                                                        : label === 'My Cart'
+                                                        ? isFocused
+                                                            ? IMAGES.mycartActive
+                                                            : IMAGES.mycart
+                                                        : label === 'Categories'
+                                                        ? isFocused
+                                                            ? IMAGES.CategoryActive
+                                                            : IMAGES.Category
+                                                        : label === 'My Orders'
+                                                        ? isFocused
+                                                            ? IMAGES.myordersActive
+                                                            : IMAGES.myorders
+                                                        : IMAGES.Home
                                                 }
                                             />
                                         {/* </Animated.View> */}
