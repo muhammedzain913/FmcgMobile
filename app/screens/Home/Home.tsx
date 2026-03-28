@@ -181,18 +181,27 @@ const Home = ({ navigation }: HomeScreenProps) => {
   },[])
 
   useEffect(() => {
-    const setDealProducts = async () => {
+    const fetchTopDiscountProducts = async () => {
       try {
-        const dealProducts = products?.filter(
-          (p: any) => p.categoryId === dealCategory.id,
+        const governorateId = address?.governorate?.id || address?.governorateId;
+        const cityId = address?.city?.id || address?.cityId;
+        const blockId = address?.block?.id || address?.blockId;
+
+        if (!governorateId || !cityId || !blockId) {
+          setDealCategoryProducts([]);
+          return;
+        }
+
+        const response = await apiPath.get(
+          `${Url}/api/products/top-discounts?gov=${governorateId}&city=${cityId}&block=${blockId}`,
         );
-        setDealCategoryProducts(dealProducts);
+        setDealCategoryProducts(response.data || []);
       } catch (error: any) {
         setError(error.message || "Something went wrong");
       }
     };
-    setDealProducts();
-  }, [dealCategory, products]);
+    fetchTopDiscountProducts();
+  }, [address]);
 
   useEffect(() => {
     const fetchCategory = async () => {
@@ -421,9 +430,6 @@ const Home = ({ navigation }: HomeScreenProps) => {
         <SectionContainer>
           <SectionHeader
             title="DEAL OF THE DAY"
-            onViewAllPress={() => {
-              navigation.navigate("ShopByBrand", {});
-            }}
           />
           <ScrollView
             contentContainerStyle={{
@@ -439,7 +445,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
             keyboardShouldPersistTaps="handled"
             overScrollMode="never"
           >
-            {displayedProducts?.map((data: any) => {
+            {dealCategoryProducts?.map((data: any) => {
               return (
                 <ProductCard
                   key={data.id || data.slug}

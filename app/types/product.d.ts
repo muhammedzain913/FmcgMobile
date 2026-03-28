@@ -22,6 +22,7 @@ export interface Product {
   id: string;
   title: string;
   slug: string; 
+  bestVariantId?: string;
   description?: string;
   userId : string;
   imageUrl?: string;

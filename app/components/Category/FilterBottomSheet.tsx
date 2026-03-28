@@ -11,6 +11,7 @@ import {
 import BottomSheetHeader from "../BottomSheet/BottomSheetHeader";
 import Button from "../Button/Button";
 import { filterCriteria } from "../../types/filterCrieria";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface FilterBottomSheetProps {
   onClose: () => void;
@@ -29,6 +30,9 @@ const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
   onApply,
   onClear,
 }) => {
+  const insets = useSafeAreaInsets();
+  const FOOTER_BASE_HEIGHT = 64;
+  const FOOTER_HEIGHT = FOOTER_BASE_HEIGHT + (insets.bottom || 0);
   const [selectedFilter, setSelectedFilter] = useState<string>("PRICE RANGE");
 
   // Filter item dimensions
@@ -53,8 +57,9 @@ const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
   // const sortOptions = [
 
   // ];
-  const [selectedSortOption, setSelectedSortOption] =
-    useState<string>("Price (High To Low)");
+  const [selectedSortOption, setSelectedSortOption] = useState<string>(
+    "Price (High To Low)",
+  );
   const [selectedPriceRanges, setSelectedPriceRanges] = useState<string[]>([]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
 
@@ -157,7 +162,8 @@ const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
 
   const isSelectedItem = (item: string) => {
     if (selectedFilter === "SORT") return selectedSortOption === item;
-    if (selectedFilter === "PRICE RANGE") return selectedPriceRanges.includes(item);
+    if (selectedFilter === "PRICE RANGE")
+      return selectedPriceRanges.includes(item);
     if (selectedFilter === "BRANDS") return selectedBrands.includes(item);
     return false;
   };
@@ -179,12 +185,11 @@ const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
   };
 
   return (
-    <Animated.ScrollView>
     <Animated.View
       style={{
         ...styles.bottomSheetContent,
         flex: 1,
-        paddingVertical: 10,
+        // paddingVertical: 10,
         // gap: 20,
       }}
     >
@@ -193,8 +198,15 @@ const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
         <View style={{ height: 20 }}></View>
       </View>
 
-      <View style={{ flex: 1, flexDirection: "row" }}>
-        <View style={{ flex: 1, position: "relative" }}>
+      <View
+        style={{
+          flex: 1,
+          minHeight: 0,
+          flexDirection: "row",
+          // paddingBottom: FOOTER_HEIGHT,
+        }}
+      >
+        <View style={{ flex: 1, minHeight: 0, position: "relative" }}>
           {filterCriterias.map((filter, index) => (
             <TouchableOpacity
               key={index}
@@ -262,45 +274,55 @@ const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
           />
         </View>
 
-        <View style={{ flex: 1, backgroundColor: "#fff" }}>
-          <ScrollView showsVerticalScrollIndicator={false}>
-          {getFilterContent().map((item: string, index: number) => {
-            return (
-              <TouchableOpacity
-                onPress={() => {
-                  handleMultiSelect(item, selectedFilter === "SORT");
-                }}
-              >
-                <View
-                  key={index}
-                  style={{
-                    ...styles.fiterCategoryContainer,
-                    borderBottomWidth: 1,
-                    borderColor: "#F5F5F5",
+        <View style={{ flex: 1, minHeight: 0, backgroundColor: "#fff" }}>
+          <ScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={{ paddingBottom: 50 }}
+            showsVerticalScrollIndicator={false}
+          >
+            {getFilterContent().map((item: string, index: number) => {
+              return (
+                <TouchableOpacity
+                  onPress={() => {
+                    handleMultiSelect(item, selectedFilter === "SORT");
                   }}
                 >
-                  {radioButton(
-                    isSelectedItem(item),
-                    selectedFilter === "SORT",
-                  )}
-                  <Text style={{ fontFamily: "Lato-Regular", fontSize: 14 }}>
-                    {item}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
+                  <View
+                    key={index}
+                    style={{
+                      ...styles.fiterCategoryContainer,
+                      borderBottomWidth: 1,
+                      borderColor: "#F5F5F5",
+                    }}
+                  >
+                    {radioButton(
+                      isSelectedItem(item),
+                      selectedFilter === "SORT",
+                    )}
+                    <Text style={{ fontFamily: "Lato-Regular", fontSize: 14 }}>
+                      {item}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
           </ScrollView>
         </View>
       </View>
 
       <View
         style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: FOOTER_HEIGHT,
           flexDirection: "row",
           gap: 12,
           backgroundColor: "#fff",
           paddingHorizontal: 20,
-          paddingVertical: 10,
+          paddingTop: 10,
+          paddingBottom: 10 + (insets.bottom || 0),
         }}
       >
         <View style={{ flex: 1 }}>
@@ -324,7 +346,6 @@ const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
         </View>
       </View>
     </Animated.View>
-    </Animated.ScrollView>
   );
 };
 
@@ -332,11 +353,12 @@ export default FilterBottomSheet;
 
 const styles = StyleSheet.create({
   bottomSheetContent: {
-    flex: 1,
     backgroundColor: "#F5F5F5",
-    height: 800,
-    // paddingHorizontal: 20,
+    flex: 1,
+    minHeight: 0,
+    position: "relative",
     paddingTop: 50,
+    height : 450
   },
   filter: {
     fontFamily: "Lato-Medium",

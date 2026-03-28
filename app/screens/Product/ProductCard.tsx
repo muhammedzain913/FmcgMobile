@@ -39,7 +39,13 @@ const ProductCard = React.memo(
     imageContainerHeight,
   }: ProductCardProps) => {
     const [isAdded, setIsAdded] = useState<boolean>(false);
-    const selectedVariant = product?.variants?.[0] || null;
+    const bestVariantId = (product as any)?.bestVariantId || (product as any)?.bestVariant?.id;
+    const selectedVariant =
+      (bestVariantId
+        ? product?.variants?.find((variant) => String(variant?.id) === String(bestVariantId))
+        : null) ||
+      product?.variants?.[0] ||
+      null;
     const dispatch = useDispatch<AppDispatch>();
     const cartItem = useSelector(selectCartItemById(product.id));
 
@@ -167,8 +173,10 @@ const ProductCard = React.memo(
                 onPressIn={() => {
                   console.log("add to cart");
                   triggerTouchFeedback();
-                  addToCart(product, selectedVariant);
-                  setIsAdded(true);
+                  if (selectedVariant) {
+                    addToCart(product, selectedVariant);
+                    setIsAdded(true);
+                  }
                 }}
               >
                 <View
@@ -218,14 +226,16 @@ const ProductCard = React.memo(
               {product.title}
             </Text>
             <Text style={styles.itemDescription}>
-              {product.variants[0]?.quantity}{" "}
+              {selectedVariant?.quantity}{" "}
               {product.unit === "KILOGRAM"
                 ? "KG"
                 : product.unit === "LITER"
                   ? "L"
                   : product.unit}
             </Text>
-            {product.variants[0]?.price > product.variants[0]?.salePrice && (
+            {selectedVariant?.price != null &&
+              selectedVariant?.salePrice != null &&
+              selectedVariant.price > selectedVariant.salePrice && (
               <Text
                 style={{
                   ...styles.itemDescription,
@@ -234,8 +244,8 @@ const ProductCard = React.memo(
                 }}
               >
                 {calculateDiscountPercentage(
-                  product.variants[0]?.price,
-                  product.variants[0]?.salePrice,
+                  selectedVariant.price,
+                  selectedVariant.salePrice,
                 )}
                 % OFF
               </Text>
@@ -248,10 +258,12 @@ const ProductCard = React.memo(
                   fontSize: 14,
                 }}
               >
-                KD {product?.variants[0]?.salePrice}
+                KD {selectedVariant?.salePrice}
               </Text>
 
-              {product.variants[0].salePrice < product.variants[0].price && (
+              {selectedVariant?.salePrice != null &&
+                selectedVariant?.price != null &&
+                selectedVariant.salePrice < selectedVariant.price && (
                 <Text
                   style={{
                     ...styles.itemDescription,
@@ -261,7 +273,7 @@ const ProductCard = React.memo(
                     textDecorationLine: "line-through",
                   }}
                 >
-                  KD {product.variants[0]?.price}
+                  KD {selectedVariant?.price}
                 </Text>
               )}
             </View>

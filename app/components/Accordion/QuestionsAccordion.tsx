@@ -23,32 +23,32 @@ const QuestionsAccordion = () => {
             content: 'Package have the JavaScript JS, JavaScript JSON, XML, .apk, .java, JavaScript JSON, .java, .plist, Well Define Documentation, Fonts and Icons, Responsive Designs, Image Assets, Customization Options, and many more.',
         },
         {
-            title: 'What features does FootFlare offer?',
-            content: 'FootFlare offers a wide range of features including responsive design, customizable layouts, product catalog pages, shopping cart functionality, checkout pages, user account management, and more.',
+            title: 'What features does Sooper offer?',
+            content: 'Sooper offers a wide range of features including responsive design, customizable layouts, product catalog pages, shopping cart functionality, checkout pages, user account management, and more.',
 
         },
         {
             title: "Can I customize the template's design?",
-            content: 'Absolutely! FootFlare is built using JSX, which makes it highly customizable. You can easily adjust colors, fonts, layout structures, and more to match your brand identity.',
+            content: 'Absolutely! Sooper is built using JSX, which makes it highly customizable. You can easily adjust colors, fonts, layout structures, and more to match your brand identity.',
 
         },
         {
             title: 'Are there pre-designed page templates included?',
-            content: 'Yes, FootFlare typically includes pre-designed templates for essential pages like the homepage, product listings, product details, shopping cart, checkout, and user account pages.',
+            content: 'Yes, Sooper typically includes pre-designed templates for essential pages like the homepage, product listings, product details, shopping cart, checkout, and user account pages.',
         },
         {
-            title: 'Does FootFlare provide customer support?',
-            content: 'FootFlare offers customer support options for their clients. Check the template documentation or you can directly contact to our support team from here - Click Here',
+            title: 'Does Sooper provide customer support?',
+            content: 'Sooper offers customer support options for their clients. Check the template documentation or you can directly contact to our support team from here - Click Here',
 
         },
         {
-            title: "Is coding knowledge required to use FootFlare?",
-            content: "Basic knowledge of JavaScript JS, XML, and JSX can be helpful for customizing FootFlare to your needs. However, it's designed to be user- friendly and doesn't necessarily require extensive coding skills.",
+            title: "Is coding knowledge required to use Sooper?",
+            content: "Basic knowledge of JavaScript JS, XML, and JSX can be helpful for customizing Sooper to your needs. However, it's designed to be user- friendly and doesn't necessarily require extensive coding skills.",
 
         },
         {
-            title: 'How can I get started with FootFlare?',
-            content: "To get started, purchase and download the FootFlare template. Then, follow the included documentation to set up and customize your e-commerce website based on your specific requirements.",
+            title: 'How can I get started with Sooper?',
+            content: "To get started, purchase and download the Sooper template. Then, follow the included documentation to set up and customize your e-commerce website based on your specific requirements.",
         },
     ];
 
