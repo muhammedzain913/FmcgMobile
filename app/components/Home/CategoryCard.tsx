@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { Image } from "expo-image";
 
 interface CategoryCardProps {
   title: string;
@@ -18,11 +19,16 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
     <View style={[styles.categoryCard, containerStyle]}>
       <TouchableOpacity style={styles.touchable} onPress={onPress}>
         <View style={styles.categoryImageContainer}>
-          <Image
-            resizeMode="contain"
-            style={styles.categoryImage}
-            source={{uri : image}}
-          />
+          {image ? (
+            <Image
+              source={{ uri: image }}
+              style={styles.categoryImage}
+              contentFit="contain"
+              cachePolicy="memory-disk"
+              recyclingKey={image}
+              transition={150}
+            />
+          ) : null}
         </View>
         <View>
           <Text style={styles.categoryText}>{title}</Text>

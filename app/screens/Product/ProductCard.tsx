@@ -8,6 +8,7 @@ import {
   Vibration,
   View,
 } from "react-native";
+import { Image as ExpoImage } from "expo-image";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
 import { Product, Variant } from "../../types/product";
 import { NavigationProp } from "@react-navigation/native";
@@ -97,11 +98,16 @@ const ProductCard = React.memo(
               overflow: "hidden",
             }}
           >
-            <Image
-              source={{ uri: product.imageUrl }}
-              style={{ height: "100%", width: "100%" }}
-              resizeMode= "contain"
-            />
+            {product.imageUrl ? (
+              <ExpoImage
+                source={{ uri: product.imageUrl }}
+                style={{ height: "100%", width: "100%" }}
+                contentFit="contain"
+                cachePolicy="memory-disk"
+                recyclingKey={String(product.id)}
+                transition={150}
+              />
+            ) : null}
             {cartItem ? (
               <LinearGradient
                 colors={["#059B5D", "#023520"]}

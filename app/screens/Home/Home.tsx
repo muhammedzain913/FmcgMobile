@@ -77,7 +77,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
   const [dealCategoryProducts, setDealCategoryProducts] = useState<any[]>();
   const [searchQuery, setSearchQuety] = useState<string>("");
   const totalQuantity = useSelector(selectCartTotalQuantity);
-  
+
   const [editingAddress, setEditingAddress] = useState<any>(null); // Store address being edited
   const openLocationSheet = () => {
     if (closeTimeoutRef.current) {
@@ -154,7 +154,6 @@ const Home = ({ navigation }: HomeScreenProps) => {
     fetchBanner();
   }, []);
 
-
   useEffect(() => {
     if (!address) return;
     if (!address.governorate) return;
@@ -164,8 +163,16 @@ const Home = ({ navigation }: HomeScreenProps) => {
           `${Url}/api/products?gov=${address.governorate.id}&city=${address.city.id}&block=${address.block.id}&search =${searchQuery}`,
         );
         console.log("product api", response.data);
-        setProducts(response.data);
-        setDisplayedProducts(response.data);
+        const list = Array.isArray(response.data) ? response.data : [];
+        setProducts(list as any);
+        const latestFive = [...list]
+          .sort((a: any, b: any) => {
+            const at = Date.parse(a?.createdAt ?? "") || 0;
+            const bt = Date.parse(b?.createdAt ?? "") || 0;
+            return bt - at;
+          })
+          .slice(0, 5);
+        setDisplayedProducts(latestFive);
       } catch (error: any) {
         setError(error.message || "Something went wrong");
       } finally {
@@ -175,15 +182,15 @@ const Home = ({ navigation }: HomeScreenProps) => {
     fetchProducts();
   }, [searchQuery, governorate, city, block]);
 
-
   useEffect(() => {
-    console.log('this are the ',governorate,city,block)
-  },[])
+    console.log("this are the ", governorate, city, block);
+  }, []);
 
   useEffect(() => {
     const fetchTopDiscountProducts = async () => {
       try {
-        const governorateId = address?.governorate?.id || address?.governorateId;
+        const governorateId =
+          address?.governorate?.id || address?.governorateId;
         const cityId = address?.city?.id || address?.cityId;
         const blockId = address?.block?.id || address?.blockId;
 
@@ -340,17 +347,21 @@ const Home = ({ navigation }: HomeScreenProps) => {
         </View>
 
         {/* No Products Notification Banner */}
-        {displayedProducts && displayedProducts.length === 0 && address && address.governorate && (
-          <View style={styles.noProductsBanner}>
-            <Image
-              style={styles.noProductsIcon}
-              source={require("../../assets/images/icons/locationpinblack.png")}
-            />
-            <Text style={styles.noProductsText}>
-              No products available in your selected location. Please try a different address.
-            </Text>
-          </View>
-        )}
+        {displayedProducts &&
+          displayedProducts.length === 0 &&
+          address &&
+          address.governorate && (
+            <View style={styles.noProductsBanner}>
+              <Image
+                style={styles.noProductsIcon}
+                source={require("../../assets/images/icons/locationpinblack.png")}
+              />
+              <Text style={styles.noProductsText}>
+                No products available in your selected location. Please try a
+                different address.
+              </Text>
+            </View>
+          )}
 
         <SectionContainer>
           <SectionHeader
@@ -376,7 +387,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
                 onPress={() => {
                   setSelectedCategory(data.title);
                   // Navigate to StackNavigator's Categories screen (not BottomNavigation's Categories tab)
-                  navigation.getParent()?.navigate('Categories', {
+                  navigation.getParent()?.navigate("Categories", {
                     categoryTitle: data.title,
                     categoryId: data.id,
                   });
@@ -426,11 +437,8 @@ const Home = ({ navigation }: HomeScreenProps) => {
           </ScrollView>
         </SectionContainer>
 
-
         <SectionContainer>
-          <SectionHeader
-            title="DEAL OF THE DAY"
-          />
+          <SectionHeader title="DEAL OF THE DAY" />
           <ScrollView
             contentContainerStyle={{
               gap: 15,
@@ -481,7 +489,12 @@ const Home = ({ navigation }: HomeScreenProps) => {
             {brands?.map((brand: any) => (
               <View key={brand.id} style={styles.brandCard}>
                 <TouchableOpacity
-                  onPress={() => navigation.navigate("ShopByBrand", { brandId: brand.id, brand: brand })}
+                  onPress={() =>
+                    navigation.navigate("ShopByBrand", {
+                      brandId: brand.id,
+                      brand: brand,
+                    })
+                  }
                 >
                   <Image
                     style={styles.brandImage}
@@ -499,12 +512,11 @@ const Home = ({ navigation }: HomeScreenProps) => {
       <BottomSheet2 ref={sheetRef} />
 
       {isLocationSheetMounted && (
-      <LocationBottomSheet
-        isOpen={isOpen}
-        toggleSheet={toggleSheet}
-        duration={SHEET_DURATION}
-      >
-
+        <LocationBottomSheet
+          isOpen={isOpen}
+          toggleSheet={toggleSheet}
+          duration={SHEET_DURATION}
+        >
           <Animated.View
             style={{
               ...styles.bottomSheetContent,
@@ -572,8 +584,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
               />
             </View>
           </Animated.View>
-        
-      </LocationBottomSheet>
+        </LocationBottomSheet>
       )}
       <GlobalCartNotification />
     </SafeAreaView>

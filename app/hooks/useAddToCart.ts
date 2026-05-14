@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../redux/store";
 import { addToCart } from "../redux/reducer/cartReducer";
@@ -21,8 +22,7 @@ import { Product, Variant } from "../types/product";
 export const useAddToCart = () => {
   const dispatch = useDispatch<AppDispatch>();
 
-  const addItemToCart = (product: Product,selectedVariant: Variant) => {
-    console.log("adding items..");
+  const addItemToCart = useCallback((product: Product, selectedVariant: Variant) => {
     dispatch(
       addToCart({
         id: product?.id,  
@@ -39,7 +39,7 @@ export const useAddToCart = () => {
         vendorId: product?.userId,
       } as any),
     );
-  };
+  }, [dispatch]);
 
   return addItemToCart;
 };
