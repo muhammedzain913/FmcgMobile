@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
 import { useAddToCart } from "../../hooks/useAddToCart";
-import GlobalCartNotification from "../../components/Cart/GlobalCartNotification";
+
 import { useSharedValue } from "react-native-reanimated";
 import LocationBottomSheet from "../../components/BottomSheet/LocationBottomSheet";
 import CategoriesHeader from "../../components/Category/CategoriesHeader";
@@ -23,7 +23,7 @@ type PriceRange = { min?: number; max?: number };
 type FilterObject = {
   priceRanges: PriceRange[];
   brands: string[];
-  sort: "price_asc" | "price_desc" | "newest" | "";
+  sort: "price_asc" | "price_desc" | "discount_desc" | "newest" | "";
 };
 
 const Categories = ({ navigation, route }: CategoriesScreenProps) => {
@@ -46,6 +46,7 @@ const Categories = ({ navigation, route }: CategoriesScreenProps) => {
   );
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string | null>(null);
   const isOpen = useSharedValue(false);
+  const [filterInitial, setFilterInitial] = useState<string>("PRICE RANGE");
   const [displayedProducts, setDisplayedProducts] = useState<any[]>();
   const [dealCategory, setDealCategory] = useState<any>();
   const [dealCategoryProducts, setDealCategoryProducts] = useState<any[]>();
@@ -79,7 +80,8 @@ const Categories = ({ navigation, route }: CategoriesScreenProps) => {
     },
   ];
 
-  const openSheet = () => {
+  const openSheet = (initial: string = "PRICE RANGE") => {
+    setFilterInitial(initial);
     isOpen.value = true;
   };
 
@@ -124,6 +126,8 @@ const Categories = ({ navigation, route }: CategoriesScreenProps) => {
         return "price_asc";
       case "Price (High To Low)":
         return "price_desc";
+      case "Discount (High To Low)":
+        return "discount_desc";
       default:
         return "";
     }
@@ -136,6 +140,14 @@ const Categories = ({ navigation, route }: CategoriesScreenProps) => {
     if (raw === null || raw === undefined) return null;
     const n = typeof raw === "number" ? raw : parseFloat(String(raw));
     return Number.isFinite(n) ? n : null;
+  };
+
+  const getEffectiveDiscountPct = (p: any): number => {
+    const variant = p?.variants?.[0];
+    const salePrice = variant?.salePrice ?? p?.salePrice;
+    const originalPrice = variant?.price ?? p?.price;
+    if (!originalPrice || !salePrice || originalPrice <= 0) return 0;
+    return ((originalPrice - salePrice) / originalPrice) * 100;
   };
 
   const applyFiltersToProducts = (base: any[], nextFilters: FilterObject) => {
@@ -162,6 +174,8 @@ const Categories = ({ navigation, route }: CategoriesScreenProps) => {
       out.sort((a: any, b: any) => (getEffectiveSalePrice(a) ?? 0) - (getEffectiveSalePrice(b) ?? 0));
     } else if (nextFilters.sort === "price_desc") {
       out.sort((a: any, b: any) => (getEffectiveSalePrice(b) ?? 0) - (getEffectiveSalePrice(a) ?? 0));
+    } else if (nextFilters.sort === "discount_desc") {
+      out.sort((a: any, b: any) => getEffectiveDiscountPct(b) - getEffectiveDiscountPct(a));
     }
 
     setDisplayedProducts(out);
@@ -187,7 +201,7 @@ const Categories = ({ navigation, route }: CategoriesScreenProps) => {
     try {
       setLoading(true);
       const response = await apiPath.get(
-        `${Url}/api/products?subCatId=${subcategoryId}&gov=${governorateId}&city=${cityId}&block=${blockId}&search =${searchQuery}`,
+        `${Url}/api/products?subCategoryId=${subcategoryId}&governorate=${governorateId}&city=${cityId}&block=${blockId}&search=${searchQuery}`,
       );
       console.log("Products by subcategory API", response.data.length);
       setProducts(response.data);
@@ -354,7 +368,7 @@ const Categories = ({ navigation, route }: CategoriesScreenProps) => {
   return (
     <View style={{ flex: 1, backgroundColor: "#ffff",  }}>
       <View style={{ flex: 1, gap: 0 }}>
-        <CategoriesHeader />
+        <CategoriesHeader categoryName={route.params?.categoryTitle} />
 
         <View style={{ flexDirection: "row", flex: 1, minWidth: 0 }}>
           <CategorySidebar
@@ -366,7 +380,16 @@ const Categories = ({ navigation, route }: CategoriesScreenProps) => {
           />
 
           <View style={{ flex: 1 }}>
-            <FilterBar onFilterPress={openSheet} backgroundColor="#F9F9F9" />
+            <FilterBar
+              onFilterPress={() => openSheet("PRICE RANGE")}
+              onSortPress={() => openSheet("SORT")}
+              onPricePress={() => openSheet("PRICE RANGE")}
+              onBrandPress={() => openSheet("BRANDS")}
+              backgroundColor="#F9F9F9"
+              hasActiveSort={filters.sort !== ""}
+              hasActivePrice={filters.priceRanges.length > 0}
+              hasActiveBrand={filters.brands.length > 0}
+            />
             <ProductGrid
               products={displayedProducts || []}
               addToCart={addItemToCart}
@@ -382,10 +405,11 @@ const Categories = ({ navigation, route }: CategoriesScreenProps) => {
           filterCriterias={filterCriterias}
           onApply={handleApplyFilters}
           onClear={handleClearFilters}
+          initialFilter={filterInitial}
         />
       </LocationBottomSheet>
 
-      <GlobalCartNotification />
+
       <GroceryGifLoader visible={subcategoriesLoading} />
     </View>
   );

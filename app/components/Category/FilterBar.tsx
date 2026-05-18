@@ -1,22 +1,35 @@
 import React from "react";
-import { View, Text, Image, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
+import { Ionicons } from "@expo/vector-icons";
 
 interface FilterBarProps {
   onFilterPress: () => void;
+  onSortPress: () => void;
+  onPricePress: () => void;
+  onBrandPress: () => void;
   backgroundColor?: string;
+  hasActiveSort?: boolean;
+  hasActivePrice?: boolean;
+  hasActiveBrand?: boolean;
 }
 
 const FilterBar: React.FC<FilterBarProps> = ({
   onFilterPress,
+  onSortPress,
+  onPricePress,
+  onBrandPress,
   backgroundColor,
+  hasActiveSort,
+  hasActivePrice,
+  hasActiveBrand,
 }) => {
   return (
     <View
       style={{
         paddingVertical: 5,
         paddingHorizontal: 5,
-        backgroundColor: backgroundColor ? backgroundColor : "#FFF",
+        backgroundColor: backgroundColor || "#FFF",
       }}
     >
       <ScrollView
@@ -31,58 +44,47 @@ const FilterBar: React.FC<FilterBarProps> = ({
         <TouchableOpacity onPress={onFilterPress}>
           <View style={styles.filterContainer}>
             <Text style={styles.filterText}>Filter</Text>
-            <Image
-              source={require("../../assets/images/icons/filter (1).png")}
-              style={{
-                width: 12,
-                height: 12,
-                marginLeft: 5,
-                marginTop: 3,
-              }}
-            />
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={onFilterPress}>
-          <View style={styles.filterContainer}>
-            <Text style={styles.filterText}>Sort</Text>
-            <Image
-              source={require("../../assets/images/icons/CaretDown.png")}
-              style={{
-                width: 15,
-                height: 15,
-                marginLeft: 5,
-                marginTop: 3,
-              }}
+            <Ionicons
+              name="options-outline"
+              size={14}
+              color="#000000"
+              style={{ marginLeft: 5 }}
             />
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={onFilterPress}>
-          <View style={styles.filterContainer}>
-            <Text style={styles.filterText}>Price</Text>
-            <Image
-              source={require("../../assets/images/icons/CaretDown.png")}
-              style={{
-                width: 15,
-                height: 15,
-                marginLeft: 5,
-                marginTop: 3,
-              }}
+        <TouchableOpacity onPress={onSortPress}>
+          <View style={[styles.filterContainer, hasActiveSort && styles.activeContainer]}>
+            <Text style={[styles.filterText, hasActiveSort && styles.activeText]}>Sort</Text>
+            <Ionicons
+              name="chevron-down"
+              size={14}
+              color={hasActiveSort ? "#059B5D" : "#000000"}
+              style={{ marginLeft: 5 }}
             />
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={onFilterPress}>
-          <View style={styles.filterContainer}>
-            <Text style={styles.filterText}>Brand</Text>
-            <Image
-              source={require("../../assets/images/icons/CaretDown.png")}
-              style={{
-                width: 15,
-                height: 15,
-                marginLeft: 5,
-                marginTop: 3,
-              }}
+        <TouchableOpacity onPress={onPricePress}>
+          <View style={[styles.filterContainer, hasActivePrice && styles.activeContainer]}>
+            <Text style={[styles.filterText, hasActivePrice && styles.activeText]}>Price</Text>
+            <Ionicons
+              name="chevron-down"
+              size={14}
+              color={hasActivePrice ? "#059B5D" : "#000000"}
+              style={{ marginLeft: 5 }}
+            />
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={onBrandPress}>
+          <View style={[styles.filterContainer, hasActiveBrand && styles.activeContainer]}>
+            <Text style={[styles.filterText, hasActiveBrand && styles.activeText]}>Brand</Text>
+            <Ionicons
+              name="chevron-down"
+              size={14}
+              color={hasActiveBrand ? "#059B5D" : "#000000"}
+              style={{ marginLeft: 5 }}
             />
           </View>
         </TouchableOpacity>
@@ -99,6 +101,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#000000",
   },
+  activeText: {
+    color: "#059B5D",
+    fontFamily: "Lato-SemiBold",
+  },
   filterContainer: {
     height: 30,
     flexDirection: "row",
@@ -109,5 +115,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
+  },
+  activeContainer: {
+    borderColor: "#059B5D",
+    backgroundColor: "#E6F5EF",
   },
 });

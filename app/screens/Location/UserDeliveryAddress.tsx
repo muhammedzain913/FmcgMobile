@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  Image,
+  Animated,
+  BackHandler,
   ImageBackground,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   ScrollView,
   StyleSheet,
@@ -12,11 +14,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import Input from "../../components/Input/Input";
 import Button from "../../components/Button/Button";
 import { Typography } from "../../constants/typography";
 import { useSelector } from "react-redux";
-import Animated, { useSharedValue } from "react-native-reanimated";
+import ReAnimated, { useSharedValue } from "react-native-reanimated";
 import LocationBottomSheet from "../../components/BottomSheet/LocationBottomSheet";
 import DropdownMenu from "../../components/DropDown/DropDownMenu";
 import MenuOption from "../../components/DropDown/MenuOption";
@@ -40,6 +43,38 @@ const UserDeliveryAddress = ({
   const userId = useSelector((x: any) => x?.user?.userInfo.id);
   const { saveAddress, loading } = useUserAddress();
   const isOpen = useSharedValue(false);
+
+  const [noDeliveryVisible, setNoDeliveryVisible] = useState(false);
+  const modalScale = useRef(new Animated.Value(0)).current;
+  const modalOpacity = useRef(new Animated.Value(0)).current;
+
+  const showNoDeliveryModal = () => {
+    setNoDeliveryVisible(true);
+    Animated.parallel([
+      Animated.spring(modalScale, {
+        toValue: 1,
+        useNativeDriver: true,
+        bounciness: 12,
+      }),
+      Animated.timing(modalOpacity, {
+        toValue: 1,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  const hideNoDeliveryModal = (onDone?: () => void) => {
+    Animated.parallel([
+      Animated.timing(modalScale, { toValue: 0.8, duration: 180, useNativeDriver: true }),
+      Animated.timing(modalOpacity, { toValue: 0, duration: 180, useNativeDriver: true }),
+    ]).start(() => {
+      setNoDeliveryVisible(false);
+      modalScale.setValue(0);
+      modalOpacity.setValue(0);
+      onDone?.();
+    });
+  };
 
   const [savedAddress, setSavedAddress] = useState<AddressRequest>({
     type: "HOME",
@@ -103,8 +138,21 @@ const UserDeliveryAddress = ({
           routes: [{ name: "DrawerNavigation" }],
         });
       },
-      onError: (error) => {
-        Alert.alert("Error", error || "Failed to save address");
+      onError: (error: string) => {
+        const msg = (error || "").toLowerCase();
+        const isNoVendor =
+          msg.includes("no delivery available") ||
+          msg.includes("vendor") ||
+          msg.includes("no delivery") ||
+          msg.includes("not available") ||
+          msg.includes("unavailable") ||
+          msg.includes("no vendor") ||
+          msg.includes("region");
+        if (isNoVendor) {
+          showNoDeliveryModal();
+        } else {
+          Alert.alert("Error", error || "Failed to save address");
+        }
       },
     });
   };
@@ -118,6 +166,7 @@ const UserDeliveryAddress = ({
       >
         <StatusBar translucent={true} backgroundColor="#1E123D" style="light" />
         <ScrollView
+          style={{ backgroundColor: "transparent" }}
           contentContainerStyle={{ flexGrow: 1, padding: 20 }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
@@ -133,22 +182,12 @@ const UserDeliveryAddress = ({
             <View style={{ gap: 30 }}>
               <View style={{ gap: 50 }}>
 
-                   <TouchableOpacity onPress={() => {navigation.goBack()}}>
-                <View
-                  style={{
-                    justifyContent: "center",
-                    alignItems: "center",
-                    borderColor: "#F0F0F0",
-                    borderRadius: 8,
-                    borderWidth: 1,
-                    width: 36,
-                    height: 36,
-                  }}
+                <TouchableOpacity
+                  onPress={() => navigation.goBack()}
+                  activeOpacity={0.7}
+                  style={styles.backButton}
                 >
-                  <Image
-                    source={require("../../assets/images/icons/wbackbtn.png")}
-                  />
-                </View>
+                  <Ionicons name="chevron-back" size={20} color="#FFFFFF" />
                 </TouchableOpacity>
 
                 <View
@@ -186,7 +225,6 @@ const UserDeliveryAddress = ({
                   onChangeText={(value) => handleChange(value, "apartmentNumber")}
                   variant="dark"
                   placeholder="Apartment / Flat number"
-                  keyboardType="numeric"
                   value={savedAddress.apartmentNumber || ""}
                 />
                 <Input
@@ -205,40 +243,30 @@ const UserDeliveryAddress = ({
                   </Text>
                 </View>
                 <View style={{ flexDirection: "row", gap: 10 }}>
-                  <View style={[
-                    styles.buttonView,
-                    savedAddress.type === "HOME" && styles.buttonViewActive
-                  ]}>
-                    <TouchableOpacity 
-                      style={{flexDirection : 'row',gap :5,alignItems : 'center'}} 
-                      onPress={() => handleChange("HOME", "type")}
-                    >
-                       <Image style={{width : 13,height : 13}} source={require('../../assets/images/icons/homeltst.png')}/>
-                      <Text style={styles.buttonText}>Home</Text>
-                    </TouchableOpacity>
-                  </View>
-                  <View style={[
-                    styles.buttonView,
-                    savedAddress.type === "WORK" && styles.buttonViewActive
-                  ]}>
-                    <TouchableOpacity 
-                      style={{flexDirection : 'row',gap :5}} 
-                      onPress={() => handleChange("WORK", "type")}
-                    >
-                      <Image style={{width : 13,height : 13}} source={require('../../assets/images/icons/briefcase.png')}/>
-                      <Text style={styles.buttonText}>Work</Text>
-                    </TouchableOpacity>
-                  </View>
-                  <View style={[
-                    styles.buttonView,
-                    savedAddress.type === "OTHER" && styles.buttonViewActive
-                  ]}>
-                    <TouchableOpacity 
-                      onPress={() => handleChange("OTHER", "type")}
-                    >
-                      <Text style={styles.buttonText}>Other</Text>
-                    </TouchableOpacity>
-                  </View>
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    style={[styles.buttonView, savedAddress.type === "HOME" && styles.buttonViewActive]}
+                    onPress={() => handleChange("HOME", "type")}
+                  >
+                    <Ionicons name="home-outline" size={13} color="#FFFFFF" />
+                    <Text style={styles.buttonText}>Home</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    style={[styles.buttonView, savedAddress.type === "WORK" && styles.buttonViewActive]}
+                    onPress={() => handleChange("WORK", "type")}
+                  >
+                    <Ionicons name="briefcase-outline" size={13} color="#FFFFFF" />
+                    <Text style={styles.buttonText}>Work</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    style={[styles.buttonView, savedAddress.type === "OTHER" && styles.buttonViewActive]}
+                    onPress={() => handleChange("OTHER", "type")}
+                  >
+                    <Ionicons name="ellipsis-horizontal" size={13} color="#FFFFFF" />
+                    <Text style={styles.buttonText}>Other</Text>
+                  </TouchableOpacity>
                 </View>
               </View>
             </View>
@@ -262,7 +290,7 @@ const UserDeliveryAddress = ({
 
       <LocationBottomSheet isOpen={isOpen} toggleSheet={toggleSheet}>
         <ScrollView contentContainerStyle={{ paddingBottom: 400 }}>
-          <Animated.View
+          <ReAnimated.View
             style={{ flex: 1, paddingVertical: 60, paddingHorizontal: 20 }}
           >
             <Text style={[Typography.titleMedium]}>CHOOSE GOVERNORATE</Text>
@@ -275,9 +303,7 @@ const UserDeliveryAddress = ({
                   <Text style={styles.triggerText}>
                     {governorate ? governorate?.name : "Select Governerate"}
                   </Text>
-                  <Image
-                    source={require("../../assets/images/icons/dropicon.png")}
-                  />
+                  <Ionicons name="chevron-down" size={16} color="#333333" />
                 </View>
               }
             >
@@ -308,9 +334,7 @@ const UserDeliveryAddress = ({
                   <Text style={styles.triggerText}>
                     {city ? city?.name : "Select City"}
                   </Text>
-                  <Image
-                    source={require("../../assets/images/icons/dropicon.png")}
-                  />
+                  <Ionicons name="chevron-down" size={16} color="#333333" />
                 </View>
               }
             >
@@ -346,9 +370,7 @@ const UserDeliveryAddress = ({
                   <Text style={styles.triggerText}>
                     {block ? block.name : "Select Block"}
                   </Text>
-                  <Image
-                    source={require("../../assets/images/icons/dropicon.png")}
-                  />
+                  <Ionicons name="chevron-down" size={16} color="#333333" />
                 </View>
               }
             >
@@ -371,7 +393,7 @@ const UserDeliveryAddress = ({
                 })}
               </ScrollView>
             </DropdownMenu>
-          </Animated.View>
+          </ReAnimated.View>
         </ScrollView>
         <Animated.View style={{ paddingHorizontal: 20, paddingVertical: 20 }}>
           <Button
@@ -384,6 +406,55 @@ const UserDeliveryAddress = ({
           />
         </Animated.View>
       </LocationBottomSheet>
+
+      <Modal
+        transparent
+        visible={noDeliveryVisible}
+        animationType="none"
+        statusBarTranslucent
+        onRequestClose={() => hideNoDeliveryModal()}
+      >
+        <View style={styles.modalOverlay}>
+          <Animated.View
+            style={[
+              styles.modalCard,
+              { opacity: modalOpacity, transform: [{ scale: modalScale }] },
+            ]}
+          >
+            <View style={styles.modalIconRing}>
+              <Ionicons name="location-outline" size={38} color="#1E123D" />
+            </View>
+
+            <Text style={styles.modalTitle}>No Delivery Here Yet</Text>
+            <Text style={styles.modalBody}>
+              Sorry, we don't deliver to this region yet. But we're growing fast
+              and will be available in your area soon!
+            </Text>
+
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.modalPrimaryBtn}
+              onPress={() =>
+                hideNoDeliveryModal(() => {
+                  isOpen.value = true;
+                })
+              }
+            >
+              <Ionicons name="map-outline" size={16} color="#FFFFFF" />
+              <Text style={styles.modalPrimaryBtnText}>Change Location</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.modalSecondaryBtn}
+              onPress={() => BackHandler.exitApp()}
+            >
+              <Ionicons name="exit-outline" size={16} color="#1E123D" />
+              <Text style={styles.modalSecondaryBtnText}>Exit App</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
+      </Modal>
     </>
   );
 };
@@ -391,13 +462,24 @@ const UserDeliveryAddress = ({
 export default UserDeliveryAddress;
 
 const styles = StyleSheet.create({
+  backButton: {
+    justifyContent: "center",
+    alignItems: "center",
+    borderColor: "#F0F0F0",
+    borderRadius: 8,
+    borderWidth: 1,
+    width: 36,
+    height: 36,
+  },
   buttonView: {
     width: 78,
     height: 32,
     borderRadius: 100,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
+    flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
+    gap: 5,
     borderColor: "#FFFFFF",
     borderWidth: 1,
   },
@@ -423,7 +505,83 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "#FFFFFF",
-    fontFamily : 'Lato-Regular',
-    fontSize : 13
+    fontFamily: "Lato-Regular",
+    fontSize: 13,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.55)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 28,
+  },
+  modalCard: {
+    width: "100%",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 24,
+    paddingHorizontal: 24,
+    paddingTop: 36,
+    paddingBottom: 28,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.18,
+    shadowRadius: 20,
+    elevation: 12,
+  },
+  modalIconRing: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#EDE8F9",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontFamily: "Lato-Bold",
+    fontSize: 20,
+    color: "#1E123D",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  modalBody: {
+    fontFamily: "Lato-Regular",
+    fontSize: 14,
+    color: "#666666",
+    textAlign: "center",
+    lineHeight: 22,
+    marginBottom: 28,
+  },
+  modalPrimaryBtn: {
+    width: "100%",
+    height: 50,
+    borderRadius: 12,
+    backgroundColor: "#1E123D",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    marginBottom: 12,
+  },
+  modalPrimaryBtnText: {
+    fontFamily: "Lato-Bold",
+    fontSize: 15,
+    color: "#FFFFFF",
+  },
+  modalSecondaryBtn: {
+    width: "100%",
+    height: 50,
+    borderRadius: 12,
+    backgroundColor: "#F0EDF8",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  modalSecondaryBtnText: {
+    fontFamily: "Lato-Bold",
+    fontSize: 15,
+    color: "#1E123D",
   },
 });

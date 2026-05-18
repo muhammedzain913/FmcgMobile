@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import Header from "../../layout/Header";
-import { ScrollView } from "react-native-gesture-handler";
+import { ScrollView } from "react-native";
 import { COLORS, FONTS } from "../../constants/theme";
 import Input from "../../components/Input/Input";
 import { GlobalStyleSheet } from "../../constants/StyleSheet";

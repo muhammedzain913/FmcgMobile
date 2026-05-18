@@ -84,39 +84,6 @@ const Login = ({ navigation }: LoginScreenProps) => {
         resizeMode="cover"
         source={require("../../assets/images/imgbckgrnd.png")}
       >
-        <View
-          style={{
-            width: 65,
-            height: 28,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            paddingHorizontal: 10,
-            flex: 1,
-            borderRadius: 61,
-            backgroundColor: "rgba(43, 66, 72, 0.5)",
-            alignSelf: "flex-end",
-            position: "absolute",
-            right: 20,
-            top: 30,
-          }}
-        >
-          <TouchableOpacity>
-            <Text
-              style={{
-                fontFamily: "Lato-SemiBold",
-                fontSize: 15,
-                lineHeight: 15,
-                letterSpacing: -0.45,
-                color: "#FFFFFF",
-                textAlign: "center",
-              }}
-            >
-              Skip
-            </Text>
-          </TouchableOpacity>
-        </View>
-
         <View>
           <Image
             resizeMode="contain"
@@ -165,41 +132,97 @@ const Login = ({ navigation }: LoginScreenProps) => {
       >
         <ScrollView
           contentContainerStyle={{
+            flexGrow: 1,
             paddingTop: 28,
             paddingHorizontal: 16,
             paddingBottom: 20,
-            rowGap: 8,
+            justifyContent: "space-between",
           }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <Input
-            onChangeText={(value) => handleInputChange("email", value)}
-            placeholder="Email"
-          />
-          <Input
-            onChangeText={(value) => handleInputChange("password", value)}
-            placeholder="Password"
-          />
+          {/* Top: input fields */}
+          <View style={{ rowGap: 8 }}>
+            <Input
+              onChangeText={(value) => handleInputChange("email", value)}
+              placeholder="Email"
+            />
+            <Input
+              onChangeText={(value) => handleInputChange("password", value)}
+              placeholder="Password"
+            />
 
-          <TouchableOpacity
-            style={{ alignSelf: "flex-end", marginTop: 4, marginBottom: 4 }}
-            onPress={() => navigation.navigate("ForgotPassword")}
-            activeOpacity={0.7}
-          >
-            <Text
-              style={{
-                fontFamily: "Lato-SemiBold",
-                fontSize: 14,
-                lineHeight: 20,
-                color: "#1E123D",
-              }}
+            <TouchableOpacity
+              style={{ alignSelf: "flex-end", marginTop: 4, marginBottom: 4 }}
+              onPress={() => navigation.navigate("ForgotPassword")}
+              activeOpacity={0.7}
             >
-              Forgot password?
-            </Text>
-          </TouchableOpacity>
+              <Text
+                style={{
+                  fontFamily: "Lato-SemiBold",
+                  fontSize: 14,
+                  lineHeight: 20,
+                  color: "#1E123D",
+                }}
+              >
+                Forgot password?
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-          <View style={{ marginVertical: 10 }}>
+          {/* Footer: login button + account prompt + terms */}
+          <View style={{ gap: 16 }}>
+            {/* Hidden: OR divider and social login — kept for future use */}
+            <View style={{ display: "none" }}>
+              <Text
+                style={{
+                  fontFamily: "Lato-Medium",
+                  fontSize: 13,
+                  lineHeight: 13,
+                  letterSpacing: -0.39,
+                  color: "#545454",
+                  textAlign: "center",
+                  marginVertical: 10,
+                }}
+              >
+                OR
+              </Text>
+
+              <View style={{ gap: 30 }}>
+                {/* Social login row */}
+                <View
+                  style={{
+                    flexDirection: "row",
+                    columnGap: 12,
+                  }}
+                >
+                  <View style={{ flex: 1 }}>
+                    <SocialBtn
+                      icon={
+                        <Image
+                          style={{ height: 20, width: 20, resizeMode: "contain" }}
+                          source={IMAGES.google2}
+                        />
+                      }
+                      color={colors.card}
+                      rounded
+                      text="Google"
+                    />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <SocialBtn
+                      icon={
+                        <FontAwesome name="apple" size={20} color={colors.title} />
+                      }
+                      color={colors.card}
+                      rounded
+                      text="Apple ID"
+                    />
+                  </View>
+                </View>
+              </View>
+            </View>
+
             {loading ? (
               <ActivityIndicator size="large" color={COLORS.primary} />
             ) : (
@@ -210,54 +233,6 @@ const Login = ({ navigation }: LoginScreenProps) => {
                 onPress={handleLogin}
               />
             )}
-          </View>
-
-          <Text
-            style={{
-              fontFamily: "Lato-Medium",
-              fontSize: 13,
-              lineHeight: 13,
-              letterSpacing: -0.39,
-              color: "#545454",
-              textAlign: "center",
-              marginVertical: 10,
-            }}
-          >
-            OR
-          </Text>
-
-          <View style={{ gap: 30 }}>
-            {/* Social login row */}
-            <View
-              style={{
-                flexDirection: "row",
-                columnGap: 12,
-              }}
-            >
-              <View style={{ flex: 1 }}>
-                <SocialBtn
-                  icon={
-                    <Image
-                      style={{ height: 20, width: 20, resizeMode: "contain" }}
-                      source={IMAGES.google2}
-                    />
-                  }
-                  color={colors.card}
-                  rounded
-                  text="Google"
-                />
-              </View>
-              <View style={{ flex: 1 }}>
-                <SocialBtn
-                  icon={
-                    <FontAwesome name="apple" size={20} color={colors.title} />
-                  }
-                  color={colors.card}
-                  rounded
-                  text="Apple ID"
-                />
-              </View>
-            </View>
 
             <View>
               <Text style={styles.accountPrompt}>

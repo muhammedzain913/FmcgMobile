@@ -19,36 +19,32 @@ const QuestionsAccordion = () => {
 
     const SECTIONS = [
         {
-            title: 'What is included with my purchase?',
-            content: 'Package have the JavaScript JS, JavaScript JSON, XML, .apk, .java, JavaScript JSON, .java, .plist, Well Define Documentation, Fonts and Icons, Responsive Designs, Image Assets, Customization Options, and many more.',
+            title: 'What are the delivery timings?',
+            content: 'We deliver groceries 7 days a week from 8 AM to 10 PM. Express delivery slots are available in select areas and can be chosen at checkout. Same-day delivery is available for orders placed before 6 PM.',
         },
         {
-            title: 'What features does Sooper offer?',
-            content: 'Sooper offers a wide range of features including responsive design, customizable layouts, product catalog pages, shopping cart functionality, checkout pages, user account management, and more.',
-
+            title: 'Is there a minimum order amount?',
+            content: 'Yes, the minimum order amount is ₹199. Orders above ₹499 qualify for free delivery. A small delivery fee applies for orders below the free-delivery threshold based on your location.',
         },
         {
-            title: "Can I customize the template's design?",
-            content: 'Absolutely! Sooper is built using JSX, which makes it highly customizable. You can easily adjust colors, fonts, layout structures, and more to match your brand identity.',
-
+            title: 'How do I track my order?',
+            content: 'Once your order is confirmed, go to My Orders in your account and tap Track Order. You will see real-time updates from packing to dispatch to delivery at your doorstep.',
         },
         {
-            title: 'Are there pre-designed page templates included?',
-            content: 'Yes, Sooper typically includes pre-designed templates for essential pages like the homepage, product listings, product details, shopping cart, checkout, and user account pages.',
+            title: 'What if an item I ordered is out of stock?',
+            content: 'If an item goes out of stock after you place your order, we will notify you via the app and issue a full refund for that item to your original payment method within 2–3 business days.',
         },
         {
-            title: 'Does Sooper provide customer support?',
-            content: 'Sooper offers customer support options for their clients. Check the template documentation or you can directly contact to our support team from here - Click Here',
-
+            title: 'Can I cancel or modify my order?',
+            content: 'You can cancel your order within 5 minutes of placing it from the My Orders screen. Modifications such as quantity changes are not supported after the order is confirmed. For urgent issues, please contact Support.',
         },
         {
-            title: "Is coding knowledge required to use Sooper?",
-            content: "Basic knowledge of JavaScript JS, XML, and JSX can be helpful for customizing Sooper to your needs. However, it's designed to be user- friendly and doesn't necessarily require extensive coding skills.",
-
+            title: 'Are the products fresh and quality-checked?',
+            content: 'Yes! All fruits, vegetables, dairy, and perishables are sourced daily from trusted suppliers and are quality-checked before packing. We guarantee fresh products or a full replacement.',
         },
         {
-            title: 'How can I get started with Sooper?',
-            content: "To get started, purchase and download the Sooper template. Then, follow the included documentation to set up and customize your e-commerce website based on your specific requirements.",
+            title: 'How do I apply a coupon or promo code?',
+            content: 'On the checkout screen, tap Apply Coupon and enter your code. Valid discounts will be applied automatically to your order total. Only one coupon can be used per order.',
         },
     ];
 

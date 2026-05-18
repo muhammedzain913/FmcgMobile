@@ -10,6 +10,7 @@ import {
   useWindowDimensions,
   Alert,
 } from "react-native";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
 import { useDispatch, useSelector } from "react-redux";
@@ -243,26 +244,22 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
               backgroundColor: "#ffff",
             }}
           >
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <View
-                style={{
-                  flexDirection: "row", // Flow: Horizontal
-                  alignItems: "center", // Inner alignment
-                  height: 36, // Fixed height // Padding
-                  paddingVertical: 7.78,
-                  borderRadius: 8,
-                  borderWidth: 1,
-                  borderColor: "#E5E5E5",
-                  backgroundColor: "rgba(255, 255, 255, 0.6)", // Required for blur effect
-                  width: 36,
-                  justifyContent: "center",
-                }}
-              >
-                <Image
-                  style={{ height: 20, width: 15, marginTop: 4 }}
-                  source={require("../../assets/images/icons/left-chevron.png")}
-                />
-              </View>
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                height: 36,
+                paddingVertical: 7.78,
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: "#E5E5E5",
+                backgroundColor: "rgba(255, 255, 255, 0.6)",
+                width: 36,
+                justifyContent: "center",
+              }}
+            >
+              <Ionicons name="chevron-back" size={20} color="#000" />
             </TouchableOpacity>
             <View style={{ position: "absolute", left: 0, right: 0 }}>
               <Text
@@ -327,10 +324,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
               >
                 Delivering To
               </Text>
-              <Image
-                style={{ width: 15, height: 15 }}
-                source={require("../../assets/images/icons/delivery-bike.png")}
-              />
+              <Ionicons name="bicycle-outline" size={16} color="rgba(5, 155, 93, 1)" />
               <DashedLine />
             </View>
 
@@ -350,10 +344,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                       alignItems: "center",
                     }}
                   >
-                    <Image
-                      style={{ height: 15, width: 15, resizeMode: "contain" }}
-                      source={require("../../assets/images/icons/locationpinblack.png")}
-                    />
+                    <Ionicons name="location-sharp" size={16} color="#141313" />
                     <Text
                       style={{
                         fontFamily: "Lato-Bold",
@@ -399,10 +390,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                       alignItems: "center",
                     }}
                   >
-                    <Image
-                      style={{ height: 15, width: 15, resizeMode: "contain" }}
-                      source={require("../../assets/images/icons/locationpinblack.png")}
-                    />
+                    <Ionicons name="location-sharp" size={16} color="#141313" />
                     <Text
                       style={{
                         fontFamily: "Lato-Bold",
@@ -417,33 +405,36 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                 </View>
               )}
 
-              <View
+              <TouchableOpacity
                 style={{
                   borderWidth: 1,
-                  borderBlockColor: "black",
+                  borderColor: "black",
                   paddingHorizontal: 12,
                   paddingVertical: 7,
                   borderRadius: 8,
                 }}
+                onPress={() => {
+                  setView("LOCATION");
+                  toggleSheet();
+                }}
               >
-                <TouchableOpacity
-                  onPress={() => {
-                    setView("LOCATION");
-                    toggleSheet();
-                  }}
-                >
-                  <Text style={{ fontFamily: "Lato-Regular" }}>
-                    {selectedAddress ? "Change" : "Add"}
-                  </Text>
-                </TouchableOpacity>
-              </View>
+                <Text style={{ fontFamily: "Lato-Regular" }}>
+                  {selectedAddress ? "Change" : "Add"}
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
 
           <View style={{ backgroundColor: "white", gap: 20 }}>
             {cart.map((item: any, index: number) => {
               return (
-                <View
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() =>
+                    navigation.navigate("ProductsDetails", {
+                      productId: item.slug || String(item.id || ""),
+                    })
+                  }
                   style={{
                     flexDirection: "row",
                     alignItems: "center",
@@ -505,10 +496,7 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                         dispatch(decrementQuantity({ id: item.id }));
                       }}
                     >
-                      <Image
-                        source={require("../../assets/images/icons/minusblack.png")}
-                        style={{ width: 15, height: 15 }}
-                      />
+                      <Ionicons name="remove" size={16} color="#000" />
                     </TouchableOpacity>
 
                     <Text style={styles.qty}>{item.quantity}</Text>
@@ -518,13 +506,10 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
                         dispatch(incrementQuantity({ id: item.id }));
                       }}
                     >
-                      <Image
-                        source={require("../../assets/images/icons/plusblack.png")}
-                        style={{ width: 15, height: 15 }}
-                      />
+                      <Ionicons name="add" size={16} color="#000" />
                     </TouchableOpacity>
                   </View>
-                </View>
+                </TouchableOpacity>
               );
             })}
           </View>
@@ -643,12 +628,17 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
         )}
 
         {view === "EDIT" && (
-          <Animated.View style={{ ...styles.bottomSheetContent, gap: 40 }}>
-            <BottomSheetHeader title="CHANGE ADDRESS" onClose={toggleSheet} />
+          <Animated.View style={{ ...styles.bottomSheetContent, gap: 16 }}>
+            <BottomSheetHeader
+              title={editingAddress ? "EDIT ADDRESS" : "ADD NEW ADDRESS"}
+              onClose={toggleSheet}
+            />
             <UserDeliveryAddressDropDown
-              addressToEdit={editingAddress} // Pass address if editing, null if adding new
-              onChangeLocation={() => {
-                setView("LOCATION");
+              addressToEdit={editingAddress}
+              onChangeLocation={() => setView("LOCATION")}
+              onSuccess={() => {
+                isOpen.value = false;
+                setView("LIST");
               }}
             />
           </Animated.View>
@@ -806,10 +796,11 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
               Saved د.ك {formattedSavedAmount}
             </Text>
           </View>
-          <View
+          <TouchableOpacity
+            disabled={isOrderSubmitting}
             style={{
               borderWidth: 1,
-              borderBlockColor: "black",
+              borderColor: "black",
               paddingHorizontal: 15,
               paddingVertical: 5,
               borderRadius: 8,
@@ -817,41 +808,28 @@ const MyCart = ({ navigation }: MyCartScreenProps) => {
               alignItems: "center",
               justifyContent: "center",
               backgroundColor: "rgba(30, 18, 61, 1)",
+              flexDirection: "row",
+              gap: 10,
             }}
+            onPress={handleSubmitOrder}
           >
-            <TouchableOpacity
-              disabled={isOrderSubmitting}
-              style={{
-                flexDirection: "row",
-                gap: 10,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-              onPress={() => {
-                handleSubmitOrder();
-              }}
-            >
-              {isOrderSubmitting ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
-              ) : (
-                <>
-                  <Text
-                    style={{
-                      color: "#fff",
-                      fontSize: 18,
-                      fontFamily: "Lato-Medium",
-                    }}
-                  >
-                    Order Now
-                  </Text>
-                  <Image
-                    style={{ width: 15, height: 15 }}
-                    source={require("../../assets/images/icons/arrow.png")}
-                  />
-                </>
-              )}
-            </TouchableOpacity>
-          </View>
+            {isOrderSubmitting ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <>
+                <Text
+                  style={{
+                    color: "#fff",
+                    fontSize: 18,
+                    fontFamily: "Lato-Medium",
+                  }}
+                >
+                  Order Now
+                </Text>
+                <Ionicons name="arrow-forward" size={16} color="#fff" />
+              </>
+            )}
+          </TouchableOpacity>
         </View>
       </View>
     </View>

@@ -7,10 +7,8 @@ import {
   ImageBackground,
   StyleSheet,
 } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
+import { ScrollView } from "react-native";
 import { useTheme } from "@react-navigation/native";
-import { GlobalStyleSheet } from "../../constants/StyleSheet";
-import { IMAGES } from "../../constants/Images";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
 import { StackScreenProps } from "@react-navigation/stack";
 import BottomSheet2 from "../Components/BottomSheet2";
@@ -22,40 +20,35 @@ import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import ProductCard from "../Product/ProductCard";
-import { selectCartTotalQuantity } from "../../redux/reducer/cartReducer";
+
 import { useAddToCart } from "../../hooks/useAddToCart";
 import Animated, { useSharedValue } from "react-native-reanimated";
 import LocationBottomSheet from "../../components/BottomSheet/LocationBottomSheet";
-import UserDeliveryAddressDropDown from "../Location/UserDeliveryAddressDropDown";
-import Button from "../../components/Button/Button";
 import SectionHeader from "../../components/Home/SectionHeader";
 import SectionContainer from "../../components/Home/SectionContainer";
-import LocationDropdown from "../../components/Home/LocationDropdown";
-import GlobalCartNotification from "../../components/Cart/GlobalCartNotification";
+
 import BottomSheetHeader from "../../components/BottomSheet/BottomSheetHeader";
-import AddressList from "../../components/BottomSheet/AddressList";
 import LocationSelectionView from "../../components/BottomSheet/LocationSelectionView";
 import { widthPercentageToDP as wp } from "react-native-responsive-screen";
 import HomeHeader from "../../components/Home/HomeHeader";
 import CategoryCard from "../../components/Home/CategoryCard";
-import { useUserAddress } from "../../hooks/useSaveUserAddress";
+
 import { useSaveUserLocation } from "../../hooks/useSaveUserLocation";
 import { Alert } from "react-native";
+import NoDeliveryModal from "../../components/Modal/NoDeliveryModal";
 
 const apiPath = ApiClient();
 
 type HomeScreenProps = StackScreenProps<RootStackParamList, "Home">;
 
 const Home = ({ navigation }: HomeScreenProps) => {
-  const addresses = useSelector((x: any) => x?.user?.addresses || []);
   const userId = useSelector((x: any) => x?.user?.userInfo.id);
-  const { deleteAddress, loading: deleteLoading } = useUserAddress();
-  const { saveLocation, loading: locationLoading } = useSaveUserLocation();
+  const { saveLocation } = useSaveUserLocation();
   const isOpen = useSharedValue(false);
   const SHEET_DURATION = 500;
   const [isLocationSheetMounted, setIsLocationSheetMounted] = useState(false);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isOpenEdit = useSharedValue(false);
+
   const [banner, setBanner] = useState<{
     title?: string;
     subtitle?: string;
@@ -65,20 +58,17 @@ const Home = ({ navigation }: HomeScreenProps) => {
     isActive?: boolean;
   } | null>(null);
   const address = useSelector((x: any) => x.user.defaultAddress);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [products, setProducts] = useState<[]>();
+  const [, setLoading] = useState(true);
+  const [, setError] = useState<string | null>(null);
   const [brands, setBrands] = useState<[]>();
   const [categories, setCategories] = useState<any[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>("All");
-  const [rotatingProductIndex, setRotatingProductIndex] = useState<number>(0);
-  const [displayedProducts, setDisplayedProducts] = useState<any[]>();
-  const [dealCategory, setDealCategory] = useState<any>();
+  const [, setSelectedCategory] = useState<string>("All");
+  const [, setDealCategory] = useState<any>();
   const [dealCategoryProducts, setDealCategoryProducts] = useState<any[]>();
   const [searchQuery, setSearchQuety] = useState<string>("");
-  const totalQuantity = useSelector(selectCartTotalQuantity);
   
-  const [editingAddress, setEditingAddress] = useState<any>(null); // Store address being edited
+  const [showNoDeliveryModal, setShowNoDeliveryModal] = useState(false);
+
   const openLocationSheet = () => {
     if (closeTimeoutRef.current) {
       clearTimeout(closeTimeoutRef.current);
@@ -106,10 +96,6 @@ const Home = ({ navigation }: HomeScreenProps) => {
     } else {
       openLocationSheet();
     }
-  };
-
-  const toggleSheetEdit = () => {
-    isOpenEdit.value = !isOpenEdit.value;
   };
 
   const {
@@ -155,30 +141,39 @@ const Home = ({ navigation }: HomeScreenProps) => {
   }, []);
 
 
+
+  // Availability check is separate from the new-products fetch so that
+  // filter differences in /api/products/new never falsely hide delivery.
   useEffect(() => {
-    if (!address) return;
-    if (!address.governorate) return;
-    const fetchProducts = async () => {
+    if (!address?.governorate) return;
+    const checkAvailability = async () => {
       try {
+        const gov = address.governorate.id;
+        const city = address.city.id;
+        const block = address.block.id;
         const response = await apiPath.get(
-          `${Url}/api/products?gov=${address.governorate.id}&city=${address.city.id}&block=${address.block.id}&search =${searchQuery}`,
+          `${Url}/api/products/top-discounts?gov=${gov}&city=${city}&block=${block}&limit=1`,
         );
-        console.log("product api", response.data);
-        setProducts(response.data);
-        setDisplayedProducts(response.data);
-      } catch (error: any) {
-        setError(error.message || "Something went wrong");
-      } finally {
-        setLoading(false);
+        const hasVendors = Array.isArray(response.data) && response.data.length > 0;
+        // Only show modal when we are certain there is no stock at all.
+        // A second pass checks new products too so a vendor without deals
+        // doesn't falsely trigger the modal.
+        if (!hasVendors) {
+          const np = await apiPath.get(
+            `${Url}/api/products?gov=${gov}&city=${city}&block=${block}&limit=1`,
+          );
+          const hasNewProducts = Array.isArray(np.data) && np.data.length > 0;
+          setShowNoDeliveryModal(!hasNewProducts);
+        } else {
+          setShowNoDeliveryModal(false);
+        }
+      } catch {
+        // Network error — don't show the modal, give the user benefit of the doubt.
+        setShowNoDeliveryModal(false);
       }
     };
-    fetchProducts();
-  }, [searchQuery, governorate, city, block]);
-
-
-  useEffect(() => {
-    console.log('this are the ',governorate,city,block)
-  },[])
+    checkAvailability();
+  }, [address]);
 
   useEffect(() => {
     const fetchTopDiscountProducts = async () => {
@@ -220,21 +215,6 @@ const Home = ({ navigation }: HomeScreenProps) => {
     fetchCategory();
   }, []);
 
-  // Rotate product title in search placeholder every 3 seconds
-  useEffect(() => {
-    if (searchQuery) return; // placeholder is only visible when searchQuery is empty
-
-    const list = displayedProducts?.length ? displayedProducts : products;
-    if (!list || list.length === 0) return;
-
-    const interval = setInterval(() => {
-      setRotatingProductIndex((prevIndex) => {
-        return (prevIndex + 1) % list.length;
-      });
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, [displayedProducts, products, searchQuery]);
 
   useEffect(() => {
     const fetchBrands = async () => {
@@ -270,7 +250,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
     <SafeAreaView style={{ backgroundColor: colors.card, flex: 1 }} edges={[]}>
       <StatusBar translucent={true} backgroundColor="#1E123D" style="light" />
       <ScrollView
-        contentContainerStyle={{ paddingBottom: totalQuantity > 0 ? 180 : 30 }}
+        contentContainerStyle={{ paddingBottom: 30 }}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.headerContainer}>
@@ -287,11 +267,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
                 console.log("term", e);
                 setSearchQuety(e);
               }}
-              searchPlaceholder={
-                displayedProducts?.[rotatingProductIndex]?.title
-                  ? `Search '${displayedProducts[rotatingProductIndex].title}'`
-                  : "Search Product"
-              }
+              searchPlaceholder="Search Product"
             />
             <ImageBackground
               imageStyle={{ opacity: 0.2 }}
@@ -339,19 +315,6 @@ const Home = ({ navigation }: HomeScreenProps) => {
           </LinearGradient>
         </View>
 
-        {/* No Products Notification Banner */}
-        {displayedProducts && displayedProducts.length === 0 && address && address.governorate && (
-          <View style={styles.noProductsBanner}>
-            <Image
-              style={styles.noProductsIcon}
-              source={require("../../assets/images/icons/locationpinblack.png")}
-            />
-            <Text style={styles.noProductsText}>
-              No products available in your selected location. Please try a different address.
-            </Text>
-          </View>
-        )}
-
         <SectionContainer>
           <SectionHeader
             title="Categories"
@@ -368,64 +331,31 @@ const Home = ({ navigation }: HomeScreenProps) => {
             horizontal
             showsHorizontalScrollIndicator={false}
           >
-            {categories?.map((data: any, index: any) => (
-              <CategoryCard
-                key={index}
-                title={data.title}
-                image={data.imageUrl}
-                onPress={() => {
-                  setSelectedCategory(data.title);
-                  // Navigate to StackNavigator's Categories screen (not BottomNavigation's Categories tab)
-                  navigation.getParent()?.navigate('Categories', {
-                    categoryTitle: data.title,
-                    categoryId: data.id,
-                  });
-                }}
-                containerStyle={{ width: 95 }}
-              />
+            {categories?.reduce((cols: any[][], cat: any, i: number) => {
+              if (i % 2 === 0) cols.push([cat]);
+              else cols[cols.length - 1].push(cat);
+              return cols;
+            }, []).map((pair: any[], colIndex: number) => (
+              <View key={colIndex} style={{ gap: 15 }}>
+                {pair.map((data: any) => (
+                  <CategoryCard
+                    key={data.id ?? data.title}
+                    title={data.title}
+                    image={data.imageUrl}
+                    onPress={() => {
+                      setSelectedCategory(data.title);
+                      navigation.getParent()?.navigate('Categories', {
+                        categoryTitle: data.title,
+                        categoryId: data.id,
+                      });
+                    }}
+                    containerStyle={{ width: 95 }}
+                  />
+                ))}
+              </View>
             ))}
           </ScrollView>
         </SectionContainer>
-
-        <SectionContainer>
-          <SectionHeader
-            title="NEW PRODUCTS"
-            onViewAllPress={() => {
-              navigation.navigate("ShopByBrand", {});
-            }}
-          />
-          <ScrollView
-            contentContainerStyle={{
-              gap: 15,
-              flexDirection: "row",
-              marginTop: 20,
-              paddingRight: 44,
-            }}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            nestedScrollEnabled
-            directionalLockEnabled={true}
-            keyboardShouldPersistTaps="handled"
-            overScrollMode="never"
-          >
-            {displayedProducts?.map((data: any) => {
-              return (
-                <ProductCard
-                  key={data.id || data.slug}
-                  addToCart={addItemToCart}
-                  product={data}
-                  navigation={navigation}
-                  containerStyle={{
-                    width: wp("30%"),
-                    minWidth: 120,
-                    maxWidth: 160,
-                  }}
-                />
-              );
-            })}
-          </ScrollView>
-        </SectionContainer>
-
 
         <SectionContainer>
           <SectionHeader
@@ -478,7 +408,7 @@ const Home = ({ navigation }: HomeScreenProps) => {
             horizontal
             showsHorizontalScrollIndicator={false}
           >
-            {brands?.map((brand: any) => (
+            {brands?.filter((brand: any) => brand.image || brand.imageUrl || brand.logo).map((brand: any) => (
               <View key={brand.id} style={styles.brandCard}>
                 <TouchableOpacity
                   onPress={() => navigation.navigate("ShopByBrand", { brandId: brand.id, brand: brand })}
@@ -575,7 +505,16 @@ const Home = ({ navigation }: HomeScreenProps) => {
         
       </LocationBottomSheet>
       )}
-      <GlobalCartNotification />
+      <NoDeliveryModal
+        visible={showNoDeliveryModal}
+        onChangeLocation={() => {
+          setShowNoDeliveryModal(false);
+          navigation.navigate("UserLocation", { fromNoDelivery: true });
+        }}
+        governorate={address?.governorate?.name}
+        city={address?.city?.name}
+        block={address?.block?.name}
+      />
     </SafeAreaView>
   );
 };
@@ -734,30 +673,5 @@ const styles = StyleSheet.create({
   editText: {
     fontFamily: "Lato-SemiBold",
     fontSize: 13,
-  },
-  noProductsBanner: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(255, 193, 7, 0.15)", // Light yellow/orange background
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    marginHorizontal: 20,
-    marginTop: 10,
-    borderRadius: 8,
-    gap: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: "rgba(255, 152, 0, 1)", // Orange accent border
-  },
-  noProductsIcon: {
-    width: 20,
-    height: 20,
-    tintColor: "rgba(255, 152, 0, 1)", // Orange icon color
-  },
-  noProductsText: {
-    flex: 1,
-    fontFamily: "Lato-Medium",
-    fontSize: 13,
-    color: "rgba(102, 60, 0, 1)", // Dark orange/brown text
-    lineHeight: 18,
   },
 });

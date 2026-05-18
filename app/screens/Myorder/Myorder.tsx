@@ -167,7 +167,7 @@ const Myorder = ({ navigation }: MyorderScreenProps) => {
           ) : (
             orders.map((item: any, index: number) => {
             return (
-              <>
+              <React.Fragment key={item.id ?? index}>
                 <View
                   style={{
                     backgroundColor: "#fff",
@@ -248,7 +248,7 @@ const Myorder = ({ navigation }: MyorderScreenProps) => {
                     color={item.orderStatus === "DELIVERED" ? "#059B5D" : "#1E123D"}
                   ></Button>
                 </View>
-              </>
+              </React.Fragment>
             );
             })
           )}

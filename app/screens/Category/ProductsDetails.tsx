@@ -8,7 +8,10 @@ import {
   LayoutAnimation,
   useWindowDimensions,
   ScrollView,
+  Share,
+  Pressable,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import PagerView from "react-native-pager-view";
 import { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
@@ -102,7 +105,8 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
   const dispatch = useDispatch();
 
   const [activeTab, setActiveTab] = useState("");
-  const [expanded, setExpanded] = useState(false);
+  const [expandedTabs, setExpandedTabs] = useState<Record<string, boolean>>({});
+  const [tabLineCount, setTabLineCount] = useState<Record<string, number>>({});
   const [hasUserSelectedVariant, setHasUserSelectedVariant] = useState(false);
 
 
@@ -188,7 +192,8 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
     }
   }, [product, activeTab, productDetailsTabs]);
 
-  const [textExceeds, setTextExceeds] = useState(false);
+  const isExpanded = expandedTabs[activeTab] ?? false;
+  const textExceeds = (tabLineCount[activeTab] ?? 0) > 7;
   const addItemToCart = useAddToCart();
 
   return (
@@ -210,18 +215,24 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
               onPress={() => navigation.goBack()}
               style={styles.icon}
             >
-              <Image
-                style={{ width: 20, height: 20 }}
-                source={require("../../assets/images/icons/left-chevron.png")}
-              />
+              <Ionicons name="chevron-back" size={22} color="#333" />
             </TouchableOpacity>
 
-            <View style={styles.icon}>
-              <Image
-                style={{ width: 20, height: 20 }}
-                source={require("../../assets/images/icons/share.png")}
-              />
-            </View>
+            <TouchableOpacity
+              style={styles.icon}
+              onPress={async () => {
+                try {
+                  await Share.share({
+                    title: product?.title ?? "Check out this product",
+                    message: product?.title
+                      ? `Check out ${product.title} on Sooper!`
+                      : "Check out this product on Sooper!",
+                  });
+                } catch (_) {}
+              }}
+            >
+              <Ionicons name="share-social-outline" size={22} color="#333" />
+            </TouchableOpacity>
           </View>
           {galleryUrls.length > 0 ? (
             <>
@@ -307,10 +318,7 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
                   gap: 5,
                 }}
               >
-                <Image
-                  style={{ width: 14, height: 14 }}
-                  source={require("../../assets/images/icons/ratingstar.png")}
-                />
+                <Ionicons name="star" size={14} color="orange" />
                 <Text
                   style={{
                     fontFamily: "Lato-Regular",
@@ -334,11 +342,9 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
             <View>
               <Text style={styles.productTitleText}>{product?.title}</Text>
             </View>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Text style={styles.categoryText}>Quantity : </Text>{" "}
-              <Text
-                style={{ ...styles.categoryText, fontFamily: "Lato-SemiBold" }}
-              >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+              <Text style={styles.categoryText}>Quantity :</Text>
+              <Text style={{ ...styles.categoryText, fontFamily: "Lato-SemiBold" }}>
                 {product?.unit}
               </Text>
             </View>
@@ -516,11 +522,7 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
               {productDetailsTabs.map((tab) => (
                 <TouchableOpacity
                   key={tab.key}
-                  onPress={() => {
-                    setActiveTab(tab.key);
-                    setExpanded(false); 
-                    setTextExceeds(false);
-                  }}
+                  onPress={() => setActiveTab(tab.key)}
                 >
                   <Text
                     style={{
@@ -540,32 +542,40 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
             </View>
 
             <View>
+              {/* Hidden full-text measurer — no numberOfLines so we get the real line count */}
+              <View style={{ height: 0, overflow: "hidden" }} pointerEvents="none">
+                <Text
+                  key={`measure-${activeTab}`}
+                  onTextLayout={(e) => {
+                    const count = e?.nativeEvent?.lines?.length;
+                    if (count != null) {
+                      setTabLineCount((prev) => ({ ...prev, [activeTab]: count }));
+                    }
+                  }}
+                >
+                  {activeTabContent}
+                </Text>
+              </View>
 
-
-
-            <Text
-              style={{
-                marginTop: 12,
-                color: "#4A4A4A",
-                lineHeight: 20,
-              }}
-              numberOfLines={expanded ? undefined : 7}
-              onTextLayout={(e) => {
-                setTextExceeds(e.nativeEvent.lines.length > 7);
-              }}
-            >
-              {activeTabContent}
-            </Text>
+              <Text
+                key={`display-${activeTab}`}
+                style={{ marginTop: 12, color: "#4A4A4A", lineHeight: 20 }}
+                numberOfLines={isExpanded ? undefined : 7}
+              >
+                {activeTabContent}
+              </Text>
             </View>
-
 
             {textExceeds && (
               <TouchableOpacity
                 onPress={() => {
-                  (setExpanded((prev) => !prev),
-                    LayoutAnimation.configureNext(
-                      LayoutAnimation.Presets.easeInEaseOut,
-                    ));
+                  LayoutAnimation.configureNext(
+                    LayoutAnimation.Presets.easeInEaseOut,
+                  );
+                  setExpandedTabs((prev) => ({
+                    ...prev,
+                    [activeTab]: !isExpanded,
+                  }));
                 }}
                 style={{
                   marginTop: 8,
@@ -574,11 +584,10 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
                 }}
               >
                 <Text style={{ fontWeight: "500" }}>
-                  {expanded ? "Show Less" : "Show More"}
+                  {isExpanded ? "Show Less" : "Show More"}
                 </Text>
-
                 <Text style={{ marginLeft: 4, color: "#0E8A4A" }}>
-                  {expanded ? "▲" : "▼"}
+                  {isExpanded ? "▲" : "▼"}
                 </Text>
               </TouchableOpacity>
             )}
@@ -638,24 +647,18 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
                   justifyContent: "space-between",
                   alignItems: "center",
                   width: "100%",
-                  paddingHorizontal: 20,
+                  paddingHorizontal: 12,
                 }}
               >
-                <TouchableOpacity
-                  style={{ marginTop: 10 }}
+                <Pressable
+                  hitSlop={8}
                   onPress={() => {
-                    console.log(
-                      "decrementing quantity for product ID:",
-                      product?.id,
-                    );
                     dispatch(decrementQuantity({ id: product?.id } as any) as any);
                   }}
+                  style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
                 >
-                  <Image
-                    style={{ width: 10, height: 10 }}
-                    source={require("../../assets/images/icons/subtract.png")}
-                  />
-                </TouchableOpacity>
+                  <Ionicons name="remove" size={22} color="#fff" />
+                </Pressable>
 
                 <Text
                   style={{
@@ -666,16 +669,16 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
                 >
                   {cartItem.quantity}
                 </Text>
-                <TouchableOpacity
+
+                <Pressable
+                  hitSlop={8}
                   onPress={() => {
                     dispatch(incrementQuantity({ id: product?.id } as any) as any);
                   }}
+                  style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
                 >
-                  <Image
-                    style={{ width: 10, height: 15 }}
-                    source={require("../../assets/images/icons/add.png")}
-                  />
-                </TouchableOpacity>
+                  <Ionicons name="add" size={22} color="#fff" />
+                </Pressable>
               </View>
             ) : (
               <TouchableOpacity
@@ -684,15 +687,16 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
                     addItemToCart(product, selectedVariant);
                   }
                 }}
-                style={{ width: "100%", alignItems: "center" }}
+                style={{ width: "100%", alignItems: "center", flexDirection: "row", justifyContent: "center", gap: 6 }}
               >
-                <Text style={styles.addToCartText}>Add To Cart +</Text>
+                <Ionicons name="cart-outline" size={20} color="#fff" />
+                <Text style={styles.addToCartText}>Add To Cart</Text>
               </TouchableOpacity>
             )}
           </LinearGradient>
 
-          <View
-            style={{
+          <Pressable
+            style={({ pressed }) => ({
               width: 170,
               height: 50,
               justifyContent: "center",
@@ -700,19 +704,20 @@ const ProductsDetails = ({ navigation, route }: ProductsDetailsScreenProps) => {
               backgroundColor: "rgba(30, 18, 61, 1)",
               borderRadius: 8,
               flexBasis: "45%",
+              flexDirection: "row",
+              gap: 6,
+              opacity: pressed ? 0.85 : 1,
+            })}
+            onPress={() => {
+              if (!cartItem && product && selectedVariant) {
+                addItemToCart(product, selectedVariant);
+              }
+              navigation.navigate("MyCart");
             }}
           >
-            <TouchableOpacity
-              onPress={() => {
-                if (!cartItem && product && selectedVariant) {
-                  addItemToCart(product, selectedVariant);
-                }
-                navigation.navigate("MyCart");
-              }}
-            >
-              <Text style={styles.addToCartText}>Buy Now</Text>
-            </TouchableOpacity>
-          </View>
+            <Ionicons name="flash-outline" size={18} color="#fff" />
+            <Text style={styles.addToCartText}>Buy Now</Text>
+          </Pressable>
         </View>
       </View>
       <GroceryGifLoader visible={loading} />

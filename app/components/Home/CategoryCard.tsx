@@ -24,8 +24,8 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
             source={{uri : image}}
           />
         </View>
-        <View>
-          <Text style={styles.categoryText}>{title}</Text>
+        <View style={styles.categoryTextContainer}>
+          <Text style={styles.categoryText} numberOfLines={2}>{title}</Text>
         </View>
       </TouchableOpacity>
     </View>
@@ -58,9 +58,14 @@ const styles = StyleSheet.create({
     height: undefined,
     aspectRatio: 1,
   },
+  categoryTextContainer: {
+    height: 34,
+    justifyContent: "center",
+  },
   categoryText: {
     fontFamily: "Lato-SemiBold",
     fontSize: 12,
+    lineHeight: 17,
     color: "rgba(0, 0, 0, 1)",
     textAlign: "center",
   },

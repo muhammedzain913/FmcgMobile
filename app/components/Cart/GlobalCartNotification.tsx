@@ -45,7 +45,16 @@ const GlobalCartNotification: React.FC = () => {
   }
 
   return (
-    <Animated.View style={{ transform: [{ translateY: cartItemCount }] }}>
+    <Animated.View
+      pointerEvents="box-none"
+      style={{
+        position: "absolute",
+        left: 0,
+        right: 0,
+        bottom: 0,
+        transform: [{ translateY: cartItemCount }],
+      }}
+    >
       <CartNotification totalQuantity={totalQuantity} navigation={navigation} />
     </Animated.View>
   );

@@ -1,8 +1,16 @@
-import React from "react";
-import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useEffect } from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { NavigationProp } from "@react-navigation/native";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSequence,
+  withTiming,
+  withSpring,
+} from "react-native-reanimated";
 
 interface CartNotificationProps {
   totalQuantity: number;
@@ -13,9 +21,32 @@ const CartNotification: React.FC<CartNotificationProps> = ({
   totalQuantity,
   navigation,
 }) => {
-  if (totalQuantity <= 0) {
-    return null;
-  }
+  const scale = useSharedValue(1);
+  const rotate = useSharedValue(0);
+
+  useEffect(() => {
+    if (totalQuantity <= 0) return;
+    scale.value = withSequence(
+      withTiming(1.5, { duration: 120 }),
+      withSpring(1, { damping: 4, stiffness: 180 }),
+    );
+    rotate.value = withSequence(
+      withTiming(-20, { duration: 80 }),
+      withTiming(20, { duration: 80 }),
+      withTiming(-12, { duration: 80 }),
+      withTiming(12, { duration: 80 }),
+      withTiming(0, { duration: 80 }),
+    );
+  }, [totalQuantity]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { scale: scale.value },
+      { rotate: `${rotate.value}deg` },
+    ],
+  }));
+
+  if (totalQuantity <= 0) return null;
 
   return (
     <View style={styles.cartNotification}>
@@ -27,17 +58,17 @@ const CartNotification: React.FC<CartNotificationProps> = ({
       >
         <View style={styles.cartTextContainer}>
           <Text style={styles.cartText}>{totalQuantity} Items Added</Text>
-          <Image style={{width : 30,height : 29}} source={require("../../assets/images/icons/popgif.gif")} />
+          <Animated.View style={animatedStyle}>
+            <MaterialCommunityIcons name="party-popper" size={26} color="rgba(5, 155, 93, 1)" />
+          </Animated.View>
         </View>
-        <View style={styles.cartButton}>
-          <TouchableOpacity onPress={() => navigation.navigate("MyCart")}>
-            <Text style={{ color: "#fff",fontFamily : 'Lato-Medium' }}>View Cart</Text>
-          </TouchableOpacity>
-          <Image
-            style={{width : 15, height : 15}}
-            source={require("../../assets/images/icons/market.png")}
-          />
-        </View>
+        <TouchableOpacity
+          style={styles.cartButton}
+          onPress={() => navigation.navigate("MyCart")}
+        >
+          <Text style={{ color: "#fff", fontFamily: "Lato-Medium" }}>View Cart</Text>
+          <Ionicons name="cart" size={16} color="#fff" />
+        </TouchableOpacity>
       </LinearGradient>
     </View>
   );
@@ -47,10 +78,8 @@ export default CartNotification;
 
 const styles = StyleSheet.create({
   cartNotification: {
-    position: "absolute",
-    left: 30,
-    right: 30,
-    bottom: 16,
+    marginHorizontal: 30,
+    marginBottom: 16,
     borderRadius: 12,
     backgroundColor: "#FFFFFF",
     overflow: "hidden",
@@ -75,7 +104,7 @@ const styles = StyleSheet.create({
   cartText: {
     color: "rgba(5, 155, 93, 1)",
     fontSize: 16,
-    fontFamily: 'Lato-Bold'
+    fontFamily: "Lato-Bold",
   },
   cartButton: {
     backgroundColor: "rgba(5, 155, 93, 1)",
@@ -84,5 +113,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 10,
     borderRadius: 8,
+    alignItems: "center",
   },
 });

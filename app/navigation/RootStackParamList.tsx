@@ -22,7 +22,7 @@ export type RootStackParamList = {
   Login: undefined;
   Register: undefined;
   ForgotPassword: undefined;
-  UserLocation: undefined;
+  UserLocation: { fromNoDelivery?: boolean } | undefined;
   UserDeliveryAddress : undefined;
   DeliveryLocation: undefined;
   ConfirmLocation: undefined;
@@ -35,6 +35,7 @@ export type RootStackParamList = {
   Singlechat: undefined;
   Chat: undefined;
   Support: undefined;
+  Help: undefined;
   History: undefined;
   Verification: undefined;
   Call: undefined;

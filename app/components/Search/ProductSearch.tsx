@@ -1,6 +1,5 @@
-import React, { useMemo } from "react";
+import React from "react";
 import {
-  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -9,13 +8,11 @@ import {
   View,
   ViewStyle,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
 
 export type ProductSearchRecentItem = {
   id: string;
   label: string;
-  imageUrl?: string;
-  imageSource?: any;
   onPress?: () => void;
 };
 
@@ -30,7 +27,6 @@ type ProductSearchProps = {
   value: string;
   onChangeText: (text: string) => void;
   placeholder?: string;
-  onFilterPress?: () => void;
   onSubmit?: () => void;
   containerStyle?: ViewStyle;
   recentSearches?: ProductSearchRecentItem[];
@@ -42,27 +38,13 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
   value,
   onChangeText,
   placeholder = "Search products",
-  onFilterPress,
   onSubmit,
   containerStyle,
   recentSearches = [],
   discoverMore = [],
 }) => {
-  const hasRecent = (recentSearches?.length || 0) > 0;
-  const hasDiscover = (discoverMore?.length || 0) > 0;
-
-  const filterIcon = useMemo(
-    () => require("../../assets/images/icons/filter (1).png"),
-    [],
-  );
-  const searchIcon = useMemo(
-    () => require("../../assets/images/icons/searchiconimg.png"),
-    [],
-  );
-  const backIcon = useMemo(
-    () => require("../../assets/images/icons/left-chevron.png"),
-    [],
-  );
+  const hasRecent = recentSearches.length > 0;
+  const hasDiscover = discoverMore.length > 0;
 
   return (
     <View style={[styles.container, containerStyle]}>
@@ -73,35 +55,33 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
             activeOpacity={0.8}
             style={styles.backBtn}
           >
-            <Image source={backIcon} style={styles.backIcon} />
+            <Ionicons name="arrow-back" size={20} color="rgba(0,0,0,0.8)" />
           </TouchableOpacity>
         ) : null}
-        <View style={{ flex: 1 }}>
-          <LinearGradient
-            colors={["rgba(255,255,255,1)", "rgba(184,184,184,1)"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.gradientBorder}
-          >
-            <View style={styles.searchBoxCotainer}>
-              <Image source={searchIcon} style={styles.searchIcon} />
-              <View style={styles.searchBoxDivider} />
-              <TextInput
-                value={value}
-                onChangeText={onChangeText}
-                placeholder={placeholder}
-                placeholderTextColor="rgba(0,0,0,0.45)"
-                style={styles.textInput}
-                autoCorrect={false}
-                autoCapitalize="none"
-                returnKeyType="search"
-                onSubmitEditing={() => onSubmit?.()}
-              />
-            </View>
-          </LinearGradient>
+
+        <View style={styles.searchBoxContainer}>
+          <Ionicons name="search" size={18} color="rgba(0,0,0,0.45)" />
+          <View style={styles.searchBoxDivider} />
+          <TextInput
+            value={value}
+            onChangeText={onChangeText}
+            placeholder={placeholder}
+            placeholderTextColor="rgba(0,0,0,0.35)"
+            style={styles.textInput}
+            autoCorrect={false}
+            autoCapitalize="none"
+            returnKeyType="search"
+            onSubmitEditing={() => onSubmit?.()}
+          />
+          {value.length > 0 && (
+            <TouchableOpacity
+              onPress={() => onChangeText("")}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Ionicons name="close-circle" size={18} color="rgba(0,0,0,0.35)" />
+            </TouchableOpacity>
+          )}
         </View>
-
-
       </View>
 
       {hasRecent ? (
@@ -117,21 +97,9 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                 key={item.id}
                 activeOpacity={0.85}
                 onPress={item.onPress}
-                style={styles.recentItem}
+                style={styles.recentChip}
               >
-                <View style={styles.recentAvatar}>
-                  {item.imageSource || item.imageUrl ? (
-                    <Image
-                      source={
-                        item.imageSource
-                          ? item.imageSource
-                          : { uri: item.imageUrl }
-                      }
-                      style={styles.recentAvatarImg}
-                      resizeMode="cover"
-                    />
-                  ) : null}
-                </View>
+                <Ionicons name="time-outline" size={13} color="#1E123D" style={{ marginRight: 5 }} />
                 <Text style={styles.recentLabel} numberOfLines={1}>
                   {item.label}
                 </Text>
@@ -163,71 +131,10 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
-    width: "100%",
-    gap: 18,
-  },
-  topRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  gradientBorder: {
-    borderRadius: 8,
-    padding: 1,
-    shadowColor: "#FFFFFF",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 25,
-    elevation: 6,
-  },
-  searchBoxCotainer: {
-    height: 48,
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    gap: 8,
-    borderRadius: 8,
-    backgroundColor: "#FFFFFF",
-    shadowColor: "rgb(115, 158, 123)",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    elevation: 8,
-  },
-  searchIcon: {
-    width: 18,
-    height: 18,
-    tintColor: "rgba(0,0,0,0.65)",
-  },
-  searchBoxDivider: {
-    width: 1,
-    height: 20,
-    backgroundColor: "rgba(0,0,0,0.18)",
-  },
-  textInput: {
-    flex: 1,
-    height: 48,
-    color: "rgba(0,0,0,0.90)",
-    fontSize: 16,
-    fontFamily: "Lato-Regular",
-    padding: 0,
-  },
-  filterBtn: {
-    width: 40,
-    height: 48,
-    borderRadius: 10,
-    backgroundColor: "rgba(0,0,0,0.06)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  filterIcon: {
-    width: 18,
-    height: 18,
-    tintColor: "rgba(0,0,0,0.65)",
-  },
+  container: { width: "100%", gap: 18 },
+  topRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   backBtn: {
-    width: 40,
+    width: 42,
     height: 48,
     borderRadius: 10,
     borderWidth: 1,
@@ -236,52 +143,59 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  backIcon: {
-    width: 16,
-    height: 16,
-    tintColor: "rgba(0,0,0,0.80)",
-    resizeMode: "contain",
+  searchBoxContainer: {
+    flex: 1,
+    height: 48,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    gap: 8,
+    borderRadius: 10,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.08)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  section: {
-    gap: 10,
+  searchBoxDivider: {
+    width: 1,
+    height: 20,
+    backgroundColor: "rgba(0,0,0,0.12)",
   },
+  textInput: {
+    flex: 1,
+    height: 48,
+    color: "rgba(0,0,0,0.90)",
+    fontSize: 15,
+    fontFamily: "Lato-Regular",
+    padding: 0,
+  },
+  section: { gap: 10 },
   sectionTitle: {
     fontFamily: "Lato-SemiBold",
-    fontSize: 16,
+    fontSize: 15,
     color: "rgba(0,0,0,0.85)",
   },
-  recentRow: {
-    gap: 18,
-    paddingRight: 4,
-  },
-  recentItem: {
+  recentRow: { gap: 10, paddingRight: 4 },
+  recentChip: {
+    flexDirection: "row",
     alignItems: "center",
-    width: 70,
-    gap: 8,
-  },
-  recentAvatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "rgba(0,0,0,0.05)",
-    overflow: "hidden",
-  },
-  recentAvatarImg: {
-    width: "100%",
-    height: "100%",
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(30,18,61,0.18)",
+    backgroundColor: "rgba(30,18,61,0.04)",
   },
   recentLabel: {
     fontFamily: "Lato-Regular",
-    fontSize: 12,
-    color: "rgba(0,0,0,0.75)",
-    maxWidth: 70,
-    textAlign: "center",
+    fontSize: 13,
+    color: "#1E123D",
   },
-  chipsWrap: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-  },
+  chipsWrap: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   chip: {
     paddingHorizontal: 14,
     height: 34,
@@ -300,4 +214,3 @@ const styles = StyleSheet.create({
 });
 
 export default ProductSearch;
-

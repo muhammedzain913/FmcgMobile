@@ -1,29 +1,44 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
+  Animated,
   View,
   Text,
-  Image,
   ImageBackground,
   StyleSheet,
-  TextInput,
   TouchableOpacity,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useTheme } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
-import { FONTS } from "../../constants/theme";
+import { Ionicons } from "@expo/vector-icons";
+
+const LOGO_COLORS = ["#FFB800", "#F26522", "#6B3FA0", "#09A86B"];
+
+const SEARCH_TERMS = [
+  "Fresh Milk",
+  "Mineral Water",
+  "Olive Oil",
+  "Rice",
+  "Detergent",
+  "Body Wash",
+  "Juice",
+  "Chocolate",
+  "Biscuits",
+  "Shampoo",
+  "Eggs",
+  "Bread",
+];
 
 interface HomeHeaderProps {
   governorate?: { name: string } | null;
   city?: { name: string } | null;
   block?: { name: string } | null;
   onLocationPress: () => void;
-  searchQuery: string;
-  onSearchChange: (text: string) => void;
-  searchPlaceholder?: string; // Optional dynamic placeholder (e.g., "Search 'Vegetables'")
+  searchQuery?: string;
+  onSearchChange?: (text: string) => void;
+  searchPlaceholder?: string;
 }
 
 const HomeHeader: React.FC<HomeHeaderProps> = ({
@@ -31,52 +46,36 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({
   city,
   block,
   onLocationPress,
-  searchQuery,
-  onSearchChange,
-
-  searchPlaceholder,
 }) => {
   const insets = useSafeAreaInsets();
-  const theme = useTheme();
-  const { colors }: { colors: any } = theme;
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
-  // Function to get color for different categories
-  const getCategoryColor = (categoryName: string): string => {
-    const categoryColors: { [key: string]: string } = {
-      Vegetables: "#FF6B35", // Orange/Red
-      Fruits: "#4CAF50", // Green
-      "Vegetables & Fruits": "#FF6B35", // Orange/Red
-      Electronics: "#2196F3", // Blue
-      "Dairy Products": "#FFC107", // Amber/Yellow
-      "Diary Products": "#FFC107", // Amber/Yellow
-      Snacks: "#E91E63", // Pink
-      "Ice Cream": "#00BCD4", // Cyan
-      Beverages: "#9C27B0", // Purple
-      Meat: "#F44336", // Red
-      Bakery: "#FF9800", // Deep Orange
-      Frozen: "#00E5FF", // Light Cyan
-    };
+  const [termIndex, setTermIndex] = useState(0);
+  const [colorIndex, setColorIndex] = useState(0);
+  const fadeAnim = useRef(new Animated.Value(1)).current;
 
-    // Check for exact match first
-    if (categoryColors[categoryName]) {
-      return categoryColors[categoryName];
-    }
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Fade out
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start(() => {
+        // Swap term + color while invisible
+        setTermIndex((prev) => (prev + 1) % SEARCH_TERMS.length);
+        setColorIndex((prev) => (prev + 1) % LOGO_COLORS.length);
+        // Fade in
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }).start();
+      });
+    }, 2500);
 
-    // Check for partial match (case insensitive)
-    const lowerCategory = categoryName.toLowerCase();
-    for (const [key, color] of Object.entries(categoryColors)) {
-      if (
-        lowerCategory.includes(key.toLowerCase()) ||
-        key.toLowerCase().includes(lowerCategory)
-      ) {
-        return color;
-      }
-    }
-
-    // Default color if no match found
-    return "#FF6B35"; // Default orange/red
-  };
+    return () => clearInterval(interval);
+  }, [fadeAnim]);
 
   return (
     <View style={styles.headerContainer}>
@@ -88,123 +87,43 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({
           ]}
           source={require("../../assets/images/maskgroup.png")}
         >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
+          {/* Location + Profile row */}
+          <View style={styles.topRow}>
             <View style={styles.locationContainer}>
               <View style={styles.locationRow}>
-                <Image
-                  style={styles.locationIcon}
-                  source={require("../../assets/images/icons/locationpin.png")}
-                />
+                <Ionicons name="location-sharp" size={15} color="#FFFFFF" />
                 <Text style={styles.locationText}>{governorate?.name}</Text>
                 <TouchableOpacity onPress={onLocationPress}>
-                  <Image
-                    style={styles.chevronIcon}
-                    source={require("../../assets/images/icons/down-chevron.png")}
-                  />
+                  <Ionicons name="chevron-down" size={16} color="#FFFFFF" />
                 </TouchableOpacity>
               </View>
-              <View>
-                <Text style={styles.locationSubText}>
-                  {city?.name} , Block {block?.name}
-                </Text>
-              </View>
+              <Text style={styles.locationSubText}>
+                {city?.name} , Block {block?.name}
+              </Text>
             </View>
             <TouchableOpacity
               onPress={() => navigation.navigate("Profile")}
               activeOpacity={0.7}
             >
-              <View style={{ borderRadius: 50, overflow: "hidden" }}>
-                <Image
-                  style={{ width: 50, height: 50 }}
-                  resizeMode="cover"
-                  source={require("../../assets/images/profilepic.jpg")}
-                />
-              </View>
+              <Ionicons name="person-circle" size={50} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
 
-          <LinearGradient
-            colors={["rgba(255, 255, 255, 1)", "rgba(184, 184, 184, 1)"]}
-          ></LinearGradient>
-
-          <LinearGradient
-            colors={["rgba(255,255,255,1)", "rgba(184,184,184,1)"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.gradientBorder}
+          {/* Search bar */}
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => navigation.navigate("ProductSearch")}
+            style={styles.searchBox}
           >
-            <View style={styles.searchBoxCotainer}>
-              {/* Search Icon */}
-              <Image
-                source={require("../../assets/images/icons/searchiconimg.png")}
-                style={styles.icon}
-              />
-
-              {/* Divider */}
-              <View style={styles.searchBoxDivider} />
-
-              {/* Text Input Container */}
-              <View style={styles.textInputContainer}>
-                {/* Text Input */}
-                <TextInput
-                  placeholder=""
-                  value={searchQuery}
-                  style={styles.textInput}
-                  onChangeText={onSearchChange}
-                  onFocus={() => {
-                    // Open dedicated search screen instead of typing on Home.
-                    navigation.navigate("ProductSearch");
-                  }}
-                />
-
-                {/* Custom Placeholder with Colored Category */}
-                {!searchQuery && searchPlaceholder && (
-                  <View
-                    style={styles.placeholderContainer}
-                    pointerEvents="none"
-                  >
-                    {(() => {
-                      // Parse placeholder: "Search 'CategoryName'" or "Search Product"
-                      const match =
-                        searchPlaceholder.match(/Search\s+'?([^']+)'?/);
-                      if (match && match[1]) {
-                        // Has category name - get color for this category
-                        const categoryName = match[1];
-                        const categoryColor = getCategoryColor(categoryName);
-                        return (
-                          <Text style={styles.placeholderText}>
-                            Search '
-                            <Text
-                              style={[
-                                styles.categoryText,
-                                { color: categoryColor },
-                              ]}
-                            >
-                              {categoryName}
-                            </Text>
-                            '
-                          </Text>
-                        );
-                      } else {
-                        // No category, just show as is
-                        return (
-                          <Text style={styles.placeholderText}>
-                            {searchPlaceholder}
-                          </Text>
-                        );
-                      }
-                    })()}
-                  </View>
-                )}
-              </View>
-            </View>
-          </LinearGradient>
+            <Ionicons name="search" size={18} color="rgba(255,255,255,0.6)" />
+            <View style={styles.searchDivider} />
+            <Animated.View style={[styles.placeholderRow, { opacity: fadeAnim }]}>
+              <Text style={styles.searchPrefix}>Search </Text>
+              <Text style={[styles.searchTerm, { color: LOGO_COLORS[colorIndex] }]}>
+                '{SEARCH_TERMS[termIndex]}'
+              </Text>
+            </Animated.View>
+          </TouchableOpacity>
         </ImageBackground>
       </LinearGradient>
     </View>
@@ -222,20 +141,21 @@ const styles = StyleSheet.create({
   imageBackground: {
     flex: 1,
     padding: 20,
-    gap: 20,
+    gap: 18,
+  },
+  topRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   locationContainer: {
-    gap: 10,
+    gap: 6,
   },
   locationRow: {
     flexDirection: "row",
-    gap: 10,
+    gap: 8,
     alignItems: "center",
   },
-  locationIcon: {
-    width: 15,
-    height: 15,
-  } as const,
   locationText: {
     fontFamily: "Lato-SemiBold",
     fontSize: 20,
@@ -244,78 +164,36 @@ const styles = StyleSheet.create({
   locationSubText: {
     fontFamily: "Lato-Regular",
     fontSize: 15,
-    color: "#FFFFFF",
+    color: "rgba(255,255,255,0.8)",
   },
-  chevronIcon: {
-    width: 16,
-    height: 16,
-    tintColor: "#FFFFFF",
-  } as const,
-  gradientBorder: {
-    borderRadius: 8,
-    padding: 1,
-    shadowColor: "#FFFFFF",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 25,
-    elevation: 6,
-  },
-  searchBoxCotainer: {
-    height: 48,
+  searchBox: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 12,
-    gap: 8,
-    borderRadius: 8,
-    backgroundColor: "rgba(44, 33, 71, 1)",
-    shadowColor: "rgb(115, 158, 123)",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    elevation: 8,
+    height: 48,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
+    gap: 10,
   },
-  icon: {
-    width: 18,
-    height: 18,
-    tintColor: "#FFFFFF",
-  },
-  searchBoxDivider: {
+  searchDivider: {
     width: 1,
     height: 20,
-    backgroundColor: "#fff",
+    backgroundColor: "rgba(255,255,255,0.25)",
   },
-  textInputContainer: {
+  placeholderRow: {
+    flexDirection: "row",
+    alignItems: "center",
     flex: 1,
-    position: "relative",
-    height: 50,
-    justifyContent: "center",
   },
-  textInput: {
-    height: 50,
-    width: "100%",
-    borderWidth: 1,
-    borderColor: "transparent",
-    borderRadius: 8,
-    color: "white",
-    fontSize: 16,
+  searchPrefix: {
     fontFamily: "Lato-Regular",
-    padding: 0,
+    fontSize: 15,
+    color: "rgba(255,255,255,0.5)",
   },
-  placeholderContainer: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    height: 50,
-    justifyContent: "center",
-  },
-  placeholderText: {
-    fontSize: 16,
-    fontFamily: "Lato-Regular",
-    color: "#FFFFFF",
-  },
-  categoryText: {
-    fontSize: 16,
-    fontFamily: "Lato-Regular",
-    // Color will be set dynamically based on category
+  searchTerm: {
+    fontFamily: "Lato-SemiBold",
+    fontSize: 15,
   },
 });

@@ -22,6 +22,7 @@ interface FilterBottomSheetProps {
     sort: string;
   }) => void;
   onClear?: () => void;
+  initialFilter?: string;
 }
 
 const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
@@ -29,11 +30,18 @@ const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
   filterCriterias,
   onApply,
   onClear,
+  initialFilter,
 }) => {
   const insets = useSafeAreaInsets();
   const FOOTER_BASE_HEIGHT = 64;
   const FOOTER_HEIGHT = FOOTER_BASE_HEIGHT + (insets.bottom || 0);
-  const [selectedFilter, setSelectedFilter] = useState<string>("PRICE RANGE");
+  const [selectedFilter, setSelectedFilter] = useState<string>(initialFilter || "PRICE RANGE");
+
+  useEffect(() => {
+    if (initialFilter) {
+      setSelectedFilter(initialFilter);
+    }
+  }, [initialFilter]);
 
   // Filter item dimensions
   const FILTER_ITEM_PADDING = 20; // paddingVertical

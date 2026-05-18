@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  Image,
+  BackHandler,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
 import { StackScreenProps } from "@react-navigation/stack";
@@ -39,13 +40,20 @@ type UserLocationScreenProps = StackScreenProps<
 
 const apiPath = ApiClient();
 
-const UserLocation = ({ navigation }: UserLocationScreenProps) => {
+const UserLocation = ({ navigation, route }: UserLocationScreenProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const userId = useSelector((x: any) => x?.user?.userInfo.id);
   const { saveLocation } = useSaveUserLocation();
+  const fromNoDelivery = route.params?.fromNoDelivery ?? false;
 
   const [loading, setLoading] = useState(false);
   const theme = useTheme();
+
+  useEffect(() => {
+    if (!fromNoDelivery) return;
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => true);
+    return () => sub.remove();
+  }, [fromNoDelivery]);
 
   const {
     governorates,
@@ -81,8 +89,11 @@ const UserLocation = ({ navigation }: UserLocationScreenProps) => {
           block: block.id,
         },
         onSuccess: () => {
-          console.log("SUCCESS SUCCESS");
-          navigation.navigate("UserDeliveryAddress");
+          if (fromNoDelivery) {
+            navigation.reset({ index: 0, routes: [{ name: "DrawerNavigation" }] });
+          } else {
+            navigation.navigate("UserDeliveryAddress");
+          }
         },
         onError: () => {
           Alert.alert("Error", "Failed to save location");
@@ -111,21 +122,25 @@ const UserLocation = ({ navigation }: UserLocationScreenProps) => {
           // paddingHorizontal: 20,
         }}
       >
-        <TouchableOpacity onPress={() => {navigation.goBack()}}>
-        <View
-          style={{
-            borderWidth: 0.2,
-            width: 38,
-            height: 38,
-            justifyContent: "center",
-            alignItems: "center",
-            borderRadius: 8,
-            borderColor: "grey",
-          }}
-        >
-          <Image source={require("../../assets/images/icons/CaretLeft.png")} />
-        </View>
-        </TouchableOpacity>
+        {!fromNoDelivery ? (
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            activeOpacity={0.6}
+            style={{
+              borderWidth: 0.2,
+              width: 42,
+              height: 42,
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: 8,
+              borderColor: "grey",
+            }}
+          >
+            <Ionicons name="chevron-back" size={22} color="#000" />
+          </TouchableOpacity>
+        ) : (
+          <View style={{ width: 42 }} />
+        )}
         <Text
           style={[
             Typography.headerText,
@@ -138,7 +153,7 @@ const UserLocation = ({ navigation }: UserLocationScreenProps) => {
         >
           Select Your Location
         </Text>
-        <View></View>
+        <View style={{ width: 42 }} />
       </View>
 
       <View style={{ gap: 10, marginTop: 50 }}>
@@ -153,9 +168,7 @@ const UserLocation = ({ navigation }: UserLocationScreenProps) => {
                 <Text style={styles.triggerText}>
                   {governorate ? governorate.name : "Select Governerate"}
                 </Text>
-                <Image
-                  source={require("../../assets/images/icons/dropicon.png")}
-                />
+                <Ionicons name="chevron-down" size={18} color="#666" />
               </View>
             }
           >
@@ -189,9 +202,7 @@ const UserLocation = ({ navigation }: UserLocationScreenProps) => {
                   <Text style={styles.triggerText}>
                     {city ? city.name : "Select City"}
                   </Text>
-                  <Image
-                    source={require("../../assets/images/icons/dropicon.png")}
-                  />
+                  <Ionicons name="chevron-down" size={18} color="#666" />
                 </View>
               }
             >
@@ -230,9 +241,7 @@ const UserLocation = ({ navigation }: UserLocationScreenProps) => {
                   <Text style={styles.triggerText}>
                     {block ? block.name : "Select Block"}
                   </Text>
-                  <Image
-                    source={require("../../assets/images/icons/dropicon.png")}
-                  />
+                  <Ionicons name="chevron-down" size={18} color="#666" />
                 </View>
               }
             >

@@ -2,43 +2,34 @@ import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import Input from "../../components/Input/Input";
 import Button from "../../components/Button/Button";
 import { COLORS } from "../../constants/theme";
-import { Typography } from "../../constants/typography";
 import { useSelector } from "react-redux";
-import { useLocationSelector } from "../../hooks/useLocationSelector";
 import { useUserAddress } from "../../hooks/useSaveUserAddress";
 import { AddressRequest } from "../../types/requests/addressRequest";
 import { AddressResponse } from "../../types/response/addressResponse";
-import LocationDisplay from "../../components/Location/LocationDisplay";
 
 type Props = {
   onChangeLocation: () => void;
-  addressToEdit?: AddressResponse | null; // If provided, edit mode. If null/undefined, add new mode
+  addressToEdit?: AddressResponse | null;
+  onSuccess?: () => void;
 };
 
 const UserDeliveryAddressDropDown = ({
   onChangeLocation,
   addressToEdit,
+  onSuccess,
 }: Props) => {
   const userId = useSelector((x: any) => x?.user?.userInfo.id);
   const { saveAddress, updateAddress, loading } = useUserAddress();
-
-  const {
-    governorate,
-    city,
-    block,
-  } = useLocationSelector();
 
   // Initialize state: if editing, use addressToEdit data; if adding new, use empty state
   const [savedAddress, setSavedAddress] = useState<AddressRequest>(() => {
@@ -106,26 +97,17 @@ const UserDeliveryAddressDropDown = ({
     // If editing (addressToEdit has id), call updateAddress
     // If adding new (addressToEdit is null), call saveAddress
     if (addressToEdit?.id) {
-      // Update existing address
       updateAddress({
-        payload: {
-          ...payload,
-          id: addressToEdit.id,
-        },
-        onSuccess: () => {
-          // Handle success (could close bottom sheet, refresh list, etc.)
-        },
+        payload: { ...payload, id: addressToEdit.id },
+        onSuccess: () => onSuccess?.(),
         onError: (error: any) => {
           Alert.alert("Error", error || "Failed to update address");
         },
       });
     } else {
-      // Create new address
       saveAddress({
         payload,
-        onSuccess: () => {
-          // Handle success (could close bottom sheet, refresh list, etc.)
-        },
+        onSuccess: () => onSuccess?.(),
         onError: (error: any) => {
           Alert.alert("Error", error || "Failed to save address");
         },
@@ -134,201 +116,160 @@ const UserDeliveryAddressDropDown = ({
   };
 
   return (
-    <>
-      <KeyboardAvoidingView
-        style={{}}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
+    <View style={styles.flex}>
+      <ScrollView
+        style={styles.flex}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1 }}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={{ justifyContent: "space-between" }}>
-            <View style={{ gap: 30 }}>
-
-              <View style={{ gap: 15 }}>
-                <Input
-                  value={savedAddress.street || ""}
-                  onChangeText={(value) => handleChange(value, "street")}
-                  placeholder="Street"
-                />
-                <Input
-                  value={savedAddress.apartmentName || ""}
-                  onChangeText={(value) => handleChange(value, "apartmentName")}
-                  placeholder="Apartment"
-                />
-                <Input
-                  value={savedAddress.apartmentNumber || ""}
-                  onChangeText={(value) =>
-                    handleChange(value, "apartmentNumber")
-                  }
-                  placeholder="Apartment / Flat number"
-                  keyboardType="numeric"
-                />
-                <Input
-                  value={savedAddress.contactPhone || ""}
-                  onChangeText={(value) =>
-                    handleChange(value, "contactPhone")
-                  }
-                  placeholder="Phone"
-                  keyboardType="phone-pad"
-                />
-              </View>
-
-              <View>
-                <View>
-                  <Text style={[Typography.titleMedium, { color: "#000" }]}>
-                    Save As
-                  </Text>
-                </View>
-                <View style={{ flexDirection: "row", gap: 10 }}>
-                  <View
-                    style={[
-                      styles.buttonView,
-                      savedAddress.type === "HOME" && styles.buttonViewActive,
-                    ]}
-                  >
-                    <TouchableOpacity
-                      style={{
-                        flexDirection: "row",
-                        gap: 5,
-                        alignItems: "center",
-                      }}
-                      onPress={() => handleChange("HOME", "type")}
-                    >
-                      <Image
-                        style={{ width: 13, height: 13 }}
-                        source={require("../../assets/images/icons/homeltst.png")}
-                      />
-                      <Text style={styles.buttonText}>Home</Text>
-                    </TouchableOpacity>
-                  </View>
-                  <View
-                    style={[
-                      styles.buttonView,
-                      savedAddress.type === "WORK" && styles.buttonViewActive,
-                    ]}
-                  >
-                    <TouchableOpacity
-                      style={{ flexDirection: "row", gap: 5 }}
-                      onPress={() => handleChange("WORK", "type")}
-                    >
-                      <Image
-                        style={{ width: 13, height: 13 }}
-                        source={require("../../assets/images/icons/briefcase.png")}
-                      />
-                      <Text style={styles.buttonText}>Work</Text>
-                    </TouchableOpacity>
-                  </View>
-                  <View
-                    style={[
-                      styles.buttonView,
-                      savedAddress.type === "OTHER" && styles.buttonViewActive,
-                    ]}
-                  >
-                    <TouchableOpacity
-                      onPress={() => handleChange("OTHER", "type")}
-                    >
-                      <Text style={styles.buttonText}>Other</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </View>
-            </View>
-
-            <View style={{ marginVertical: 10 }}>
-              {loading ? (
-                <ActivityIndicator size="large" color={COLORS.primary} />
-              ) : (
-                <Button
-                  variant=""
-                  text={"#fff"}
-                  color={"rgba(30, 18, 61, 1)"}
-                  title="Save Address"
-                  onPress={onSaveAddress}
-                />
-              )}
-            </View>
+        <View style={{ gap: 15 }}>
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Street</Text>
+            <Input
+              value={savedAddress.street || ""}
+              onChangeText={(value) => handleChange(value, "street")}
+              placeholder="e.g. Street 5"
+            />
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </>
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Apartment Name</Text>
+            <Input
+              value={savedAddress.apartmentName || ""}
+              onChangeText={(value) => handleChange(value, "apartmentName")}
+              placeholder="e.g. Al Noor Building"
+            />
+          </View>
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Flat / Unit Number</Text>
+            <Input
+              value={savedAddress.apartmentNumber || ""}
+              onChangeText={(value) => handleChange(value, "apartmentNumber")}
+              placeholder="e.g. 12"
+              keyboardType="numeric"
+            />
+          </View>
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Phone Number</Text>
+            <Input
+              value={savedAddress.contactPhone || ""}
+              onChangeText={(value) => handleChange(value, "contactPhone")}
+              placeholder="e.g. +965 XXXX XXXX"
+              keyboardType="phone-pad"
+            />
+          </View>
+        </View>
+
+        <View style={styles.saveAsSection}>
+          <Text style={styles.saveAsLabel}>Save As</Text>
+          <View style={styles.typeRow}>
+            {(["HOME", "WORK", "OTHER"] as const).map((t) => (
+              <TouchableOpacity
+                key={t}
+                activeOpacity={0.7}
+                style={[
+                  styles.typeChip,
+                  savedAddress.type === t && styles.typeChipActive,
+                ]}
+                onPress={() => handleChange(t, "type")}
+              >
+                <Ionicons
+                  name={
+                    t === "HOME"
+                      ? "home-outline"
+                      : t === "WORK"
+                      ? "briefcase-outline"
+                      : "ellipsis-horizontal"
+                  }
+                  size={13}
+                  color={savedAddress.type === t ? "#fff" : "#1E123D"}
+                />
+                <Text
+                  style={[
+                    styles.typeChipText,
+                    savedAddress.type === t && styles.typeChipTextActive,
+                  ]}
+                >
+                  {t.charAt(0) + t.slice(1).toLowerCase()}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      </ScrollView>
+
+      {/* Save button always visible at the bottom */}
+      <View style={styles.footer}>
+        {loading ? (
+          <ActivityIndicator size="large" color={COLORS.primary} />
+        ) : (
+          <Button
+            variant="non"
+            text={"#fff"}
+            color={"rgba(30, 18, 61, 1)"}
+            title={addressToEdit ? "Update Address" : "Save Address"}
+            onPress={onSaveAddress}
+          />
+        )}
+      </View>
+    </View>
   );
 };
 
 export default UserDeliveryAddressDropDown;
 
 const styles = StyleSheet.create({
-  buttonView: {
-    width: 78,
-    height: 32,
-    borderRadius: 100,
-    backgroundColor: "#fff",
-    justifyContent: "center",
-    alignItems: "center",
-    borderColor: "#000",
-    borderWidth: 1,
-  },
-  buttonViewActive: {
-    backgroundColor: "rgba(0, 0, 0, 0.1)",
-    borderWidth: 2,
-  },
-  triggerStyle: {
-    width: "100%",
-    height: 48,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#F0F0F0",
-    borderRadius: 8,
-  },
-  triggerText: {
-    fontSize: 16,
-  },
-  buttonText: {
-    color: "#000",
-  },
   flex: {
     flex: 1,
   },
-  container: {
-    flex: 1,
-    height: 250,
+  scrollContent: {
+    gap: 20,
+    paddingBottom: 10,
   },
-  buttonContainer: {
-    marginTop: 16,
-    display: "flex",
+  inputGroup: {
+    gap: 6,
+  },
+  inputLabel: {
+    fontFamily: "Lato-Medium",
+    fontSize: 13,
+    color: "#1E123D",
+  },
+  saveAsSection: {
+    gap: 10,
+  },
+  saveAsLabel: {
+    fontFamily: "Lato-SemiBold",
+    fontSize: 14,
+    color: "#1E123D",
+  },
+  typeRow: {
     flexDirection: "row",
-    width: "100%",
-    justifyContent: "space-around",
+    gap: 10,
   },
-  toggleButton: {
-    backgroundColor: "#b58df1",
-    padding: 12,
-    borderRadius: 48,
-  },
-  toggleButtonText: {
-    color: "white",
-    padding: 1,
-  },
-  safeArea: {
-    alignItems: "center",
-    justifyContent: "center",
-    flex: 1,
-  },
-  bottomSheetButton: {
-    display: "flex",
+  typeChip: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    paddingBottom: 2,
+    gap: 5,
+    paddingHorizontal: 14,
+    height: 34,
+    borderRadius: 100,
+    borderWidth: 1.5,
+    borderColor: "#1E123D",
+    backgroundColor: "#fff",
   },
-  bottomSheetButtonText: {
-    fontWeight: 600,
-    textDecorationLine: "underline",
+  typeChipActive: {
+    backgroundColor: "#1E123D",
+  },
+  typeChipText: {
+    fontFamily: "Lato-Medium",
+    fontSize: 13,
+    color: "#1E123D",
+  },
+  typeChipTextActive: {
+    color: "#fff",
+  },
+  footer: {
+    paddingTop: 12,
+    paddingBottom: 8,
   },
 });

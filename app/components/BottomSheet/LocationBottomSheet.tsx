@@ -73,8 +73,7 @@ const sheetStyles = StyleSheet.create({
   sheet: {
     width: "100%",
     position: "absolute",
-    maxHeight: "90%",
-    minHeight: 500,
+    height: "90%",
     bottom: 0,
     borderTopRightRadius: 20,
     borderTopLeftRadius: 20,

@@ -76,7 +76,9 @@ import OrderSuccess from "../screens/Myorder/OrderSuccess";
 import OrderPlacedSuccess from "../screens/Myorder/OrderPlacedSuccess";
 import GiveRating from "../screens/Myorder/GiveRating";
 import ShopByBrand from "../screens/Brand/ShopByBrand";
-// import SavedAddresses from "../screens/Profile/SavedAddresses";
+import SavedAddresses from "../screens/Profile/SavedAddresses";
+import Help from "../screens/Profile/Help";
+import Support from "../screens/Profile/Support";
 //import BottomNavigation from './BottomNavigation';
 
 const StackComponent = createStackNavigator<RootStackParamList>();
@@ -231,7 +233,9 @@ const StackNavigator = () => {
         <StackComponent.Screen name="Writereview" component={Writereview} />
         <StackComponent.Screen name="Profile" component={Profile} />
         <StackComponent.Screen name="EditProfile" component={EditProfile} />
-        {/* <StackComponent.Screen name="SavedAddresses" component={SavedAddresses} /> */}
+        <StackComponent.Screen name="SavedAddresses" component={SavedAddresses} />
+        <StackComponent.Screen name="Help" component={Help} />
+        <StackComponent.Screen name="Support" component={Support} />
         <StackComponent.Screen name="Language" component={Language} />
         <StackComponent.Screen name="Questions" component={Questions} />
         <StackComponent.Screen name="Coupons" component={Coupons} />

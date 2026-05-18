@@ -8,6 +8,7 @@ import {
   Vibration,
   View,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
 import { Product, Variant } from "../../types/product";
 import { NavigationProp } from "@react-navigation/native";
@@ -39,12 +40,28 @@ const ProductCard = React.memo(
     imageContainerHeight,
   }: ProductCardProps) => {
     const [isAdded, setIsAdded] = useState<boolean>(false);
-    const bestVariantId = (product as any)?.bestVariantId || (product as any)?.bestVariant?.id;
-    const selectedVariant =
+    const bestVariantObj: any = (product as any)?.bestVariant || null;
+    const bestVariantId = (product as any)?.bestVariantId || bestVariantObj?.id;
+    // Build a synthetic variant from flat product fields when no variant array exists
+    const flatVariant: any =
+      (product as any).salePrice != null || (product as any).price != null
+        ? {
+            id: undefined,
+            salePrice: (product as any).salePrice,
+            price: (product as any).price ?? (product as any).salePrice,
+            quantity: (product as any).quantity,
+            unit: product.unit,
+            productStock: (product as any).productStock ?? 0,
+            productId: product.id,
+          }
+        : null;
+    const selectedVariant: Variant | null =
       (bestVariantId
         ? product?.variants?.find((variant) => String(variant?.id) === String(bestVariantId))
         : null) ||
       product?.variants?.[0] ||
+      bestVariantObj ||
+      flatVariant ||
       null;
     const dispatch = useDispatch<AppDispatch>();
     const cartItem = useSelector(selectCartItemById(product.id));
@@ -121,21 +138,15 @@ const ProductCard = React.memo(
                   flexDirection: "row",
                 }}
               >
-                <View style={{ marginTop: 8 }}>
-                  <Pressable
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                    onPressIn={() => {
-                      triggerTouchFeedback();
-                      console.log("decrement quantity");
-                      dispatch(decrementQuantity({ id: product.id } as any));
-                    }}
-                  >
-                    <Image
-                      style={{ width: 10, height: 10 }}
-                      source={require("../../assets/images/icons/subtract.png")}
-                    />
-                  </Pressable>
-                </View>
+                <Pressable
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  onPressIn={() => {
+                    triggerTouchFeedback();
+                    dispatch(decrementQuantity({ id: product.id } as any));
+                  }}
+                >
+                  <Ionicons name="remove" size={14} color="#fff" />
+                </Pressable>
                 <Text
                   style={{
                     color: "#fff",
@@ -150,28 +161,23 @@ const ProductCard = React.memo(
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                     onPressIn={() => {
                       triggerTouchFeedback();
-                      console.log("increment quantity");
                       dispatch(incrementQuantity({ id: product.id } as any));
                     }}
                   >
-                    <Image
-                      style={{ width: 10, height: 15 }}
-                      source={require("../../assets/images/icons/add.png")}
-                    />
+                    <Ionicons name="add" size={14} color="#fff" />
                   </Pressable>
                 </View>
               </LinearGradient>
             ) : (
-              <TouchableOpacity
+              <Pressable
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 style={{
                   padding: 5,
                   position: "absolute",
-                  // top: 0,
                   bottom: 0,
                   right: 0,
                 }}
-                onPressIn={() => {
-                  console.log("add to cart");
+                onPress={() => {
                   triggerTouchFeedback();
                   if (selectedVariant) {
                     addToCart(product, selectedVariant);
@@ -191,12 +197,9 @@ const ProductCard = React.memo(
                     alignItems: "center",
                   }}
                 >
-                  <Image
-                    style={{ width: 15, height: 15 }}
-                    source={require("../../assets/images/icons/plusgreen.png")}
-                  />
+                  <Ionicons name="add" size={18} color="#059B5D" />
                 </View>
-              </TouchableOpacity>
+              </Pressable>
             )}
           </View>
 
@@ -204,10 +207,7 @@ const ProductCard = React.memo(
             <View
               style={{ flexDirection: "row", gap: 5, alignItems: "center" }}
             >
-              <Image
-                style={{ width: 14, height: 14 }}
-                source={require("../../assets/images/icons/ratingstar.png")}
-              />
+              <Ionicons name="star" size={13} color="orange" />
               <Text
                 style={{
                   fontFamily: "Lato-Regular",
@@ -225,14 +225,12 @@ const ProductCard = React.memo(
             >
               {product.title}
             </Text>
-            <Text style={styles.itemDescription}>
-              {selectedVariant?.quantity}{" "}
-              {product.unit === "KILOGRAM"
-                ? "KG"
-                : product.unit === "LITER"
-                  ? "L"
-                  : product.unit}
-            </Text>
+            {(selectedVariant?.quantity != null || product.unit) && (
+              <Text style={styles.itemDescription}>
+                {selectedVariant?.quantity != null ? `${selectedVariant.quantity} ` : ""}
+                {selectedVariant?.unit || product.unit}
+              </Text>
+            )}
             {selectedVariant?.price != null &&
               selectedVariant?.salePrice != null &&
               selectedVariant.price > selectedVariant.salePrice && (
@@ -250,33 +248,34 @@ const ProductCard = React.memo(
                 % OFF
               </Text>
             )}
-            <View style={{ flexDirection: "row", gap: 10 }}>
-              <Text
-                style={{
-                  ...styles.itemDescription,
-                  fontFamily: "Lato-Bold",
-                  fontSize: 14,
-                }}
-              >
-                KD {selectedVariant?.salePrice}
-              </Text>
-
-              {selectedVariant?.salePrice != null &&
-                selectedVariant?.price != null &&
-                selectedVariant.salePrice < selectedVariant.price && (
+            {selectedVariant?.salePrice != null && (
+              <View style={{ flexDirection: "row", gap: 10 }}>
                 <Text
                   style={{
                     ...styles.itemDescription,
-                    fontFamily: "Lato-Medium",
+                    fontFamily: "Lato-Bold",
                     fontSize: 14,
-                    color: "#8C8C8C",
-                    textDecorationLine: "line-through",
                   }}
                 >
-                  KD {selectedVariant?.price}
+                  KD {selectedVariant.salePrice}
                 </Text>
-              )}
-            </View>
+
+                {selectedVariant.price != null &&
+                  selectedVariant.salePrice < selectedVariant.price && (
+                  <Text
+                    style={{
+                      ...styles.itemDescription,
+                      fontFamily: "Lato-Medium",
+                      fontSize: 14,
+                      color: "#8C8C8C",
+                      textDecorationLine: "line-through",
+                    }}
+                  >
+                    KD {selectedVariant.price}
+                  </Text>
+                )}
+              </View>
+            )}
           </View>
         </View>
       </TouchableOpacity>

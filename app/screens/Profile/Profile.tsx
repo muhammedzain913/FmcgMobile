@@ -1,26 +1,17 @@
-import {
-  CommonActions,
-  useNavigation,
-  useTheme,
-} from "@react-navigation/native";
-import React, { useEffect, useState } from "react";
+import { useNavigation, useTheme } from "@react-navigation/native";
+import React, { useState } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
-  Image,
   ScrollView,
-  SectionList,
   ActivityIndicator,
   SafeAreaView,
   ImageBackground,
   StyleSheet,
   Alert,
 } from "react-native";
-import Header from "../../layout/Header";
-import { GlobalStyleSheet } from "../../constants/StyleSheet";
-import { IMAGES } from "../../constants/Images";
-import { COLORS, FONTS, SIZES } from "../../constants/theme";
+import { COLORS, FONTS } from "../../constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
@@ -28,40 +19,38 @@ import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/reducer/userReducer";
 import { StatusBar } from "expo-status-bar";
 import { LinearGradient } from "expo-linear-gradient";
-import iconSet from "@expo/vector-icons/build/Fontisto";
 
 type ProfileScreenProps = StackScreenProps<RootStackParamList, "Profile">;
 
+type MenuItem = {
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  route: string;
+  iconColor?: string;
+};
+
+const MENU: MenuItem[] = [
+  { label: "My Orders", icon: "receipt-outline", route: "Myorder" },
+  { label: "Saved Addresses", icon: "location-outline", route: "SavedAddresses" },
+  { label: "My Cart", icon: "cart-outline", route: "MyCart" },
+  { label: "FAQ", icon: "help-circle-outline", route: "Questions" },
+  { label: "Support", icon: "headset-outline", route: "Support" },
+  { label: "Log Out", icon: "log-out-outline", route: "LogOut", iconColor: "#E53935" },
+];
+
 const Profile = ({ navigation }: ProfileScreenProps) => {
   const user = useSelector((x: any) => x.user.userInfo);
-  const selectedAddress = useSelector((x: any) => x.user.selectedAddress);
-  const address = selectedAddress; // Use selectedAddress instead of defaultAddress
   const dispatch = useDispatch();
   const [loading, setLoading] = useState<boolean>(false);
   const theme = useTheme();
   const { colors }: { colors: any } = theme;
-
-  const MENU = [
-    { label: "My Orders", icon: IMAGES.myordersprofile },
-    { label: "Saved Addresses", icon: IMAGES.bookmark },
-    { label: "My Cart", icon: IMAGES.mycart },
-    { label: "FAQ", icon: IMAGES.Chat },
-    { label: "Help", icon: IMAGES.information },
-    { label: "Support", icon: IMAGES.support },
-    { label: "Log Out", icon: IMAGES.logout },
-  ];
-
-  //const navigation = useNavigation();
 
   const handleLogout = () => {
     Alert.alert(
       "Log Out",
       "Are you sure you want to log out?",
       [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
+        { text: "Cancel", style: "cancel" },
         {
           text: "Log Out",
           style: "destructive",
@@ -78,157 +67,107 @@ const Profile = ({ navigation }: ProfileScreenProps) => {
     );
   };
 
-  const handleMenuPress = (label: string) => {
-    switch (label) {
-      case "My Orders":
-        navigation.navigate("Myorder");
-        break;
-      case "My Cart":
-        navigation.navigate("MyCart");
-        break;
-      // case "Saved Addresses":
-      //   navigation.navigate("SavedAddresses");
-        break;
-      case "Log Out":
-        handleLogout();
-        break;
-      // Add more cases for other menu items as needed
-      default:
-        // Handle other menu items or do nothing
-        break;
+  const handleMenuPress = (item: MenuItem) => {
+    if (item.route === "LogOut") {
+      handleLogout();
+      return;
     }
+    navigation.navigate(item.route as any);
   };
 
   if (loading) {
     return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: colors.card,
-        }}
-      >
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.card }}>
         <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text
-          style={{
-            ...FONTS.fontMedium,
-            fontSize: 16,
-            color: colors.title,
-            marginTop: 10,
-          }}
-        >
+        <Text style={{ ...FONTS.fontMedium, fontSize: 16, color: colors.title, marginTop: 10 }}>
           Logging out...
         </Text>
       </View>
     );
   }
+
   return (
     <SafeAreaView style={{ backgroundColor: "#FAFAFA", flex: 1 }}>
       <StatusBar translucent={true} backgroundColor="#1E123D" style="light" />
-      <ScrollView
-        contentContainerStyle={{ gap: 30 }}
-        showsVerticalScrollIndicator={false}
-      >
-        <View
-          style={{
-            borderBottomLeftRadius: 30,
-            borderBottomRightRadius: 30,
-            overflow: "hidden",
-          }}
-        >
-          <LinearGradient
-            // Button Linear Gradient
-            colors={["rgba(30, 18, 61, 1)", "rgba(12, 0, 40, 1)"]}
-          >
+      <ScrollView contentContainerStyle={{ gap: 30 }} showsVerticalScrollIndicator={false}>
+
+        {/* HEADER BANNER */}
+        <View style={{ borderBottomLeftRadius: 30, borderBottomRightRadius: 30, overflow: "hidden" }}>
+          <LinearGradient colors={["rgba(30, 18, 61, 1)", "rgba(12, 0, 40, 1)"]}>
             <ImageBackground
-              style={{ flex: 1, padding: 20 }}
+              style={{ flex: 1, padding: 20, paddingTop: 16 }}
               source={require("../../assets/images/maskgroup.png")}
             >
-              {/* HEADER – TOP ROW */}
-              <View style={{ justifyContent: "space-between", gap: 50 }}>
-                <View style={styles.headerTopRow}>
-                  {/* Back Button */}
-                  <TouchableOpacity
-                    style={styles.iconBtn}
-                    onPress={() => navigation.goBack()}
-                  >
-                    <Ionicons name="chevron-back" size={20} color="#fff" />
-                  </TouchableOpacity>
+              {/* TOP ROW – back button + title */}
+              <View style={styles.headerTopRow}>
+                <TouchableOpacity
+                  style={styles.backBtn}
+                  activeOpacity={0.75}
+                  onPress={() => navigation.goBack()}
+                >
+                  <Ionicons name="chevron-back" size={20} color="#fff" />
+                  <Text style={styles.backBtnText}>Back</Text>
+                </TouchableOpacity>
 
-                  {/* Title */}
-                  <Text style={styles.headerTitle}>My Account</Text>
+                <Text style={styles.headerTitle}>My Account</Text>
 
-                  {/* Options */}
-                  <TouchableOpacity style={styles.iconBtn}>
-                    <Ionicons name="ellipsis-vertical" size={18} color="#fff" />
-                  </TouchableOpacity>
-                </View>
-
-                {/* HEADER – PROFILE ROW */}
-                <View style={styles.profileRow}>
-                  {/* Profile Image */}
-                  <Image
-                    source={require("../../assets/images/profilepic.jpg")}
-                    style={styles.profileImage}
-                  />
-
-                  {/* Name & Phone */}
-                  <View style={styles.profileInfo}>
-                    <Text style={styles.profileName}>
-                      {user?.name || "John Mathew"}
-                    </Text>
-                    <Text style={styles.profilePhone}>
-                      {user?.phone || "+91 0987654321"}
-                    </Text>
-                  </View>
-
-                  {/* Edit Profile */}
-                  <TouchableOpacity style={styles.editBtn}>
-                    <Text style={styles.editBtnText}>Edit Profile</Text>
-                  </TouchableOpacity>
-                </View>
+                {/* Invisible spacer to keep title centered */}
+                <View style={{ width: 72 }} />
               </View>
 
-              <LinearGradient
-                // Button Linear Gradient
-                colors={["rgba(255, 255, 255, 1)", "rgba(184, 184, 184, 1)"]}
-              ></LinearGradient>
+              {/* PROFILE ROW */}
+              <View style={styles.profileRow}>
+                <View style={styles.profileImage}>
+                  <Ionicons name="person" size={32} color="rgba(255,255,255,0.9)" />
+                </View>
 
-              <LinearGradient
-                colors={["rgba(255,255,255,1)", "rgba(184,184,184,1)"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                // style={styles.gradientBorder}
-              ></LinearGradient>
+                <View style={styles.profileInfo}>
+                  <Text style={styles.profileName} numberOfLines={1}>
+                    {user?.name || "Guest User"}
+                  </Text>
+                  <Text style={styles.profilePhone}>
+                    {user?.phone ? `+${user.phone}` : user?.email || "No contact info"}
+                  </Text>
+                </View>
+              </View>
             </ImageBackground>
           </LinearGradient>
         </View>
 
+        {/* MENU LIST */}
         <View style={styles.menuContainer}>
-          {MENU.map((item, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.menuItem}
-              onPress={() => handleMenuPress(item.label)}
-            >
-              <View style={styles.menuLeft}>
-                <Image
-                  style={{ width: 20, height: 20, tintColor: "#000" }}
-                  source={item?.icon}
-                />
-                <Text style={styles.menuText}>{item.label}</Text>
-              </View>
-              {index !== MENU.length - 1 && (
-                <Ionicons name="chevron-forward" size={18} color="#1E123D" />
-              )}
-            </TouchableOpacity>
-          ))}
+          {MENU.map((item, index) => {
+            const isLogout = item.route === "LogOut";
+            return (
+              <TouchableOpacity
+                key={index}
+                style={[styles.menuItem, isLogout && styles.menuItemLogout]}
+                activeOpacity={0.7}
+                onPress={() => handleMenuPress(item)}
+              >
+                <View style={styles.menuLeft}>
+                  <View style={[styles.menuIconWrap, isLogout && styles.menuIconWrapLogout]}>
+                    <Ionicons
+                      name={item.icon}
+                      size={20}
+                      color={isLogout ? "#E53935" : "#1E123D"}
+                    />
+                  </View>
+                  <Text style={[styles.menuText, isLogout && styles.menuTextLogout]}>
+                    {item.label}
+                  </Text>
+                </View>
+                {!isLogout && (
+                  <Ionicons name="chevron-forward" size={18} color="#1E123D" />
+                )}
+              </TouchableOpacity>
+            );
+          })}
 
           {/* FOOTER */}
           <View style={styles.footer}>
             <Text style={styles.brand}>sooper</Text>
-            <Text style={styles.version}>Version 4.54</Text>
+            <Text style={styles.version}>Version 1.0</Text>
           </View>
         </View>
       </ScrollView>
@@ -239,103 +178,6 @@ const Profile = ({ navigation }: ProfileScreenProps) => {
 export default Profile;
 
 const styles = StyleSheet.create({
-  container: {
-    marginTop: 20,
-    height: 500,
-    backgroundColor: "#1E123D",
-    position: "relative",
-    overflow: "hidden",
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-  },
-
-  backgroundImage: {
-    ...StyleSheet.absoluteFillObject,
-  },
-
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "#1E123D",
-    opacity: 0.85, // tweak: 0.8–0.9 for best match
-  },
-
-  content: {
-    flex: 1,
-    padding: 20,
-    zIndex: 2,
-  },
-  divider: {
-    width: 1,
-    height: "60%",
-    backgroundColor: "rgba(255,255,255,0.35)",
-    marginHorizontal: 12,
-  },
-  containerW: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "orange",
-  },
-  background: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    height: 300,
-  },
-  button: {
-    padding: 15,
-    alignItems: "center",
-    borderRadius: 5,
-  },
-  text: {
-    backgroundColor: "transparent",
-    fontSize: 15,
-    color: "#fff",
-  },
-  gradientBorder: {
-    borderRadius: 8,
-    padding: 1, // border thickness = 1px
-    shadowColor: "#FFFFFF",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 25,
-    elevation: 6, // Android shadow
-  },
-
-  searchBoxCotainer: {
-    height: 48,
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    gap: 8,
-    borderRadius: 8,
-    backgroundColor: "rgba(44, 33, 71, 1)",
-  },
-
-  icon: {
-    width: 18,
-    height: 18,
-    tintColor: "#FFFFFF",
-  },
-
-  searchBoxDivider: {
-    width: 1,
-    height: 20,
-    backgroundColor: "rgba(255,255,255,0.35)",
-  },
-
-  placeholder: {
-    fontFamily: "Lato",
-    fontSize: 15,
-    color: "#FFFFFF",
-  },
-
-  highlight: {
-    color: "#FFC107", // yellow "Snacks"
-    fontWeight: "600",
-  },
-
   headerTopRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -343,14 +185,23 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
 
-  iconBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
+  backBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.18)",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.3)",
-    justifyContent: "center",
-    alignItems: "center",
+    gap: 4,
+  },
+
+  backBtnText: {
+    fontFamily: "Lato",
+    fontSize: 13,
+    fontWeight: "500",
+    color: "#fff",
   },
 
   headerTitle: {
@@ -364,14 +215,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 14,
+    paddingBottom: 20,
   },
 
   profileImage: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.4)",
+    borderColor: "rgba(255,255,255,0.5)",
+    backgroundColor: "rgba(255,255,255,0.15)",
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   profileInfo: {
@@ -381,8 +236,8 @@ const styles = StyleSheet.create({
 
   profileName: {
     fontFamily: "Lato",
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 17,
+    fontWeight: "700",
     color: "#FFFFFF",
   },
 
@@ -392,25 +247,9 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.75)",
   },
 
-  editBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.4)",
-  },
-
-  editBtnText: {
-    fontFamily: "Lato",
-    fontSize: 13,
-    fontWeight: "500",
-    color: "#FFFFFF",
-  },
-
   menuContainer: {
     paddingHorizontal: 20,
-    paddingTop: 25,
-    gap: 12,
+    gap: 10,
   },
 
   menuItem: {
@@ -419,14 +258,37 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     backgroundColor: "#FFFFFF",
     paddingHorizontal: 16,
-    paddingVertical: 20,
-    borderRadius: 12,
+    paddingVertical: 16,
+    borderRadius: 14,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+
+  menuItemLogout: {
+    backgroundColor: "#FFF5F5",
+    marginTop: 8,
   },
 
   menuLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: 14,
+  },
+
+  menuIconWrap: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: "rgba(30,18,61,0.07)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  menuIconWrapLogout: {
+    backgroundColor: "rgba(229,57,53,0.1)",
   },
 
   menuText: {
@@ -436,8 +298,13 @@ const styles = StyleSheet.create({
     color: "#1F1F1F",
   },
 
+  menuTextLogout: {
+    color: "#E53935",
+  },
+
   footer: {
-    marginTop: 40,
+    marginTop: 32,
+    marginBottom: 24,
     alignItems: "center",
   },
 

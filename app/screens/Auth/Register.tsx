@@ -4,12 +4,15 @@ import {
   Text,
   ScrollView,
   Image,
-  TouchableOpacity,
   Alert,
   StyleSheet,
   ActivityIndicator,
   ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 import { COLORS } from "../../constants/theme";
 import Input from "../../components/Input/Input";
 import Button from "../../components/Button/Button";
@@ -61,127 +64,99 @@ const Register = ({ navigation }: RegisterScreenProps) => {
   }
 
   return (
-    <View style={{ backgroundColor: " #1E123D", flex: 1 }}>
-      <ScrollView
-        nestedScrollEnabled
-        contentContainerStyle={{ flexGrow: 1, backgroundColor: "#1E123D" }}
-        showsVerticalScrollIndicator={false}
+    <SafeAreaView
+      style={{ flex: 1, flexDirection: "column", backgroundColor: "#1E123D" }}
+    >
+      <StatusBar backgroundColor="#1E123D" />
+      <ImageBackground
+        imageStyle={{ opacity: 0.1, transform: [{ scale: 2 }] }}
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          flex: 1,
+          paddingBottom: 30,
+        }}
+        resizeMode="cover"
+        source={require("../../assets/images/bg.png")}
       >
-        {/* <View style={[GlobalStyleSheet.container, { padding: 0,backgroundColor:'#1E123D' }]}> */}
-        <ImageBackground
-          imageStyle={{ opacity: 0.1, transform: [{ scale: 2 }] }}
-          style={{
-            justifyContent: "center",
-            alignItems: "center",
-            flex: 1,
-            backgroundColor: "#1E123D",
-            paddingBottom: 30,
-          }}
-          resizeMode="cover"
-          source={require("../../assets/images/bg.png")}
-        >
-          <View
+        <View>
+          <Image
+            resizeMode="contain"
+            style={{ width: "70%", height: undefined, aspectRatio: 1 }}
+            source={require("../../assets/images/brand/sooper.png")}
+          />
+        </View>
+
+        <View style={{ justifyContent: "center", alignItems: "center" }}>
+          <Text
             style={{
-              width: 65,
-              height: 28,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              paddingHorizontal: 10,
-              flex: 1,
-              borderRadius: 61,
-              backgroundColor: "rgba(43, 66, 72, 0.5)",
-              alignSelf: "flex-end",
-              position: "absolute",
-              right: 20,
-              top: 30,
+              fontFamily: "Lato-Bold",
+              fontSize: 24,
+              lineHeight: 32,
+              color: "#FFFFFF",
+              textAlign: "center",
             }}
           >
-            <TouchableOpacity>
-              <Text
-                style={{
-                  fontFamily: "Lato-SemiBold",
-                  fontSize: 15,
-                  lineHeight: 15,
-                  letterSpacing: -0.45,
-                  color: "#FFFFFF",
-                  textAlign: "center",
-                }}
-              >
-                Skip
-              </Text>
-            </TouchableOpacity>
-          </View>
+            Get Started
+          </Text>
+          <Text
+            style={{
+              fontFamily: "Lato-Regular",
+              fontWeight: "400",
+              fontSize: 15,
+              lineHeight: 22,
+              letterSpacing: -0.3,
+              color: "#FFFFFF",
+              textAlign: "center",
+            }}
+          >
+            Create your account with email and password
+          </Text>
+        </View>
+      </ImageBackground>
 
-          <View>
-            <Image
-              resizeMode="contain"
-              style={{ width: "70%", height: undefined, aspectRatio: 1 }}
-              source={require("../../assets/images/brand/sooper.png")}
-            />
-          </View>
-
-          <View style={{ justifyContent: "center", alignItems: "center" }}>
-            <Text
-              style={{
-                fontFamily: "Lato-Bold", // or "Lato" if weight mapping is used
-                fontSize: 24,
-                lineHeight: 32,
-                color: "#FFFFFF",
-                textAlign: "center",
-              }}
-            >
-              Get Started
-            </Text>
-            <Text
-              style={{
-                fontFamily: "Lato-Regular",
-                fontWeight: "400", // Explicitly set to normal weight
-                fontSize: 15,
-                lineHeight: 22,
-                letterSpacing: -0.3, // ✅ converted from -2%
-                color: "#FFFFFF",
-                textAlign: "center",
-              }}
-            >
-              Create your account with email and password
-            </Text>
-          </View>
-        </ImageBackground>
-
-        <View
-          style={{
-            borderTopRightRadius: 18,
-            borderTopLeftRadius: 18,
-            backgroundColor: "white",
+      <KeyboardAvoidingView
+        style={{
+          borderTopRightRadius: 18,
+          borderTopLeftRadius: 18,
+          backgroundColor: "white",
+          flexBasis: "60%",
+        }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+      >
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
             paddingTop: 28,
             paddingHorizontal: 16,
-            rowGap: 8,
+            paddingBottom: 20,
+            justifyContent: "space-between",
           }}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
-          <Input
-            placeholder="Name"
-            onChangeText={(text: string) => {
-              handleInputChange("name", text);
-            }}
-          />
-
-          <View>
+          <View style={{ rowGap: 8 }}>
+            <Input
+              placeholder="Name"
+              onChangeText={(text: string) => {
+                handleInputChange("name", text);
+              }}
+            />
             <Input
               placeholder="Email Address"
               onChangeText={(text: string) => {
                 handleInputChange("email", text);
               }}
             />
+            <Input
+              type={"password"}
+              placeholder="Password"
+              onChangeText={(value) => handleInputChange("password", value)}
+            />
           </View>
 
-          <Input
-            type={"password"}
-            placeholder="Password"
-            onChangeText={(value) => handleInputChange("password", value)}
-          />
-
-          <View style={{ marginBottom: 20 }}>
+          <View style={{ gap: 16 }}>
             {loading ? (
               <ActivityIndicator size="large" color={COLORS.primary} />
             ) : (
@@ -189,47 +164,38 @@ const Register = ({ navigation }: RegisterScreenProps) => {
                 variant="decorate"
                 title="Sign Up"
                 color={"#1E123D"}
-                // text={theme.dark ? COLORS.primary : COLORS.white}
                 onPress={onSubmit}
               />
             )}
-          </View>
 
-          <View style={{ paddingBottom: 30 }}>
-            <Text style={styles.accountPrompt}>
-              Already have an account?{" "}
-              <Text
-                onPress={() => navigation.navigate("Login")}
-                style={styles.signInLink}
-              >
-                Sign In
+            <View>
+              <Text style={styles.accountPrompt}>
+                Already have an account?{" "}
+                <Text
+                  onPress={() => navigation.navigate("Login")}
+                  style={styles.signInLink}
+                >
+                  Sign In
+                </Text>
               </Text>
-            </Text>
 
-            <Text style={styles.termsText}>
-              By Continuing, you agree to our{" "}
-              <Text style={styles.termsLink}>Terms of Use</Text>
-              {" & "}
-              <Text style={styles.termsLink}>Privacy Policy</Text>
-            </Text>
+              <Text style={styles.termsText}>
+                By Continuing, you agree to our{" "}
+                <Text style={styles.termsLink}>Terms of Use</Text>
+                {" & "}
+                <Text style={styles.termsLink}>Privacy Policy</Text>
+              </Text>
+            </View>
           </View>
-        </View>
-        {/* </View> */}
-      </ScrollView>
-    </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
 export default Register;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  map: {
-    width: "100%",
-    height: "100%",
-  },
   accountPrompt: {
     fontFamily: "Lato-Regular",
     fontSize: 14,

@@ -7,7 +7,7 @@ import {
   View,
   TouchableOpacity,
 } from "react-native";
-import { FlatList, ScrollView } from "react-native-gesture-handler";
+import { FlatList, ScrollView } from "react-native";
 import { RootStackParamList } from "../../navigation/RootStackParamList";
 import { StackScreenProps } from "@react-navigation/stack";
 import { ApiClient } from "../../redux/api";
